@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+*.log
+npm-debug.log*
+
+# Runtime data
+data/
+logs/
+*.db
+*.sqlite
+*.sqlite3
+
+# Development
+.DS_Store
+.env
+.env.local
+.env.*.local
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# OS files
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+
+# Session data
+sessions/
+afk_sessions/
+afk_registry/

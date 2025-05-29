@@ -1,0 +1,64 @@
+# Test files
+test/
+*.test.js
+*.test.sh
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Development files
+demo.sh
+prepare-release.sh
+test-before-publish.sh
+sync-to-repo.sh
+justfile
+
+# Archive directories
+archive*/
+
+# Documentation source files (keep compiled docs)
+docs/src/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+
+# CI/CD
+.github/
+.travis.yml
+.gitlab-ci.yml
+
+# Development dependencies config
+.eslintrc*
+.prettierrc*
+
+# Session data and databases
+data/*.db
+data/sessions.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Keep empty directories with .gitkeep
+!**/.gitkeep

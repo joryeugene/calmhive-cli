@@ -1,0 +1,101 @@
+#!/usr/bin/env node
+/**
+ * Calmhive V3 - Main Entry Point
+ * The intelligent Claude CLI wrapper
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+
+// Available commands
+const COMMANDS = {
+  'afk': 'Run long tasks in background with automatic retries',
+  'a': 'Alias for afk',
+  'chat': 'Interactive chat with Claude',
+  'c': 'Alias for chat',
+  'run': 'Execute one-shot tasks headlessly',
+  'r': 'Alias for run',
+  'tui': 'Terminal UI for process management',
+  't': 'Alias for tui',
+  'voice': 'Voice interface to Claude',
+  'v': 'Alias for voice'
+};
+
+// Command aliases
+const ALIASES = {
+  'a': 'afk',
+  'c': 'chat',
+  'r': 'run',
+  't': 'tui',
+  'v': 'voice'
+};
+
+function showHelp() {
+  console.log(`
+🐝 Calmhive V3 - Claude That Never Quits
+
+Usage: calmhive <command> [options]
+
+Commands:
+`);
+  
+  Object.entries(COMMANDS).forEach(([cmd, desc]) => {
+    if (!ALIASES[cmd]) { // Only show main commands, not aliases
+      const aliases = Object.entries(ALIASES)
+        .filter(([alias, target]) => target === cmd)
+        .map(([alias]) => alias);
+      const aliasStr = aliases.length > 0 ? ` (${aliases.join(', ')})` : '';
+      console.log(`  ${cmd.padEnd(8)} ${desc}${aliasStr}`);
+    }
+  });
+  
+  console.log(`
+Examples:
+  calmhive chat "explain this code"
+  calmhive run "add tests to utils.js"
+  calmhive afk "migrate to TypeScript" --iterations 20
+  calmhive voice
+  calmhive tui
+
+For command-specific help:
+  calmhive <command> --help
+`);
+}
+
+// Main execution
+const args = process.argv.slice(2);
+
+if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+  showHelp();
+  process.exit(0);
+}
+
+// Get command (resolve aliases)
+let command = args[0];
+if (ALIASES[command]) {
+  command = ALIASES[command];
+}
+
+// Check if command exists
+const commandPath = path.join(__dirname, '..', 'commands', command);
+if (!fs.existsSync(commandPath)) {
+  console.error(`❌ Unknown command: ${command}`);
+  console.log('Run "calmhive --help" for available commands');
+  process.exit(1);
+}
+
+// Execute command
+const child = spawn('node', [commandPath, ...args.slice(1)], {
+  stdio: 'inherit',
+  env: { ...process.env }
+});
+
+child.on('error', (err) => {
+  console.error(`❌ Failed to execute command: ${err.message}`);
+  process.exit(1);
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});

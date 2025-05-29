@@ -1,0 +1,395 @@
+#!/usr/bin/env node
+
+// V3 AFk Command - Reliable background processing with proper lifecycle management
+// Replaces the broken V2 system that caused phantom processes
+
+const ProcessManager = require('../lib/process-manager');
+
+class AfkCommand {
+  constructor() {
+    this.processManager = new ProcessManager();
+  }
+
+  async execute() {
+    const [,, command, ...args] = process.argv;
+    
+    // Check for help flag
+    if (command === '--help' || command === '-h' || 
+        (args.length > 0 && (args[0] === '--help' || args[0] === '-h'))) {
+      this.showHelp();
+      process.exit(0);
+    }
+    
+    try {
+      switch (command) {
+        case undefined:
+        case 'start':
+          await this.startSession(args);
+          break;
+          
+        case 'stop':
+          await this.stopSession(args);
+          break;
+          
+        case 'status':
+          await this.showStatus(args);
+          break;
+          
+        case 'tail':
+          await this.tailLogs(args);
+          break;
+          
+        case 'cleanup':
+          await this.cleanup(args);
+          break;
+          
+        case 'stats':
+          await this.showStats();
+          break;
+          
+        default:
+          // If no subcommand, treat as task description
+          await this.startSession([command, ...args]);
+          break;
+      }
+    } catch (error) {
+      console.error('❌ Error:', error.message);
+      process.exit(1);
+    }
+  }
+
+  async startSession(args) {
+    // Parse options first to remove them from task
+    const options = this.parseOptions(args);
+    
+    // Filter out option flags and their values from args
+    const taskArgs = [];
+    for (let i = 0; i < args.length; i++) {
+      if (args[i].startsWith('--') || args[i] === '-i') {
+        // Skip the flag and its value if it has one
+        if (['--iterations', '-i', '--model', '--webhook', '--checkpoint-interval'].includes(args[i])) {
+          i++; // Skip the next arg which is the value
+        }
+      } else {
+        taskArgs.push(args[i]);
+      }
+    }
+    
+    const task = taskArgs.join(' ').trim();
+    if (!task) {
+      console.error('❌ Task description required');
+      console.log('Usage: calmhive afk "task description" [options]');
+      console.log('   or: calmhive afk start "task description" [options]');
+      this.showHelp();
+      process.exit(1);
+    }
+    
+    // Validate iterations
+    if (options.iterations && (options.iterations < 1 || options.iterations > 50)) {
+      console.error('❌ Iterations must be between 1 and 50');
+      process.exit(1);
+    }
+    
+    console.log('🚀 Starting V3 AFk session...');
+    const session = await this.processManager.startAfkSession(task, options);
+    
+    console.log(`\\n📋 Session Details:`);
+    console.log(`   ID: ${session.id}`);
+    console.log(`   Task: ${session.task}`);
+    console.log(`   Iterations: ${session.iterations_planned}`);
+    console.log(`   Model: ${session.model}`);
+    console.log(`   Custom Steps: ${JSON.parse(session.metadata).customSteps ? 'Yes' : 'No'}`);
+    console.log(`\\n📊 Monitor: calmhive afk status`);
+    console.log(`📝 Logs: calmhive afk tail ${session.id}`);
+    console.log(`🛑 Stop: calmhive afk stop ${session.id}`);
+  }
+
+  async stopSession(args) {
+    const sessionId = args[0];
+    if (!sessionId) {
+      console.error('❌ Session ID required');
+      console.log('Usage: calmhive afk stop <session-id>');
+      process.exit(1);
+    }
+    
+    if (sessionId === '--all' || sessionId === 'all') {
+      await this.stopAllSessions();
+      return;
+    }
+    
+    await this.processManager.stopSession(sessionId);
+  }
+  
+  async stopAllSessions() {
+    console.log('🛑 Stopping all running sessions...');
+    const sessions = await this.processManager.getStatus();
+    const running = sessions.filter(s => s.status === 'running');
+    
+    if (running.length === 0) {
+      console.log('📊 No running sessions to stop');
+      return;
+    }
+    
+    let stopped = 0;
+    for (const session of running) {
+      try {
+        await this.processManager.stopSession(session.id);
+        stopped++;
+      } catch (error) {
+        console.error(`❌ Failed to stop ${session.id}:`, error.message);
+      }
+    }
+    
+    console.log(`✅ Stopped ${stopped} of ${running.length} sessions`);
+  }
+
+  async showStatus(args) {
+    const detailed = args.includes('-d') || args.includes('--detailed');
+    const sessions = await this.processManager.getStatus();
+    
+    if (sessions.length === 0) {
+      console.log('📊 No AFk sessions found');
+      console.log('\\n🚀 Start a new session: calmhive afk "your task description"');
+      return;
+    }
+    
+    console.log('📊 V3 AFk Sessions Summary\\n');
+    
+    if (detailed) {
+      this.showDetailedStatus(sessions);
+    } else {
+      this.showCompactStatus(sessions);
+    }
+    
+    const stats = await this.processManager.getSessionStats();
+    console.log(`\\n📈 Total Sessions: ${stats.total}`);
+    
+    if (stats.running > 0) {
+      console.log(`🟢 Running: ${stats.running}`);
+    }
+    if (stats.completed > 0) {
+      console.log(`✅ Completed: ${stats.completed}`);
+    }
+    if (stats.error > 0) {
+      console.log(`❌ Error: ${stats.error}`);
+    }
+    if (stats.stopped > 0) {
+      console.log(`🛑 Stopped: ${stats.stopped}`);
+    }
+    
+    console.log('\\nUse "calmhive afk status -d" for detailed view');
+  }
+  
+  showCompactStatus(sessions) {
+    const header = 'Session ID'.padEnd(25) + 
+                  'Task'.padEnd(35) + 
+                  'Status'.padEnd(12) + 
+                  'Progress'.padEnd(12) + 
+                  'Started';
+    
+    console.log(header);
+    console.log('-'.repeat(header.length));
+    
+    for (const session of sessions.slice(0, 20)) { // Show latest 20
+      const id = session.id; // Show FULL ID for easy copy/paste
+      const displayId = id.length > 24 ? id.substring(0, 24) : id;
+      const task = session.task.length > 32 ? 
+                   session.task.substring(0, 32) + '...' : 
+                   session.task;
+      const status = this.getStatusIcon(session.status) + session.status;
+      const progress = `${session.iterations_completed}/${session.iterations_planned}`;
+      const started = new Date(session.started_at).toLocaleString();
+      
+      console.log(
+        displayId.padEnd(25) +
+        task.padEnd(35) +
+        status.padEnd(12) +
+        progress.padEnd(12) +
+        started
+      );
+    }
+    
+    if (sessions.length > 20) {
+      console.log(`\\n... and ${sessions.length - 20} more sessions`);
+    }
+    
+    console.log('\\n💡 Tip: Copy the full Session ID for tail/stop commands');
+  }
+  
+  showDetailedStatus(sessions) {
+    for (const session of sessions.slice(0, 10)) { // Show latest 10 in detail
+      console.log(`\\n${this.getStatusIcon(session.status)} ${session.id}`);
+      console.log(`   Task: ${session.task}`);
+      console.log(`   Status: ${session.status}`);
+      console.log(`   Progress: ${session.iterations_completed}/${session.iterations_planned}`);
+      console.log(`   Model: ${session.model}`);
+      
+      if (session.pid) {
+        console.log(`   PID: ${session.pid}`);
+      }
+      
+      console.log(`   Started: ${new Date(session.started_at).toLocaleString()}`);
+      
+      if (session.completed_at) {
+        console.log(`   Completed: ${new Date(session.completed_at).toLocaleString()}`);
+        const duration = session.completed_at - session.started_at;
+        console.log(`   Duration: ${this.formatDuration(duration)}`);
+      } else if (session.status === 'running') {
+        const elapsed = Date.now() - session.started_at;
+        console.log(`   Elapsed: ${this.formatDuration(elapsed)}`);
+      }
+    }
+  }
+
+  async tailLogs(args) {
+    const sessionId = args[0];
+    if (!sessionId) {
+      console.error('❌ Session ID required');
+      console.log('Usage: calmhive afk tail <session-id>');
+      process.exit(1);
+    }
+    
+    await this.processManager.tailLogs(sessionId);
+  }
+
+  async cleanup(args) {
+    const days = parseInt(args[0]) || 7;
+    console.log(`🧹 Cleaning up sessions older than ${days} days...`);
+    
+    const result = await this.processManager.cleanupCompleted(days);
+    
+    if (result.sessions === 0 && result.logs === 0) {
+      console.log('✨ No old sessions to clean up');
+    } else {
+      console.log(`✅ Cleanup complete:`);
+      if (result.sessions > 0) {
+        console.log(`   📊 Removed ${result.sessions} old sessions`);
+      }
+      if (result.logs > 0) {
+        console.log(`   📝 Removed ${result.logs} old log files`);
+      }
+    }
+  }
+  
+  async showStats() {
+    const stats = await this.processManager.getSessionStats();
+    
+    console.log('📈 V3 AFk System Statistics\\n');
+    console.log(`Total Sessions: ${stats.total}`);
+    
+    console.log('\\nBy Status:');
+    Object.entries(stats.by_status).forEach(([status, count]) => {
+      const icon = this.getStatusIcon(status);
+      console.log(`  ${icon} ${status}: ${count}`);
+    });
+    
+    console.log('\\nBy Type:');
+    Object.entries(stats.by_type).forEach(([type, count]) => {
+      console.log(`  📋 ${type}: ${count}`);
+    });
+  }
+
+  parseOptions(args) {
+    const options = {};
+    
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i];
+      
+      if (arg === '--iterations' || arg === '-i') {
+        options.iterations = parseInt(args[++i]) || 10;
+      } else if (arg === '--custom-steps') {
+        options.customSteps = true;
+      } else if (arg === '--simple') {
+        options.customSteps = false;
+      } else if (arg === '--model') {
+        options.model = args[++i];
+      } else if (arg === '--webhook') {
+        options.webhook = args[++i];
+      } else if (arg === '--checkpoint-interval') {
+        options.checkpointInterval = parseInt(args[++i]) || 1800;
+      }
+    }
+    
+    // Default to custom steps for better results
+    if (options.customSteps === undefined) {
+      options.customSteps = true;
+    }
+    
+    return options;
+  }
+  
+  getStatusIcon(status) {
+    const icons = {
+      'running': '🟢 ',
+      'completed': '✅ ',
+      'error': '❌ ',
+      'stopped': '🛑 '
+    };
+    return icons[status] || '⚪ ';
+  }
+  
+  formatDuration(ms) {
+    const seconds = Math.floor(ms / 1000) % 60;
+    const minutes = Math.floor(ms / 60000) % 60;
+    const hours = Math.floor(ms / 3600000);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  }
+
+  showHelp() {
+    console.log(`
+🐝 Calmhive V3 AFk - Reliable Background Processing
+
+USAGE:
+  calmhive afk "task description" [options]    Start background task
+  calmhive afk start "task" [options]          Start background task  
+  calmhive afk stop <session-id>               Stop running session
+  calmhive afk stop --all                      Stop all running sessions
+  calmhive afk status                          Show all sessions
+  calmhive afk status -d                       Show detailed status
+  calmhive afk tail <session-id>               View live logs
+  calmhive afk cleanup [days]                  Remove old sessions (default: 7 days)
+  calmhive afk stats                           Show system statistics
+
+OPTIONS:
+  --iterations N          Number of iterations (default: 10, max: 50)
+  --custom-steps          Use advanced prompting (default: enabled)
+  --simple                Use basic prompting  
+  --model MODEL           Claude model to use (haiku, sonnet, opus)
+  --webhook URL           Webhook for progress notifications
+  --checkpoint-interval N Checkpoint interval in seconds
+
+EXAMPLES:
+  calmhive afk "implement JWT authentication" --iterations 15
+  calmhive afk "refactor API endpoints" --custom-steps
+  calmhive afk "write unit tests" --simple --iterations 5
+  calmhive afk stop abc12345
+  calmhive afk cleanup 3
+
+FEATURES:
+  ✅ Reliable process management (no phantom processes)
+  ✅ Accurate status tracking with PID verification  
+  ✅ Live log viewing and process monitoring
+  ✅ Automatic cleanup of completed sessions
+  ✅ Advanced prompting with sequential thinking
+  ✅ Resource usage tracking and limits
+    `);
+  }
+}
+
+// Run the command
+if (require.main === module) {
+  const afk = new AfkCommand();
+  afk.execute().catch(error => {
+    console.error('💥 Fatal error:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = AfkCommand;

@@ -1,0 +1,54 @@
+{
+  "name": "@calmhive/calmhive-cli",
+  "version": "3.0.0",
+  "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
+  "main": "index.js",
+  "bin": {
+    "calmhive": "bin/calmhive"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "node test/quick-test.js",
+    "test:full": "node test/run-tests.js",
+    "test:unit": "bash test/integration/commands.test.sh",
+    "test:integration": "bash test/integration/commands.test.sh",
+    "test:e2e": "bash test/e2e/voice-system.test.sh",
+    "start:tui": "node commands/tui",
+    "start:afk": "node commands/afk"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "ai",
+    "assistant",
+    "automation",
+    "afk",
+    "voice",
+    "mcp"
+  ],
+  "author": "Jory",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joryeugene/calmhive-cli.git"
+  },
+  "homepage": "https://github.com/joryeugene/calmhive-cli#readme",
+  "bugs": {
+    "url": "https://github.com/joryeugene/calmhive-cli/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "fs-extra": "^11.3.0",
+    "sqlite3": "^5.1.7",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10"
+  }
+}
