@@ -1,6 +1,6 @@
 # 🐝 Calmhive: Claude That Never Quits
 
-> Transform Claude into your AI development companion with voice control, background processing, and intelligent automation.
+> Enhance Claude CLI with AFk iterative sessions, usage limit recovery, voice control, and process monitoring.
 
 [![npm version](https://badge.fury.io/js/%40calmhive%2Fcalmhive-cli.svg)](https://www.npmjs.com/package/@calmhive/calmhive-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -18,11 +18,11 @@ npm install -g @calmhive/calmhive-cli
 
 ## ✨ Why Calmhive?
 
-- **🔄 Adaptive Retry** - Only CLI that handles Claude usage limits gracefully
+- **🔄 Adaptive Retry** - Automatically recovers from Claude usage limits with exponential backoff
 - **🎙️ Voice Control** - Say "hey friend" or "calmhive" to activate voice commands
-- **📊 97 MCP Tools** - Integrated Memento, Sequential Thinking, Playwright, and more
-- **🏃 True Automation** - Actually headless execution with verification
-- **🖥️ Process Management** - Beautiful TUI to monitor all your Claude sessions
+- **📊 97 MCP Tools** - Pre-approved access to Memento, Sequential Thinking, Playwright, and more
+- **🏃 AFk Iterations** - Run multiple Claude sessions sequentially in the background
+- **🖥️ Process Management** - Beautiful TUI to monitor all your AFk sessions
 
 ## 🎯 Quick Start
 
@@ -30,7 +30,7 @@ npm install -g @calmhive/calmhive-cli
 # Chat with Claude interactively
 calmhive chat "explain this useEffect dependency array"
 
-# Automate a task (runs headlessly)
+# Run a task (wrapper for claude run with tools)
 calmhive run "add TypeScript types to all .js files in src/"
 
 # Long task in background (with adaptive retry!)
@@ -53,16 +53,16 @@ calmhive c "debug this error"    # Quick question
 calmhive chat -c                 # Continue previous conversation
 ```
 
-### `run` - Headless Automation (alias: `r`)  
-Execute tasks without interaction. Perfect for scripts and CI/CD.
+### `run` - Task Execution (alias: `r`)  
+Wrapper for `claude run` with automatic tool approval. Perfect for scripts and CI/CD.
 ```bash
 calmhive run "add type annotations to services/auth.js"
 calmhive r "find and fix n+1 queries in the API"
 calmhive run "migrate database schema to TypeScript"
 ```
 
-### `afk` - Background Processing (alias: `a`)
-Long-running tasks with automatic retry on usage limits.
+### `afk` - Away From Keyboard Iterations (alias: `a`)
+Run multiple Claude sessions sequentially with automatic retry on usage limits.
 ```bash
 calmhive afk "refactor entire codebase" --iterations 20
 calmhive afk status              # Check all running tasks

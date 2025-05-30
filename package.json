@@ -18,21 +18,12 @@
     "start:tui": "node commands/tui",
     "start:afk": "node commands/afk"
   },
-  "keywords": [
-    "claude",
-    "cli",
-    "ai",
-    "assistant",
-    "automation",
-    "afk",
-    "voice",
-    "mcp"
-  ],
+  "keywords": ["claude", "cli", "ai", "assistant", "automation", "afk", "voice", "mcp"],
   "author": "Jory",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joryeugene/calmhive-cli.git"
+    "url": "https://github.com/joryeugene/calmhive-cli.git"
   },
   "homepage": "https://github.com/joryeugene/calmhive-cli#readme",
   "bugs": {

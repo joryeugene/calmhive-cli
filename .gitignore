@@ -1,56 +1,63 @@
 # Dependencies
 node_modules/
+
+# Logs
+logs/
 *.log
 npm-debug.log*
 
 # Runtime data
-data/
-logs/
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# Database files
 *.db
 *.sqlite
 *.sqlite3
 
-# Development
-.DS_Store
+# Environment variables
 .env
 .env.local
-.env.*.local
+
+# IDE files
+.vscode/
+.idea/
 *.swp
 *.swo
 *~
 
-# Test coverage
-coverage/
-.nyc_output/
-
-# IDE
-.vscode/
-.idea/
-*.sublime-*
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
+# OS files
+.DS_Store
+Thumbs.db
 
 # Temporary files
 *.tmp
 *.temp
-.cache/
+temp/
+tmp/
 
-# OS files
-Thumbs.db
-
-# Build artifacts
+# Build outputs
 dist/
 build/
 
 # Session data
-sessions/
-afk_sessions/
-afk_registry/
+data/sessions.db
+data/*.db
+
+# Archive directories (for development)
+archive*/
+
+# Development scripts
+demo.sh
+prepare-release.sh
+test-before-publish.sh
+sync-to-repo.sh
+
+# justfile
+justfile
