@@ -1,6 +1,6 @@
 {
   "name": "@calmhive/calmhive-cli",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
   "main": "index.js",
   "bin": {
@@ -18,7 +18,16 @@
     "start:tui": "node commands/tui",
     "start:afk": "node commands/afk"
   },
-  "keywords": ["claude", "cli", "ai", "assistant", "automation", "afk", "voice", "mcp"],
+  "keywords": [
+    "claude",
+    "cli",
+    "ai",
+    "assistant",
+    "automation",
+    "afk",
+    "voice",
+    "mcp"
+  ],
   "author": "Jory",
   "license": "MIT",
   "repository": {
