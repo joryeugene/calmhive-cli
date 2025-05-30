@@ -144,6 +144,9 @@ class AfkCommand {
   }
 
   async showStatus(args) {
+    // Clean up stale sessions first
+    await this.processManager.cleanupStaleSessions();
+    
     const detailed = args.includes('-d') || args.includes('--detailed');
     const sessions = await this.processManager.getStatus();
     
