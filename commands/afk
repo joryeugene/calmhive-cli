@@ -98,7 +98,7 @@ class AfkCommand {
     console.log(`   Task: ${session.task}`);
     console.log(`   Iterations: ${session.iterations_planned}`);
     console.log(`   Model: ${session.model}`);
-    console.log(`   Custom Steps: ${JSON.parse(session.metadata).customSteps ? 'Yes' : 'No'}`);
+    console.log(`   Custom Steps: No`);
     console.log(`\\n📊 Monitor: calmhive afk status`);
     console.log(`📝 Logs: calmhive afk tail ${session.id}`);
     console.log(`🛑 Stop: calmhive afk stop ${session.id}`);

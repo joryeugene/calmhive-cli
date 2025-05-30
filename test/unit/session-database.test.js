@@ -33,25 +33,26 @@ async function testSessionDatabase() {
       status: 'running'
     };
     
-    const sessionId = await db.createSession(sessionData);
-    assert(sessionId, 'Session ID should be returned');
+    const createdSession = await db.createSession(sessionData);
+    assert(createdSession, 'Session should be returned');
+    assert(createdSession.id, 'Session ID should be present');
     console.log('  ✓ Session creation');
     
     // Test session retrieval
-    const session = await db.getSession(sessionId);
+    const session = await db.getSession(createdSession.id);
     assert(session, 'Session should exist');
     assert.strictEqual(session.task, 'Test task');
     console.log('  ✓ Session retrieval');
     
     // Test session update
-    await db.updateSession(sessionId, { status: 'completed' });
-    const updatedSession = await db.getSession(sessionId);
+    await db.updateSession(createdSession.id, { status: 'completed' });
+    const updatedSession = await db.getSession(createdSession.id);
     assert.strictEqual(updatedSession.status, 'completed');
     console.log('  ✓ Session update');
     
     // Test session deletion
-    await db.deleteSession(sessionId);
-    const deletedSession = await db.getSession(sessionId);
+    await db.deleteSession(createdSession.id);
+    const deletedSession = await db.getSession(createdSession.id);
     assert.strictEqual(deletedSession, null);
     console.log('  ✓ Session deletion');
     
