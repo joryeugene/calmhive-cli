@@ -7,8 +7,28 @@
 
 ## 🚀 Quick Install
 
+### Option 1: npm (Recommended)
 ```bash
 npm install -g @calmhive/calmhive-cli
+```
+
+### Option 2: Git Clone + PATH Setup
+```bash
+# Clone the repository
+git clone https://github.com/joryeugene/calmhive-cli.git $HOME/repos/calmhive-cli
+
+# Add to your PATH (choose your shell)
+# For bash (~/.bashrc or ~/.bash_profile):
+echo 'export PATH="$HOME/repos/calmhive-cli/bin:$PATH"' >> ~/.bashrc
+
+# For zsh (~/.zshrc):
+echo 'export PATH="$HOME/repos/calmhive-cli/bin:$PATH"' >> ~/.zshrc
+
+# Reload your shell
+source ~/.bashrc  # or ~/.zshrc
+
+# Test it works
+calmhive --help
 ```
 
 **Prerequisites**: 
@@ -133,16 +153,37 @@ calmhive afk "complex task" --custom-steps --iterations 25
 
 ## 🔧 Installation Troubleshooting
 
-**Command not found?**
+**Command not found after npm install?**
 ```bash
-# Add to your shell profile:
+# Add npm global binaries to PATH:
 export PATH="$PATH:$(npm prefix -g)/bin"
+
+# Or find where npm installs global packages:
+npm prefix -g
 ```
 
-**Permission errors?**
+**Permission errors with npm?**
 ```bash
-# Use a Node version manager instead:
+# Use npx to run without global install:
 npx @calmhive/calmhive-cli chat "hello"
+
+# Or use the git clone method above for full control
+```
+
+**Git clone setup example:**
+```bash
+# Create repos directory if it doesn't exist
+mkdir -p $HOME/repos
+
+# Clone and setup
+git clone https://github.com/joryeugene/calmhive-cli.git $HOME/repos/calmhive-cli
+
+# Add to PATH (same as Option 2 above)
+echo 'export PATH="$HOME/repos/calmhive-cli/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# Test it works
+calmhive --help
 ```
 
 **Claude CLI missing?**
@@ -287,6 +328,7 @@ calmhive voice
 
 ## 📖 More Info
 
+- **[Blog Post](https://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Detailed command documentation
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - Configure powerful MCP tools
 - **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Version history
