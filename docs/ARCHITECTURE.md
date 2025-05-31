@@ -81,9 +81,10 @@ calmhive tui -m         # Monitor-only mode
 calmhive afk "analyze entire codebase and create documentation" --iterations 5
 
 # Monitor processes
-calmhive afk status
-calmhive afk tail <session-id>
-calmhive afk stop <session-id>
+calmhive afk status              # Compact view
+calmhive afk status -d           # Detailed view
+calmhive afk tail <session-id>   # Live logs
+calmhive afk stop <session-id>   # Stop session
 ```
 
 ## When to Use Each Command

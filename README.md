@@ -66,6 +66,7 @@ Run multiple Claude sessions sequentially with automatic retry on usage limits.
 ```bash
 calmhive afk "refactor entire codebase" --iterations 20
 calmhive afk status              # Check all running tasks
+calmhive afk status -d           # Detailed view with full task info
 calmhive afk tail abc-123        # Watch live progress
 calmhive afk stop abc-123        # Stop a task
 ```
@@ -248,6 +249,16 @@ find . -name "*.js" | calmhive chat -p "list potential bugs in these files"
 calmhive run "create comprehensive test suite" > test-plan.md
 ```
 
+**Using Prompt Files**
+```bash
+# Pass a markdown file as AFk task description
+calmhive afk "$(cat prompt.md)" --iterations 20
+
+# Use complex prompts from files
+calmhive chat "$(cat detailed-instructions.md)"
+calmhive run "$(cat build-script-prompt.md)"
+```
+
 **Voice + AFk Combo**
 ```bash
 # Start voice interface
@@ -271,6 +282,7 @@ calmhive voice
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - Configure powerful MCP tools
 - **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Version history
 - **[GitHub Repository](https://github.com/joryeugene/calmhive-cli)** - Source code & issues
+- **[Try Claude AI](https://claude.ai/referral/rb3lQwQWDg)** - Get started with Claude (referral link)
 
 ## 🤝 Contributing
 

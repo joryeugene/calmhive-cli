@@ -187,7 +187,9 @@ class AfkCommand {
       console.log(`🛑 Stopped: ${stats.stopped}`);
     }
     
-    console.log('\nUse "calmhive afk status -d" for detailed view');
+    if (!detailed) {
+      console.log('\nUse "calmhive afk status -d" for detailed view');
+    }
   }
   
   showCompactStatus(sessions) {
@@ -373,8 +375,8 @@ USAGE:
   calmhive afk start "task" [options]          Start background task  
   calmhive afk stop <session-id>               Stop running session
   calmhive afk stop --all                      Stop all running sessions
-  calmhive afk status                          Show all sessions
-  calmhive afk status -d                       Show detailed status
+  calmhive afk status                          Show all sessions (compact view)
+  calmhive afk status -d                       Show detailed status (full info)
   calmhive afk tail <session-id>               View live logs
   calmhive afk cleanup [days]                  Remove old sessions (default: 7 days)
   calmhive afk killorphans                     Kill orphan Claude processes
