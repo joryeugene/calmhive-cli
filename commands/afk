@@ -47,6 +47,10 @@ class AfkCommand {
           await this.showStats();
           break;
           
+        case 'killorphans':
+          await this.killOrphans();
+          break;
+          
         default:
           // If no subcommand, treat as task description
           await this.startSession([command, ...args]);
@@ -294,6 +298,18 @@ class AfkCommand {
       console.log(`  📋 ${type}: ${count}`);
     });
   }
+  
+  async killOrphans() {
+    console.log('🔍 Scanning for orphan Claude processes...');
+    const result = await this.processManager.killOrphanProcesses();
+    
+    if (result.killed > 0) {
+      console.log(`\n🧹 Cleanup complete! Killed ${result.killed} orphan processes.`);
+      console.log('💡 Tip: Run "calmhive afk status" to see if any sessions need to be marked as stopped.');
+    } else {
+      console.log('\n✨ No orphan processes found - system is clean!');
+    }
+  }
 
   parseOptions(args) {
     const options = {};
@@ -361,6 +377,7 @@ USAGE:
   calmhive afk status -d                       Show detailed status
   calmhive afk tail <session-id>               View live logs
   calmhive afk cleanup [days]                  Remove old sessions (default: 7 days)
+  calmhive afk killorphans                     Kill orphan Claude processes
   calmhive afk stats                           Show system statistics
 
 OPTIONS:
