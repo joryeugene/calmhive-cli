@@ -93,13 +93,13 @@ class AfkCommand {
     console.log('🚀 Starting V3 AFk session...');
     const session = await this.processManager.startAfkSession(task, options);
     
-    console.log(`\\n📋 Session Details:`);
+    console.log(`\n📋 Session Details:`);
     console.log(`   ID: ${session.id}`);
     console.log(`   Task: ${session.task}`);
     console.log(`   Iterations: ${session.iterations_planned}`);
     console.log(`   Model: ${session.model}`);
     console.log(`   Custom Steps: No`);
-    console.log(`\\n📊 Monitor: calmhive afk status`);
+    console.log(`\n📊 Monitor: calmhive afk status`);
     console.log(`📝 Logs: calmhive afk tail ${session.id}`);
     console.log(`🛑 Stop: calmhive afk stop ${session.id}`);
   }
@@ -155,11 +155,11 @@ class AfkCommand {
     
     if (sessions.length === 0) {
       console.log('📊 No AFk sessions found');
-      console.log('\\n🚀 Start a new session: calmhive afk "your task description"');
+      console.log('\n🚀 Start a new session: calmhive afk "your task description"');
       return;
     }
     
-    console.log('📊 V3 AFk Sessions Summary\\n');
+    console.log('📊 V3 AFk Sessions Summary\n');
     
     if (detailed) {
       this.showDetailedStatus(sessions);
@@ -168,7 +168,7 @@ class AfkCommand {
     }
     
     const stats = await this.processManager.getSessionStats();
-    console.log(`\\n📈 Total Sessions: ${stats.total}`);
+    console.log(`\n📈 Total Sessions: ${stats.total}`);
     
     if (stats.running > 0) {
       console.log(`🟢 Running: ${stats.running}`);
@@ -183,7 +183,7 @@ class AfkCommand {
       console.log(`🛑 Stopped: ${stats.stopped}`);
     }
     
-    console.log('\\nUse "calmhive afk status -d" for detailed view');
+    console.log('\nUse "calmhive afk status -d" for detailed view');
   }
   
   showCompactStatus(sessions) {
@@ -216,15 +216,15 @@ class AfkCommand {
     }
     
     if (sessions.length > 20) {
-      console.log(`\\n... and ${sessions.length - 20} more sessions`);
+      console.log(`\n... and ${sessions.length - 20} more sessions`);
     }
     
-    console.log('\\n💡 Tip: Copy the full Session ID for tail/stop commands');
+    console.log('\n💡 Tip: Copy the full Session ID for tail/stop commands');
   }
   
   showDetailedStatus(sessions) {
     for (const session of sessions.slice(0, 10)) { // Show latest 10 in detail
-      console.log(`\\n${this.getStatusIcon(session.status)} ${session.id}`);
+      console.log(`\n${this.getStatusIcon(session.status)} ${session.id}`);
       console.log(`   Task: ${session.task}`);
       console.log(`   Status: ${session.status}`);
       console.log(`   Progress: ${session.iterations_completed}/${session.iterations_planned}`);
@@ -280,16 +280,16 @@ class AfkCommand {
   async showStats() {
     const stats = await this.processManager.getSessionStats();
     
-    console.log('📈 V3 AFk System Statistics\\n');
+    console.log('📈 V3 AFk System Statistics\n');
     console.log(`Total Sessions: ${stats.total}`);
     
-    console.log('\\nBy Status:');
+    console.log('\nBy Status:');
     Object.entries(stats.by_status).forEach(([status, count]) => {
       const icon = this.getStatusIcon(status);
       console.log(`  ${icon} ${status}: ${count}`);
     });
     
-    console.log('\\nBy Type:');
+    console.log('\nBy Type:');
     Object.entries(stats.by_type).forEach(([type, count]) => {
       console.log(`  📋 ${type}: ${count}`);
     });
@@ -367,7 +367,7 @@ OPTIONS:
   --iterations N          Number of iterations (default: 10, max: 50)
   --custom-steps          Use advanced prompting (default: enabled)
   --simple                Use basic prompting  
-  --model MODEL           Claude model to use (haiku, sonnet, opus)
+  --model MODEL           Claude model to use (sonnet, opus)
   --webhook URL           Webhook for progress notifications
   --checkpoint-interval N Checkpoint interval in seconds
 

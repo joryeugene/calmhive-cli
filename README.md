@@ -112,7 +112,7 @@ After installation:
 ### Use Different Models
 ```bash
 calmhive chat --model opus "complex analysis"
-calmhive run --model haiku "quick formatting task"
+calmhive run --model sonnet "standard task"
 ```
 
 ### Pipe Input/Output
@@ -167,6 +167,103 @@ Calmhive requires Claude Max, Pro, or Teams subscription for MCP (Model Context 
 
 **Need detailed MCP setup?**
 See our comprehensive [MCP Setup Guide](docs/MCP_SETUP.md) for step-by-step instructions on configuring essential tools like Sequential Thinking and OmniSearch.
+
+## 💡 Tips & Tricks
+
+### 🔄 AFk Session Best Practices
+
+**Stopping AFk Sessions**
+```bash
+# ❌ DON'T use Ctrl+C (won't work - AFk runs in background)
+# ✅ DO use proper stop command:
+calmhive afk stop <session-id>
+```
+
+**Continue Where You Left Off**
+```bash
+# After an AFk session completes, pick up the conversation:
+calmhive chat -c  # Claude remembers the context!
+```
+
+**Monitor Progress**
+```bash
+calmhive afk status           # See all sessions
+calmhive afk tail <session>   # Watch live logs
+calmhive tui                  # Visual interface
+```
+
+### ⚠️ Common Issues & Solutions
+
+**Mixed Console Output**
+If you see iterations jumping (1 → 3), you may have multiple AFk processes:
+```bash
+ps aux | grep "commands/afk"  # Check for duplicates
+kill <pid>                    # Kill orphan processes
+```
+
+**Long Tasks Timing Out**
+AFk sessions can run for hours - no artificial timeouts!
+```bash
+# These will run as long as needed:
+calmhive afk "complex refactoring" -i 30
+calmhive afk "comprehensive testing" -i 50
+```
+
+**Usage Limit Recovery**
+Calmhive automatically handles rate limits with exponential backoff:
+```
+✅ Iteration 5 complete
+⚠️ Usage limit detected  
+⏳ Waiting 30s → 1m → 2m → 4m...
+✅ Iteration 6 started!
+```
+
+### 🚀 Workflow Power Tips
+
+**Chaining Commands**
+```bash
+# 1. Run AFk session for bulk work
+calmhive afk "audit security vulnerabilities" -i 10
+
+# 2. After completion, dive deeper interactively  
+calmhive chat -c "focus on the critical ones"
+
+# 3. Or run follow-up automation
+calmhive run "apply the security fixes you identified"
+```
+
+**Smart Model Selection**
+```bash
+calmhive chat --model sonnet "standard work"     # Balanced (default)
+calmhive afk --model sonnet "standard work" -i 5 # Balanced performance
+calmhive chat --model opus "complex analysis"    # Most capable
+```
+
+**Pipe Workflows**
+```bash
+# Process files through Claude
+find . -name "*.js" | calmhive chat -p "list potential bugs in these files"
+
+# Generate and save output
+calmhive run "create comprehensive test suite" > test-plan.md
+```
+
+**Voice + AFk Combo**
+```bash
+# Start voice interface
+calmhive voice
+
+# Say: "Start an AFk session to refactor the entire authentication system with 20 iterations"
+# Then monitor with TUI while doing other work!
+```
+
+### 🎯 Pro Tips
+
+- **Context Continuity**: Use `chat -c` after AFk to maintain conversation history
+- **Background Monitoring**: Keep `calmhive tui` open in a separate terminal  
+- **Smart Iterations**: 5-15 iterations for most tasks, 20+ for major refactoring
+- **Clean Shutdown**: Always use `afk stop` instead of killing terminals
+- **Model Efficiency**: Sonnet for most work (default), Opus for complex reasoning
 
 ## 📖 More Info
 
