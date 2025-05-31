@@ -171,6 +171,15 @@ See our comprehensive [MCP Setup Guide](docs/MCP_SETUP.md) for step-by-step inst
 
 ## 💡 Tips & Tricks
 
+### 📝 CLAUDE.md for Persistent Context
+
+Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Claude sessions:
+- Global coding preferences and standards
+- Frequently used tools and workflows
+- Custom instructions for your AI assistant
+
+See `CLAUDE.md.example` for a template. Learn more in the [Terminal Velocity guide](https://github.com/joryeugene/ai-dev-tooling/blob/main/blog/02-terminal-velocity.md#the-claudemd-directive-experimental).
+
 ### 🔄 AFk Session Best Practices
 
 **Stopping AFk Sessions**
