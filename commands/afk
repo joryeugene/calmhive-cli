@@ -154,6 +154,15 @@ class AfkCommand {
     // Clean up stale sessions
     await this.processManager.cleanupStaleSessions();
     
+    // Kill any orphan processes if --cleanup flag is provided
+    if (args.includes('--cleanup')) {
+      console.log('🔍 Scanning for orphan Claude processes...');
+      const result = await this.processManager.killOrphanProcesses();
+      if (result.killed > 0) {
+        console.log(`🧹 Killed ${result.killed} orphan processes: ${result.pids.join(', ')}`);
+      }
+    }
+    
     const detailed = args.includes('-d') || args.includes('--detailed');
     const sessions = await this.processManager.getStatus();
     
@@ -377,6 +386,7 @@ USAGE:
   calmhive afk stop --all                      Stop all running sessions
   calmhive afk status                          Show all sessions (compact view)
   calmhive afk status -d                       Show detailed status (full info)
+  calmhive afk status --cleanup                Show status and kill orphan processes
   calmhive afk tail <session-id>               View live logs
   calmhive afk cleanup [days]                  Remove old sessions (default: 7 days)
   calmhive afk killorphans                     Kill orphan Claude processes
