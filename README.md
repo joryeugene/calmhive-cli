@@ -2,6 +2,55 @@
 
 > Enhance Claude CLI with AFk iterative sessions, usage limit recovery, voice control, and process monitoring.
 
+## ⚠️ CRITICAL SECURITY WARNING ⚠️
+
+**CALMHIVE IS A POWERFUL TOOL THAT GIVES CLAUDE AI DIRECT ACCESS TO YOUR SYSTEM. BY USING THIS SOFTWARE, YOU ACCEPT FULL RESPONSIBILITY FOR ANY ACTIONS IT MAY TAKE.**
+
+### 🚨 POTENTIAL RISKS:
+- **File System Destruction**: Claude can execute `rm -rf`, `rsync --delete`, or other destructive commands that could completely wipe your files
+- **Data Loss**: Your personal notes, second brain, knowledge bases, or any directory could be permanently deleted
+- **System Modifications**: Claude can modify system files, install/uninstall software, change configurations
+- **Network Access**: Claude can make network requests, upload/download files, interact with APIs
+- **Code Execution**: Claude can run arbitrary code in any programming language on your system
+- **Privilege Escalation**: If run with elevated permissions, Claude could modify system-critical files
+
+### 📋 REQUIRED SAFETY MEASURES:
+
+**BEFORE USING CALMHIVE:**
+
+1. **BACKUP EVERYTHING**:
+   - Create complete system backups (Time Machine, etc.)
+   - Backup critical data to remote locations (cloud storage, external drives)
+   - Ensure you can restore your entire system if needed
+
+2. **Version Control**:
+   - Use Git for ALL projects - local Git repos are NOT sufficient backup
+   - Push to remote repositories (GitHub, GitLab, etc.) regularly
+   - Consider your local Git history expendable
+
+3. **Isolation Strategies**:
+   - Run Calmhive in sandboxed environments when possible
+   - Avoid running with sudo/admin privileges unless absolutely necessary
+   - Consider using containers or VMs for risky operations
+
+4. **Monitoring**:
+   - Regularly review what commands Claude is executing
+   - Stop immediately if you see unexpected destructive commands
+   - Use `calmhive afk status` to monitor background processes
+
+### 🛡️ THIS IS NOT A TOY
+This tool amplifies Claude's capabilities to include direct system control. While powerful for productivity, it's equally capable of causing irreversible damage. **A simple miscommunication or AI misunderstanding could result in complete data loss.**
+
+### 💾 DID YOU BACKUP?
+- Is your entire file system backed up remotely?
+- Are your personal notes/knowledge base in cloud storage?
+- Can you recover if your home directory gets deleted?
+- Are your Git repositories pushed to remote origins?
+
+**If you answered "no" to any of these questions, STOP and create proper backups before proceeding.**
+
+By continuing to use Calmhive, you acknowledge these risks and confirm you have taken appropriate precautions.
+
 [![npm version](https://img.shields.io/npm/v/@calmhive/calmhive-cli.svg)](https://www.npmjs.com/package/@calmhive/calmhive-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -31,7 +80,7 @@ source ~/.bashrc  # or ~/.zshrc
 calmhive --help
 ```
 
-**Prerequisites**: 
+**Prerequisites**:
 - Node.js 18+
 - [Claude CLI](https://docs.anthropic.com/en/docs/claude-cli) with Max/Pro/Teams subscription (for MCP tools)
 - OpenAI API key (for voice features only)
@@ -73,7 +122,7 @@ calmhive c "debug this error"    # Quick question
 calmhive chat -c                 # Continue previous conversation
 ```
 
-### `run` - Task Execution (alias: `r`)  
+### `run` - Task Execution (alias: `r`)
 Wrapper for `claude run` with automatic tool approval. Perfect for scripts and CI/CD.
 ```bash
 calmhive run "add type annotations to services/auth.js"
@@ -94,7 +143,7 @@ calmhive afk stop abc-123        # Stop a task
 ### `voice` - Voice Control (alias: `v`)
 Full-featured voice interface with speech recognition and text-to-speech.
 ```bash
-calmhive voice                   # Start voice interface  
+calmhive voice                   # Start voice interface
 calmhive voice --debug           # Debug mode
 # Say "hey friend", "calmhive", or "ok friend" to activate
 ```
@@ -114,7 +163,7 @@ Ever had an overnight task die at iteration 10 due to usage limits? Not anymore!
 Iteration 10 ✓
 ⚠️ Usage limit detected
 ⏳ Waiting 60s before retry...
-⏳ Waiting 120s before retry... 
+⏳ Waiting 120s before retry...
 ✅ Iteration 11 started!
 ```
 
@@ -264,7 +313,7 @@ calmhive afk "comprehensive testing" -i 50
 Calmhive automatically handles rate limits with exponential backoff:
 ```
 ✅ Iteration 5 complete
-⚠️ Usage limit detected  
+⚠️ Usage limit detected
 ⏳ Waiting 30s → 1m → 2m → 4m...
 ✅ Iteration 6 started!
 ```
@@ -276,7 +325,7 @@ Calmhive automatically handles rate limits with exponential backoff:
 # 1. Run AFk session for bulk work
 calmhive afk "audit security vulnerabilities" -i 10
 
-# 2. After completion, dive deeper interactively  
+# 2. After completion, dive deeper interactively
 calmhive chat -c "focus on the critical ones"
 
 # 3. Or run follow-up automation
@@ -321,7 +370,7 @@ calmhive voice
 ### 🎯 Pro Tips
 
 - **Context Continuity**: Use `chat -c` after AFk to maintain conversation history
-- **Background Monitoring**: Keep `calmhive tui` open in a separate terminal  
+- **Background Monitoring**: Keep `calmhive tui` open in a separate terminal
 - **Smart Iterations**: 5-15 iterations for most tasks, 20+ for major refactoring
 - **Clean Shutdown**: Always use `afk stop` instead of killing terminals
 - **Model Efficiency**: Sonnet for most work (default), Opus for complex reasoning
