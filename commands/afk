@@ -73,6 +73,8 @@ class AfkCommand {
         // Skip the flag and its value if it has one
         if (['--iterations', '-i', '--model', '--webhook', '--checkpoint-interval'].includes(args[i])) {
           i++; // Skip the next arg which is the value
+        } else if (args[i] === '--no-prevent-sleep') {
+          // No value to skip for this flag
         }
       } else {
         taskArgs.push(args[i]);
@@ -89,20 +91,23 @@ class AfkCommand {
     }
     
     // Validate iterations
-    if (options.iterations && (options.iterations < 1 || options.iterations > 50)) {
-      console.error('❌ Iterations must be between 1 and 50');
+    if (options.iterations && (options.iterations < 1 || options.iterations > 69)) {
+      console.error('❌ Iterations must be between 1 and 69');
       process.exit(1);
     }
     
     console.log('🚀 Starting V3 AFk session...');
+    
+    // Always run AFk sessions in background mode for proper isolation
+    options.background = true;
+    
     const session = await this.processManager.startAfkSession(task, options);
     
     console.log(`\n📋 Session Details:`);
     console.log(`   ID: ${session.id}`);
     console.log(`   Task: ${session.task}`);
     console.log(`   Iterations: ${session.iterations_planned}`);
-    console.log(`   Model: ${session.model}`);
-    console.log(`   Custom Steps: No`);
+    console.log(`   Sleep Prevention: ${session.iterations_planned > 5 && options.preventSleep !== false ? 'Enabled' : 'Disabled'}`);
     console.log(`\n📊 Monitor: calmhive afk status`);
     console.log(`📝 Logs: calmhive afk tail ${session.id}`);
     console.log(`🛑 Stop: calmhive afk stop ${session.id}`);
@@ -243,7 +248,6 @@ class AfkCommand {
       console.log(`   Task: ${session.task}`);
       console.log(`   Status: ${session.status}`);
       console.log(`   Progress: ${session.iterations_completed}/${session.iterations_planned}`);
-      console.log(`   Model: ${session.model}`);
       
       if (session.pid) {
         console.log(`   PID: ${session.pid}`);
@@ -340,6 +344,8 @@ class AfkCommand {
         options.webhook = args[++i];
       } else if (arg === '--checkpoint-interval') {
         options.checkpointInterval = parseInt(args[++i]) || 1800;
+      } else if (arg === '--no-prevent-sleep') {
+        options.preventSleep = false;
       }
     }
     
@@ -393,12 +399,13 @@ USAGE:
   calmhive afk stats                           Show system statistics
 
 OPTIONS:
-  --iterations N          Number of iterations (default: 10, max: 50)
+  --iterations N          Number of iterations (default: 10, max: 69)
   --custom-steps          Use advanced prompting (default: enabled)
   --simple                Use basic prompting  
   --model MODEL           Claude model to use (sonnet, opus)
   --webhook URL           Webhook for progress notifications
   --checkpoint-interval N Checkpoint interval in seconds
+  --no-prevent-sleep      Disable automatic sleep prevention (enabled by default for >5 iterations)
 
 EXAMPLES:
   calmhive afk "implement JWT authentication" --iterations 15
@@ -414,6 +421,7 @@ FEATURES:
   ✅ Automatic cleanup of completed sessions
   ✅ Advanced prompting with sequential thinking
   ✅ Resource usage tracking and limits
+  ☕ Automatic sleep prevention for long sessions (>5 iterations)
     `);
   }
 }

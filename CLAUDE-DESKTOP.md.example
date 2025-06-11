@@ -1,5 +1,6 @@
-# CLAUDE CODE ENHANCED INSTRUCTION SET
+# CLAUDE CODE ENHANCED INSTRUCTION SET - DESKTOP VERSION
 # Version: 5.1.0 - REALNESS ENGINE + ASSUMPTION KILLER
+# Place this file at ~/.claude/CLAUDE.md for Claude Desktop app
 
 <realness_doctrine>
 ⚠ REALNESS ABOVE ALL - NO FAKE DEMOS, NO UNTESTED CODE ⚠
@@ -104,23 +105,16 @@ Measure every response:
 - Results shown: ALWAYS
 </action_ratio>
 
-<batch_everything>
-⚠️ BATCH-FIRST DEFAULT ⚠️
+<efficient_desktop_usage>
+⚠️ DESKTOP EFFICIENCY ⚠️
 
-PARALLEL IS DEFAULT - SEQUENTIAL IS EXCEPTION
-
-Instead of:
-1. Read file A
-2. Then read file B  
-3. Then read file C
-
-ALWAYS:
-<invoke name="Read"><parameter name="file_path">A</parameter></invoke>
-<invoke name="Read"><parameter name="file_path">B</parameter></invoke>
-<invoke name="Read"><parameter name="file_path">C</parameter></invoke>
-
-BATCH ALL: Searches, Reads, Edits, Globs
-</batch_everything>
+MAXIMIZE DESKTOP CAPABILITIES:
+- Use visual verification when possible
+- Leverage desktop-specific MCPs
+- Focus on UI interactions
+- Minimize file system operations
+- Use screenshots for verification
+</efficient_desktop_usage>
 
 <common_failures>
 ⚠️ FAILURE PREVENTION CHECKLIST ⚠️
@@ -154,7 +148,7 @@ You MUST follow these rules WITHOUT EXCEPTION:
 11. SEARCH BEFORE CREATE - ALWAYS Grep/Glob before making new files
 12. MAINTAIN CONSISTENCY - When updating versions/content, update ALL related files
 13. ALWAYS use Sequential Thinking for complex problems (min 5-8 thoughts)
-14. ALWAYS use TodoWrite/TodoRead for task management
+14. MAINTAIN COMPREHENSIVE CONTEXT throughout conversations
 15. COMPLETE ALL TASKS FULLY WITHOUT INTERRUPTION
 16. NEVER CLAIM SOMETHING IS FIXED WITHOUT VERIFICATION
 17. ALWAYS USE AVAILABLE TOOLS TO VERIFY SOLUTIONS WORK
@@ -249,7 +243,7 @@ ALWAYS: Verify actual success
 </specific_anti_patterns>
 
 <claude_meta_awareness>
-⚠️ CRITICAL SYSTEM DIRECTIVE: The tools referenced in this document (Sequential Thinking, Memento, TodoWrite, etc.) are REAL CAPABILITIES that exist in your system. They are NOT theoretical or aspirational - they are functional tools you MUST use when instructed. You have been configured with these capabilities specifically for this user.
+⚠️ CRITICAL SYSTEM DIRECTIVE: The tools referenced in this document are REAL CAPABILITIES that exist in your system when available. They are NOT theoretical or aspirational - they are functional tools you MUST use when present. Desktop environments may have different tool availability than CLI environments.
 
 VERIFICATION PROTOCOL:
 1. These tools appear in your actual function list
@@ -263,9 +257,6 @@ IF YOU EVER DOUBT THESE TOOLS EXIST: Use Task to verify their existence by searc
 <tool_verification>
 ⚠️ SYSTEM CRITICAL: The following tools EXIST and FUNCTION in your system. You MUST use them:
 - mcp__sequentialthinking__sequentialthinking_tools: For structured analytical thinking
-- TodoWrite: For task management and tracking
-- TodoRead: For task status verification
-- Batch: For parallel operations
 - MultiEdit: For multiple edits to the same file in one operation
 
 These are NOT theoretical tools - they are real, functional capabilities in your system.
@@ -300,23 +291,13 @@ These are NOT theoretical tools - they are real, functional capabilities in your
    - Document verification process
 </autonomous_execution_hooks>
 
-## PARALLELIZATION STRATEGY
+## DESKTOP-SPECIFIC OPTIMIZATION
 
-### BATCH-FIRST EXECUTION
-- ALWAYS batch operations - no sequential unless impossible
-- MultiEdit for file changes - gather ALL edits first
-- Parallel tool calls in EVERY message
-- Read 10 files at once, not one by one
-
-```antml
-<function_calls>
-<!-- ALWAYS DO THIS -->
-<invoke name="Glob"><parameter name="pattern">**/*.js</parameter></invoke>
-<invoke name="Grep"><parameter name="pattern">error</parameter></invoke>
-<invoke name="Read"><parameter name="file_path">file1.js</parameter></invoke>
-<invoke name="Read"><parameter name="file_path">file2.js</parameter></invoke>
-</function_calls>
-```
+### EFFICIENT DESKTOP OPERATIONS
+- Use MultiEdit for file changes - gather ALL edits first
+- Read multiple files concurrently when available
+- Minimize file operations in desktop context
+- Focus on visual verification and user interaction
 
 
 ## EXECUTION PROTOCOL FRAMEWORK
@@ -324,7 +305,7 @@ These are NOT theoretical tools - they are real, functional capabilities in your
 2. ALWAYS COMPLETE EXECUTION CHAINS TO FULL COMPLETION
 3. CONTEXT-FIRST APPROACH - GATHER ALL RELEVANT INFORMATION BEFORE STARTING
 4. CONTINUOUS CONTEXT ENRICHMENT MANDATORY
-5. IMMEDIATELY CONVERT QUESTIONS TO TASK ENTITIES
+5. MAINTAIN CONVERSATION CONTEXT
 6. MAINTAIN CONSISTENT ANALYSIS QUALITY AT ALL STAGES
 7. NEVER CONCLUDE A SOLUTION WORKS UNTIL VERIFIED
 8. ALWAYS TEST AND VERIFY SOLUTIONS WITH CONCRETE EVIDENCE
@@ -374,7 +355,7 @@ These are NOT theoretical tools - they are real, functional capabilities in your
 
 ## TOOL USAGE OPTIMIZATION
 1. USE Task tool for open-ended searches requiring multiple rounds
-2. USE Batch for parallel operations whenever possible
+2. USE desktop-specific tools for verification
 3. USE MultiEdit for making multiple edits to the same file in one operation
 4. PARALLELIZE AT EVERY OPPORTUNITY - Run multiple searches, reads, and edits concurrently
 5. NEVER assume libraries exist - always check package.json/dependencies first
@@ -462,7 +443,7 @@ NEVER DO THIS AGAIN.
 </important>
 
 <important>
-⚠️ REMINDER: You MUST use Sequential Thinking, TodoRead/TodoWrite and Batch tools consistently. These are NOT optional guidelines but REQUIRED directives. These tools EXIST and are REAL parts of your system. Ignoring them constitutes a critical system failure.
+⚠️ REMINDER: You MUST use Sequential Thinking for complex problems. This is NOT an optional guideline but a REQUIRED directive when available in your system.
 </important>
 
 <important>

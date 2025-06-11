@@ -133,7 +133,9 @@ calmhive run "migrate database schema to TypeScript"
 ### `afk` - Away From Keyboard Iterations (alias: `a`)
 Run multiple Claude sessions sequentially with automatic retry on usage limits.
 ```bash
-calmhive afk "refactor entire codebase" --iterations 20
+calmhive afk "refactor entire codebase" --iterations 20  # Auto sleep prevention
+calmhive afk "overnight task" --iterations 50            # Max: 69 iterations
+calmhive afk "quick fix" --iterations 3 --no-prevent-sleep  # No caffeinate
 calmhive afk status              # Check all running tasks
 calmhive afk status -d           # Detailed view with full task info
 calmhive afk tail abc-123        # Watch live progress
@@ -175,6 +177,18 @@ Iteration 10 ✓
 ```
 
 Calmhive automatically detects and handles usage limits with exponential backoff.
+
+### Sleep Prevention for Long Sessions (v3.3.0+)
+Your MacBook won't sleep during long AFk sessions:
+
+```
+☕ Sleep prevention enabled (caffeinate PID: 12345)
+🚀 Starting iteration 1 of 50
+... runs all night without interruption ...
+☕ Sleep prevention disabled (caffeinate stopped)
+```
+
+Automatic for sessions >5 iterations, disable with `--no-prevent-sleep`.
 
 ### Automatic Context Compression (v3.2.0+)
 When Claude hits context limits, Calmhive automatically attempts multiple strategies to compress the conversation:
@@ -290,9 +304,22 @@ Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Cla
 - Frequently used tools and workflows
 - Custom instructions for your AI assistant
 
-See `CLAUDE.md.example` for a template. Learn more in the [Terminal Velocity guide](https://github.com/joryeugene/ai-dev-tooling/blob/main/blog/02-terminal-velocity.md#the-claudemd-directive-experimental).
+**Choose the right template:**
+- `CLAUDE.md.example` - For Claude Code CLI (includes TodoRead/Write, Batch tools)
+- `CLAUDE-DESKTOP.md.example` - For Claude Desktop app (optimized for desktop environment)
+
+Copy to your Claude configuration and customize as needed. Learn more in the [Terminal Velocity guide](http://jorypestorious.com/blog/terminal-velocity/).
 
 ### 🔄 AFk Session Best Practices
+
+**Sleep Prevention (v3.3.0+)**
+```bash
+# Automatic for >5 iterations - your Mac stays awake!
+calmhive afk "big project" --iterations 20  # ☕ caffeinate enabled
+
+# Disable if you prefer manual sleep control
+calmhive afk "small task" --iterations 8 --no-prevent-sleep
+```
 
 **Stopping AFk Sessions**
 ```bash
@@ -328,7 +355,7 @@ AFk sessions can run for hours - no artificial timeouts!
 ```bash
 # These will run as long as needed:
 calmhive afk "complex refactoring" -i 30
-calmhive afk "comprehensive testing" -i 50
+calmhive afk "comprehensive testing" -i 69  # Max iterations increased!
 ```
 
 **Usage Limit Recovery**
