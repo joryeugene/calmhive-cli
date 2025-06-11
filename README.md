@@ -89,7 +89,7 @@ calmhive --help
 
 - **🔄 Adaptive Retry** - Automatically recovers from Claude usage limits with exponential backoff
 - **🎙️ Voice Control** - Say "hey friend" or "calmhive" to activate voice commands
-- **📊 97 MCP Tools** - Pre-approved access to Memento, Sequential Thinking, Playwright, and more
+- **🔧 MCP Tools** - Optional access to Sequential Thinking, Playwright, GitHub integration (when configured)
 - **🏃 AFk Iterations** - Run multiple Claude sessions sequentially in the background
 - **🖥️ Process Management** - Beautiful TUI to monitor all your AFk sessions
 
@@ -146,6 +146,12 @@ Full-featured voice interface with speech recognition and text-to-speech.
 calmhive voice                   # Start voice interface
 calmhive voice --debug           # Debug mode
 # Say "hey friend", "calmhive", or "ok friend" to activate
+```
+
+### `update` - Update Calmhive
+Automatically update to the latest version from npm.
+```bash
+calmhive update                  # Update to latest version
 ```
 
 ### `tui` - Terminal UI (alias: `t`)
@@ -390,6 +396,46 @@ calmhive voice
 - **Smart Iterations**: 5-15 iterations for most tasks, 20+ for major refactoring
 - **Clean Shutdown**: Always use `afk stop` instead of killing terminals
 - **Model Efficiency**: Sonnet for most work (default), Opus for complex reasoning
+
+## 🎯 Power User Configuration
+
+Calmhive includes an advanced **CLAUDE.md.example** file with powerful directives that transform Claude's behavior:
+
+### 🔥 "Secret Sauce" Features
+- **Thoroughness Engine**: "We gain trust through thoroughness" - ensures Claude reads every detail
+- **Specification-First Development**: Clear specs → flawless execution ([based on this approach](http://jorypestorious.com/blog/ai-engineer-spec/))
+- **Parallelization Strategy**: MultiEdit batch operations, concurrent tool usage
+- **Verification Protocol**: Never claims "it's fixed" without concrete proof
+- **Optional MCP Integration**: Sequential Thinking, Playwright, GitHub integration (if configured)
+
+### ⚡ Quick Setup
+```bash
+# 1. Find your calmhive installation
+CALMHIVE_PATH="$(npm root -g)/@calmhive/calmhive-cli"
+echo "Calmhive installed at: $CALMHIVE_PATH"
+
+# 2. Copy the enhanced directives to your global Claude config
+cp "$CALMHIVE_PATH/CLAUDE.md.example" ~/.claude/CLAUDE.md
+
+# 3. Configure available tools based on your MCP setup
+# Check what MCP tools you have configured
+claude mcp list
+
+# 4. Edit tool allowlist to match your setup
+nano "$CALMHIVE_PATH/config/allowed-tools.json"
+# Remove any MCP tools you don't have installed
+# Keep the 16 default tools (Read, Edit, Bash, etc.)
+
+# 5. Test the enhanced behavior
+calmhive chat "analyze this codebase"  # Watch the difference!
+```
+
+The **v4.3.0 CLAUDE.md** transforms Claude from a helpful assistant into an engineering powerhouse that:
+- ✅ Reads every detail before acting
+- ✅ Uses parallel operations for maximum speed  
+- ✅ Tests solutions comprehensively before reporting success
+- ✅ Follows specification-first development principles
+- ✅ Integrates with optional MCP tools when configured
 
 ## 📖 More Info
 
