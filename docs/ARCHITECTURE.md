@@ -103,6 +103,7 @@ calmhive afk stop <session-id>   # Stop session
 - **True Automation**: Proper stdin handling enables genuinely non-interactive execution
 - **MCP Integration**: 97 tools available including Memento, Sequential Thinking, Playwright
 - **Adaptive Retry**: Intelligent handling of Claude API usage limits
+- **Context Compression** (v3.2.0+): Automatic `/compact` handling when approaching context limits
 - **Process Management**: SQLite-backed session tracking with beautiful TUI
 
 ## Implementation Details
@@ -171,7 +172,9 @@ v3/
 │   ├── adaptive-retry.js     # Usage limit handling
 │   ├── process-manager.js    # AFk process control
 │   ├── session-database.js   # SQLite session storage
-│   └── tool-manager.js       # MCP tool integration
+│   ├── tool-manager.js       # MCP tool integration
+│   ├── compact-handler.js    # Context compression (v3.2.0+)
+│   └── context-monitor.js    # Usage tracking (v3.2.0+)
 └── config/
     └── allowed-tools.json    # 97 available tools
 ```
@@ -207,10 +210,22 @@ calmhive tui                   # Process UI
 Handles Claude API usage limits with exponential backoff (30s → 60s → 120s → 240s...)
 
 ### Process Manager (`lib/process-manager.js`)
-Manages AFk background processes with proper cleanup and iteration tracking
+Manages AFk background processes with proper cleanup and iteration tracking. In v3.2.0+, includes integrated context compression handling.
 
 ### Session Database (`lib/session-database.js`)
 SQLite storage for process metadata, logs, and state management
+
+### Compact Handler (`lib/compact-handler.js`) - v3.2.0+
+Automatically handles context compression when Claude approaches limits:
+- Tries multiple `/compact` command formats for compatibility
+- Provides fallback manual compression strategies
+- Integrates seamlessly with AFk sessions
+
+### Context Monitor (`lib/context-monitor.js`) - v3.2.0+
+Tracks and analyzes context usage patterns:
+- Monitors context consumption across iterations
+- Logs compression attempts and success rates
+- Generates usage reports for optimization
 
 ---
 

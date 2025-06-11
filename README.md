@@ -155,8 +155,9 @@ calmhive tui                     # Launch the UI
 # Use arrow keys to navigate, Enter to view logs
 ```
 
-## 🔥 Killer Feature: Adaptive Retry
+## 🔥 Killer Features
 
+### Adaptive Retry with Usage Limits
 Ever had an overnight task die at iteration 10 due to usage limits? Not anymore!
 
 ```
@@ -168,6 +169,21 @@ Iteration 10 ✓
 ```
 
 Calmhive automatically detects and handles usage limits with exponential backoff.
+
+### Automatic Context Compression (v3.2.0+)
+When Claude hits context limits, Calmhive automatically attempts multiple strategies to compress the conversation:
+
+```
+⚠️ Context limit approaching
+🗜️ Attempting context compression...
+✅ Context compressed successfully!
+```
+
+Features:
+- Multiple `/compact` command formats for compatibility
+- Automatic retry with different compression strategies
+- Context usage monitoring and reporting
+- Fallback manual compression if needed
 
 ## 🚦 What's Next?
 
