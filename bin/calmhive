@@ -30,7 +30,8 @@ const COMMANDS = {
   'tui': 'Terminal UI for process management',
   't': 'Alias for tui',
   'voice': 'Voice interface to Claude',
-  'v': 'Alias for voice'
+  'v': 'Alias for voice',
+  'update': 'Update calmhive to latest version'
 };
 
 // Command aliases
@@ -86,6 +87,33 @@ if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
 if (args[0] === '--version' || args[0] === '-v') {
   console.log(getVersion());
   process.exit(0);
+}
+
+// Handle update command
+if (args[0] === 'update') {
+  console.log('🔄 Updating calmhive to latest version...');
+  const { spawn } = require('child_process');
+  const updateProcess = spawn('npm', ['install', '-g', '@calmhive/calmhive-cli@latest'], {
+    stdio: 'inherit'
+  });
+  
+  updateProcess.on('exit', (code) => {
+    if (code === 0) {
+      console.log('✅ Calmhive updated successfully!');
+      console.log(`📦 Run 'calmhive --version' to see the new version`);
+    } else {
+      console.error('❌ Update failed. Try running manually:');
+      console.error('npm install -g @calmhive/calmhive-cli@latest');
+    }
+    process.exit(code || 0);
+  });
+  
+  updateProcess.on('error', (err) => {
+    console.error(`❌ Update failed: ${err.message}`);
+    process.exit(1);
+  });
+  
+  return;
 }
 
 // Get command (resolve aliases)
