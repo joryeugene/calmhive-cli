@@ -8,6 +8,17 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+// Get version from package.json
+function getVersion() {
+  try {
+    const packagePath = path.join(__dirname, '..', 'package.json');
+    const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+    return packageData.version;
+  } catch (error) {
+    return 'unknown';
+  }
+}
+
 // Available commands
 const COMMANDS = {
   'afk': 'Run long tasks in background with automatic retries',
@@ -32,8 +43,9 @@ const ALIASES = {
 };
 
 function showHelp() {
+  const version = getVersion();
   console.log(`
-🐝 Calmhive V3 - Claude That Never Quits
+🐝 Calmhive v${version} - Claude That Never Quits
 
 Usage: calmhive <command> [options]
 
@@ -68,6 +80,11 @@ const args = process.argv.slice(2);
 
 if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
   showHelp();
+  process.exit(0);
+}
+
+if (args[0] === '--version' || args[0] === '-v') {
+  console.log(getVersion());
   process.exit(0);
 }
 
