@@ -63,6 +63,11 @@ class AfkCommand {
   }
 
   async startSession(args) {
+    // Debug logging
+    console.log('DEBUG: startSession called with args:', args);
+    console.log('DEBUG: args length:', args.length);
+    args.forEach((arg, i) => console.log(`DEBUG: arg[${i}]:`, JSON.stringify(arg)));
+    
     // First parse options to know what to exclude
     const options = this.parseOptions(args);
     
@@ -71,8 +76,11 @@ class AfkCommand {
     for (let i = 0; i < args.length; i++) {
       const arg = args[i];
       
-      // Skip flags
-      if (arg.startsWith('-')) {
+      // Skip ONLY known command flags, not content that happens to start with -
+      const knownFlags = ['-i', '-d', '-v', '--iterations', '--custom-steps', '--simple', 
+                          '--model', '--webhook', '--checkpoint-interval', '--no-prevent-sleep'];
+      
+      if (knownFlags.includes(arg) || arg.startsWith('--')) {
         // Skip the value too for flags that take values
         if (['-i', '--iterations', '--model', '--webhook', '--checkpoint-interval'].includes(arg) && i + 1 < args.length) {
           i++; // Skip next arg (the value)
@@ -83,7 +91,11 @@ class AfkCommand {
       taskArgs.push(arg);
     }
     
+    console.log('DEBUG: taskArgs:', taskArgs);
     const task = taskArgs.join(' ').trim();
+    console.log('DEBUG: final task:', JSON.stringify(task));
+    console.log('DEBUG: task empty?', !task);
+    
     if (!task) {
       console.error('❌ Task description required');
       console.log('Usage: calmhive afk "task description" [options]');
