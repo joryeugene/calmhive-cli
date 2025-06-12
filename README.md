@@ -140,6 +140,9 @@ calmhive afk status              # Check all running tasks
 calmhive afk status -d           # Detailed view with full task info
 calmhive afk tail abc-123        # Watch live progress
 calmhive afk stop abc-123        # Stop a task
+calmhive afk cleanup             # Clean old sessions (7 days)
+calmhive afk cleanup --dry-run   # Preview cleanup safely
+calmhive afk cleanup 30 --force  # Custom retention, skip prompts
 ```
 
 ### `voice` - Voice Control (alias: `v`)
