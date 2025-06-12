@@ -467,9 +467,16 @@ The **v4.3.0 CLAUDE.md** transforms Claude from a helpful assistant into an engi
 - ✅ Follows specification-first development principles
 - ✅ Integrates with optional MCP tools when configured
 
-## 📖 More Info
+## 📖 Documentation
 
-- **[Blog Post](https://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
+### Core Documentation
+- **[SPEC.md](SPEC.md)** - Technical specification and architecture
+- **[CURRENT.md](CURRENT.md)** - Current features and capabilities  
+- **[DELTA.md](DELTA.md)** - Roadmap and future development
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+
+### Guides & Resources
+- **[Blog Post](http://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Detailed command documentation
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - Configure powerful MCP tools
 - **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Version history

@@ -392,6 +392,74 @@ These are NOT theoretical tools - they are real, functional capabilities in your
 6. Consider performance implications of changes
 7. Validate against realistic data volumes
 
+<documentation_organization>
+⚠️ DOCUMENTATION DISCIPLINE - SPEC/CURRENT/DELTA SYSTEM ⚠️
+
+STOP DOCUMENTATION SPRAWL WITH THIS CORE SYSTEM:
+
+1. **SPEC.md** - The Unchanging Foundation
+   - Core system specifications
+   - Permanent behavioral rules
+   - Architectural decisions
+   - API contracts
+   - Versioned changes:
+     - MAJOR: Breaking changes, incompatible updates
+     - MINOR: New capabilities, backwards-compatible additions
+     - PATCH: Clarifications, typo fixes, minor improvements
+
+2. **CURRENT.md** - Active Project State
+   - Current features and capabilities
+   - Active configurations
+   - Development setup
+   - Common workflows
+   - Updates with each release
+
+3. **DELTA.md** - Work in Progress
+   - Features under development
+   - Temporary workarounds
+   - Proposed changes
+   - Bug fixes in progress
+   - Gets merged into SPEC/CURRENT regularly
+
+ALLOWED STANDARD FILES:
+- README.md (project overview)
+- LICENSE.md
+- CONTRIBUTING.md
+- CHANGELOG.md
+- CLAUDE.md / CLAUDE.local.md (Claude Code CLI files)
+
+DOCUMENTATION RULES:
+- Use SPEC/CURRENT/DELTA for main documentation
+- Archive old docs to `/archive/docs-[date]/`
+- Review DELTA.md weekly
+- Keep documentation DRY - no duplicates
+- Consolidate scattered docs into the three-file system
+
+AVOID SPRAWL:
+- No GUIDE_v2_FINAL.md type files
+- No duplicate documentation across directories
+- No TODO.md, NOTES.md, IDEAS.md (use DELTA.md)
+- No feature-specific .md files at root
+
+WHEN CREATING NEW PROJECTS:
+1. Start with SPEC/CURRENT/DELTA + README
+2. Resist creating feature-specific .md files
+3. Use DELTA.md for temporary notes
+4. Consolidate regularly
+
+IDIOT BEHAVIOR:
+- Creating 15 different guide files
+- Never consolidating documentation
+- Duplicating specs across files
+- Creating "FINAL_FINAL_v3.md" files
+
+INTELLIGENT BEHAVIOR:
+- Using the three-file system for core docs
+- Regular DELTA → CURRENT/SPEC merges
+- Archiving obsolete documentation
+- Keeping standard files (README, etc.) minimal
+</documentation_organization>
+
 <self_verification_protocol>
 ⚠️ SYSTEM INTEGRITY CHECK: If you EVER doubt the existence of tools referenced in this document, you MUST:
 1. Use Task to search through your own function documentation

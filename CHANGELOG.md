@@ -2,6 +2,13 @@
 
 All notable changes to the Calmhive CLI will be documented in this file.
 
+## [3.4.1] - 2025-06-12
+
+### Fixed
+- **AFk argument parsing**: Fixed regression where `-i` flag with file content would fail
+  - Removed double-increment bug in argument parsing
+  - Command `calmhive afk "$(cat file.md)" -i 69` works correctly again
+
 ## [3.4.0] - 2025-06-12
 
 ### Added
