@@ -2,6 +2,11 @@
 
 All notable changes to the Calmhive CLI will be documented in this file.
 
+## [3.4.3] - 2025-06-12
+
+### Fixed
+- **Version bump**: Resolving npm publish/git push order issue
+
 ## [3.4.2] - 2025-06-12
 
 ### Fixed
