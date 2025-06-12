@@ -63,27 +63,20 @@ class AfkCommand {
   }
 
   async startSession(args) {
-    // Parse options first 
+    // First parse options to know what to exclude
     const options = this.parseOptions(args);
     
-    // Filter out option flags from args
-    // parseOptions already consumed the values, so we just need to skip the flags
+    // Build task by excluding flags AND their values
     const taskArgs = [];
-    let skipNext = false;
-    
     for (let i = 0; i < args.length; i++) {
-      if (skipNext) {
-        skipNext = false;
-        continue;
-      }
-      
       const arg = args[i];
-      if (arg.startsWith('--') || arg === '-i') {
-        // For flags that take values, mark to skip the next arg
-        if (['--iterations', '-i', '--model', '--webhook', '--checkpoint-interval'].includes(arg)) {
-          skipNext = true;
+      
+      // Skip flags
+      if (arg.startsWith('-')) {
+        // Skip the value too for flags that take values
+        if (['-i', '--iterations', '--model', '--webhook', '--checkpoint-interval'].includes(arg) && i + 1 < args.length) {
+          i++; // Skip next arg (the value)
         }
-        // Skip the flag itself
         continue;
       }
       

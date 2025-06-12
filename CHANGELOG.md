@@ -2,6 +2,13 @@
 
 All notable changes to the Calmhive CLI will be documented in this file.
 
+## [3.4.2] - 2025-06-12
+
+### Fixed
+- **AFk argument parsing**: Properly fixed the `-i` flag regression
+  - Previous fix in 3.4.1 was incorrect and caused value inclusion in task
+  - Now correctly excludes flags AND their values from task description
+
 ## [3.4.1] - 2025-06-12
 
 ### Fixed
