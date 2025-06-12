@@ -278,7 +278,80 @@ class AfkCommand {
   }
 
   async cleanup(args) {
-    const days = parseInt(args[0]) || 7;
+    // Parse command line options
+    const options = {
+      dryRun: args.includes('--dry-run'),
+      force: args.includes('--force'),
+      verbose: args.includes('--verbose') || args.includes('-v'),
+      legacyOnly: args.includes('--legacy-only'),
+      dbOnly: args.includes('--db-only')
+    };
+    
+    // Parse days arguments
+    const daysArg = args.find(arg => !arg.startsWith('--') && !isNaN(parseInt(arg)));
+    const days = parseInt(daysArg) || 7;
+    
+    // Override retention periods if specified
+    if (daysArg) {
+      options.completedDays = days;
+      options.failedDays = days;
+      options.errorDays = days;
+      options.stoppedDays = days;
+    }
+    
+    // Use legacy cleanup for basic case
+    if (!options.dryRun && !options.force && !options.verbose && 
+        !options.legacyOnly && !options.dbOnly && !daysArg) {
+      return this.legacyCleanup(days);
+    }
+    
+    // Use comprehensive cleanup engine
+    const CleanupEngine = require('../lib/cleanup-engine');
+    const engine = new CleanupEngine(options);
+    
+    // Confirmation prompt unless --force or --dry-run
+    if (!options.force && !options.dryRun) {
+      console.log(`⚠️  This will delete sessions older than ${days} days.`);
+      console.log('Use --dry-run to preview or --force to skip this prompt.');
+      console.log('Press Ctrl+C to cancel or Enter to continue...');
+      
+      const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+      
+      await new Promise(resolve => {
+        readline.question('Continue? [y/N] ', (answer) => {
+          readline.close();
+          if (answer.toLowerCase() !== 'y' && answer.toLowerCase() !== 'yes') {
+            console.log('Cleanup cancelled.');
+            process.exit(0);
+          }
+          resolve();
+        });
+      });
+    }
+    
+    // Run cleanup
+    try {
+      const stats = await engine.cleanup(
+        this.processManager.db,
+        this.processManager
+      );
+      
+      if (stats.deleted === 0 && stats.spaceSaved === 0) {
+        console.log('✨ No cleanup needed - system is clean!');
+      }
+      
+      return stats;
+    } catch (error) {
+      console.error('❌ Cleanup failed:', error.message);
+      throw error;
+    }
+  }
+  
+  // Legacy cleanup method for backward compatibility
+  async legacyCleanup(days) {
     console.log(`🧹 Cleaning up sessions older than ${days} days...`);
     
     const result = await this.processManager.cleanupCompleted(days);
@@ -294,6 +367,8 @@ class AfkCommand {
         console.log(`   📝 Removed ${result.logs} old log files`);
       }
     }
+    
+    return result;
   }
   
   async showStats() {
@@ -394,7 +469,8 @@ USAGE:
   calmhive afk status -d                       Show detailed status (full info)
   calmhive afk status --cleanup                Show status and kill orphan processes
   calmhive afk tail <session-id>               View live logs
-  calmhive afk cleanup [days]                  Remove old sessions (default: 7 days)
+  calmhive afk cleanup [days] [options]        Remove old sessions (default: 7 days)
+                                       Options: --dry-run, --force, --verbose, --legacy-only, --db-only
   calmhive afk killorphans                     Kill orphan Claude processes
   calmhive afk stats                           Show system statistics
 
@@ -412,7 +488,11 @@ EXAMPLES:
   calmhive afk "refactor API endpoints" --custom-steps
   calmhive afk "write unit tests" --simple --iterations 5
   calmhive afk stop abc12345
-  calmhive afk cleanup 3
+  calmhive afk cleanup 3                       Delete sessions older than 3 days
+  calmhive afk cleanup --dry-run               Preview what would be deleted
+  calmhive afk cleanup --force                 Skip confirmation prompt
+  calmhive afk cleanup --verbose               Show detailed cleanup progress
+  calmhive afk cleanup --legacy-only           Only clean legacy AFk registry files
 
 FEATURES:
   ✅ Reliable process management (no phantom processes)

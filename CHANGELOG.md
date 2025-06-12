@@ -2,6 +2,27 @@
 
 All notable changes to the Calmhive CLI will be documented in this file.
 
+## [3.4.0] - 2025-06-12
+
+### Added
+- 🧹 **Comprehensive AFk Cleanup System**: Enhanced session cleanup with advanced options
+  - Multi-target cleanup: database sessions, orphaned logs, legacy registry
+  - Advanced options: `--dry-run`, `--force`, `--verbose`, `--legacy-only`, `--db-only`
+  - Safety-first design: never deletes running sessions (maxAge.running: 0)
+  - Configurable retention policies by session status (completed: 7d, failed: 30d, etc.)
+  - Comprehensive audit logging with timestamps and space tracking
+  - Smart command routing: simple usage → legacy cleanup, advanced → comprehensive engine
+- 🛡️ **Enhanced Safety Features**: Confirmation prompts and dry-run previews
+
+### Changed
+- AFk cleanup command now supports advanced options while maintaining backward compatibility
+- Enhanced help documentation with detailed cleanup examples
+
+### Technical
+- Added 365-line CleanupEngine class with configurable policies
+- Comprehensive test suite (6 test cases) covering all edge cases
+- Zero breaking changes to existing workflows
+
 ## [3.3.1] - 2025-06-11
 
 ### Fixed
