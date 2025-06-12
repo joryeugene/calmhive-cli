@@ -63,22 +63,31 @@ class AfkCommand {
   }
 
   async startSession(args) {
-    // Parse options first to remove them from task
+    // Parse options first 
     const options = this.parseOptions(args);
     
-    // Filter out option flags and their values from args
+    // Filter out option flags from args
+    // parseOptions already consumed the values, so we just need to skip the flags
     const taskArgs = [];
+    let skipNext = false;
+    
     for (let i = 0; i < args.length; i++) {
-      if (args[i].startsWith('--') || args[i] === '-i') {
-        // Skip the flag and its value if it has one
-        if (['--iterations', '-i', '--model', '--webhook', '--checkpoint-interval'].includes(args[i])) {
-          i++; // Skip the next arg which is the value
-        } else if (args[i] === '--no-prevent-sleep') {
-          // No value to skip for this flag
-        }
-      } else {
-        taskArgs.push(args[i]);
+      if (skipNext) {
+        skipNext = false;
+        continue;
       }
+      
+      const arg = args[i];
+      if (arg.startsWith('--') || arg === '-i') {
+        // For flags that take values, mark to skip the next arg
+        if (['--iterations', '-i', '--model', '--webhook', '--checkpoint-interval'].includes(arg)) {
+          skipNext = true;
+        }
+        // Skip the flag itself
+        continue;
+      }
+      
+      taskArgs.push(arg);
     }
     
     const task = taskArgs.join(' ').trim();
