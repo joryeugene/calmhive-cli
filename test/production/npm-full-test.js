@@ -30,6 +30,7 @@ class NpmFullTest {
       'CLAUDE.md.example', 
       'CLAUDE-DESKTOP.md.example',
       'bin',
+      'cmd',
       'commands',
       'lib',
       'config',

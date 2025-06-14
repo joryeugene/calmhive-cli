@@ -39,6 +39,18 @@ class ConfigTest {
   }
 
   async cleanup() {
+    // Kill any processes spawned by this test
+    try {
+      const { spawn } = require('child_process');
+      const killProcess = spawn('pkill', ['-f', this.testDir], { stdio: 'ignore' });
+      await new Promise(resolve => {
+        killProcess.on('close', () => resolve());
+        setTimeout(resolve, 1000); // Timeout after 1 second
+      });
+    } catch (error) {
+      // Ignore errors - process might not exist
+    }
+    
     // Restore environment
     process.env.HOME = this.originalHome;
     
@@ -75,7 +87,7 @@ lets bee friends`;
 
   async runCommand(args) {
     return new Promise((resolve, reject) => {
-      const configPath = path.join(this.projectRoot, 'commands', 'config');
+      const configPath = path.join(this.projectRoot, 'cmd', 'config');
       const child = spawn('node', [configPath, ...args], {
         env: { ...process.env, HOME: this.mockHome },
         stdio: ['pipe', 'pipe', 'pipe']
