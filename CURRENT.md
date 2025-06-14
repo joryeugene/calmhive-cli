@@ -1,9 +1,9 @@
 # Calmhive V3 Current State
 
-## Version 3.4.0 Features
+## Version 3.4.9 Features
 
 ### Comprehensive AFk Cleanup System ✅
-**Status**: Production Ready  
+**Status**: Production Ready
 **Implementation**: `lib/cleanup-engine.js` (365 lines)
 
 **Capabilities**:
@@ -42,7 +42,7 @@ calmhive afk stop <session-id>   # Immediate termination
 ```
 
 ### Terminal UI (TUI) ✅
-**Status**: Fully Functional  
+**Status**: Fully Functional
 **Implementation**: `commands/tui`
 
 **Features**:
@@ -52,7 +52,7 @@ calmhive afk stop <session-id>   # Immediate termination
 - Beautiful blessed-based interface
 
 ### Voice Interface ✅
-**Status**: Functional (Requires OpenAI API)  
+**Status**: Functional (Requires OpenAI API)
 **Implementation**: `commands/voice`
 
 **Features**:
@@ -151,6 +151,6 @@ calmhive/v3/
 
 ---
 
-**Current Version**: 3.4.0  
-**Last Updated**: 2025-06-12  
-**Production Status**: Ready for npm publish
+**Current Version**: 3.4.9
+**Last Updated**: 2025-06-13
+**Production Status**: Published to npm

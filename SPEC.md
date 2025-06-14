@@ -76,7 +76,7 @@ Calmhive V3 provides 6 core commands with intelligent mode selection:
 {
   maxAge: {
     completed: 7,    // days
-    failed: 30,      // days  
+    failed: 30,      // days
     error: 30,       // days
     stopped: 14,     // days
     running: 0       // never delete
@@ -127,6 +127,5 @@ Calmhive V3 provides 6 core commands with intelligent mode selection:
 
 ---
 
-**Specification Version**: 3.4.0  
-**Last Updated**: 2025-06-12  
-**Breaking Changes**: None since 3.0.0
+**Specification Version**: 3.4.9
+**Last Updated**: 2025-06-13
