@@ -1,191 +1,145 @@
-# Calmhive V3 Development Delta
+# Calmhive V3 Delta - Current Work and Next Steps
 
-## Work in Progress
+## Version 8.0.1 - Namespace Architecture Implementation
 
-### Documentation Overhaul ⏳
-**Status**: In Progress
-**Priority**: High
+### 🎯 Just Completed: Namespace Collision Fix
 
-**Completed**:
-- ✅ Created SPEC/CURRENT/DELTA structure
-- ✅ Fixed deployment script version hardcoding
-- ✅ Updated CHANGELOG.md for v3.4.0
-- ✅ Enhanced README.md with cleanup examples
+**Problem Solved**: Executable command files and Claude Code markdown templates were competing for the same `/commands/` directory, creating namespace collision and violating CLI best practices.
 
-**In Progress**:
-- 🔄 Consolidate scattered documentation
-- 🔄 Update three-file system (SPEC/CURRENT/DELTA)
-- 🔄 Archive obsolete documentation
+**Solution Implemented**: Clean architectural separation with centralized path management
+- ✅ **Executables**: Moved to `/cmd/` directory (11 files: a, afk, c, chat, config, r, run, t, tui, v, voice)
+- ✅ **Templates**: Preserved in `/commands/` directory (8 markdown files for Claude Code)
+- ✅ **PathManager**: Created centralized path resolution system (`lib/path-manager.js`)
+- ✅ **Binary Update**: Updated main entry point to use centralized paths
+- ✅ **Permissions**: All executable files properly set (`chmod +x`)
 
-## Proposed Changes
+**Test Results**: 18/18 core functionality tests passing, all commands working correctly.
 
-### 1. Cross-Platform Compatibility 🔮
-**Priority**: Medium
-**Effort**: 2-3 days
+### 🔧 Technical Implementation Details
 
-**Issue**: Sleep prevention currently macOS-only (`caffeinate`)
-**Solution**:
-- Linux: Use `systemd-inhibit` or `xset` commands
-- Windows: Use `powercfg` or Windows API calls
-- Fallback: Detect platform and gracefully disable if unsupported
+**PathManager Class** (`lib/path-manager.js`):
+```javascript
+// Centralized path resolution
+getCommandPath(commandName)     // → /path/to/cmd/commandName
+getTemplatePath(templateName)   // → /path/to/commands/templateName
+commandExists(commandName)      // Boolean check with file system verification
+getAvailableCommands()         // Dynamic command discovery
+```
 
-### 2. Enhanced Cleanup Analytics 🔮
-**Priority**: Low
-**Effort**: 1 day
+**Benefits Achieved**:
+- **Architecture**: Follows Unix CLI conventions (separate executables from content)
+- **Compatibility**: Maintains Claude Code compatibility (`~/.claude/commands/`)
+- **Maintainability**: Eliminates hardcoded paths throughout system
+- **Future-proof**: Makes directory restructuring trivial
 
-**Features**:
-- Cleanup trend analysis over time
-- Space usage reporting by session type
-- Cleanup scheduling (daily/weekly automatic cleanup)
-- Integration with `calmhive tui` for visual cleanup metrics
+### ⚠️ Operational Issues Identified
 
-### 3. Session Orchestration & Workflows 🔮
-**Priority**: High
-**Effort**: 1-2 weeks
+**Test Hygiene Problems**:
+1. **Process Pollution**: Left hanging node processes during testing
+2. **State Pollution**: Modified user files without complete restoration
+3. **Session Interference**: Touched Claude Code session tracking files
+4. **Incomplete Cleanup**: Tests don't restore original state properly
 
-**Vision**: Enterprise-level session coordination beyond simple parallel execution
-**Features**:
-- **Session Dependencies**: Chain sessions with success/failure conditions
-- **Workflow Templates**: Pre-built patterns for common multi-session tasks
-- **Data Passing**: Sessions share outputs as inputs to subsequent sessions
-- **Conditional Logic**: Branch workflows based on session results
-- **Session Groups**: Manage related sessions as a single unit
+**Specific Issues**:
+- Multiple orphaned calmhive processes found running
+- User directory pollution in `~/.claude/` (backup files, test artifacts)
+- Modified Claude Code session files that shouldn't be touched
+- Package.json npm scripts still had old command paths (fixed)
 
-### 4. Performance Optimizations 🔮
-**Priority**: Medium
-**Effort**: 2 days
+### 📋 Immediate Next Steps (Priority Order)
 
-**Areas**:
-- Database query optimization (add indexes)
-- Log file streaming instead of full reads
-- Memory usage reduction for large sessions
-- Faster session startup time
+#### 1. **Test Hygiene Fixes** (Critical - Operational Excellence)
+- [ ] **Process Management**: Ensure all spawned processes are properly cleaned up
+- [ ] **State Restoration**: All tests must restore original user state completely
+- [ ] **Isolation**: Use isolated test environments that don't touch user directories
+- [ ] **Session Preservation**: Never modify Claude Code session tracking files
 
-### 5. Enhanced Error Recovery 🔮
-**Priority**: Medium
-**Effort**: 1-2 days
+#### 2. **Package Distribution Updates** (High - NPM Compatibility)
+- [ ] **NPM Scripts**: Verify all package.json scripts use correct paths
+- [ ] **File Inclusion**: Ensure `cmd/` directory is included in npm package
+- [ ] **Test Environment**: Update npm test environments to use new structure
+- [ ] **Documentation**: Update all references to new directory structure
 
-**Features**:
-- Better error categorization (network, auth, rate-limit, system)
-- Smarter retry strategies based on error type
-- Error pattern learning (avoid repeating same errors)
-- Graceful degradation for partial failures
+#### 3. **Documentation Updates** (Medium - User Communication)
+- [ ] **README**: Update with new architecture explanation
+- [ ] **Installation Guide**: Reflect new command structure
+- [ ] **Development Guide**: Document new path management system
+- [ ] **Migration Guide**: Help users understand changes (if any impact)
 
-## Bug Fixes in Progress
+### 🎯 Success Criteria
 
-### None Currently Identified
-All major bugs from v3.3.1 were resolved with the background execution fix.
+**Operational Excellence**:
+- [ ] No hanging processes after any test run
+- [ ] Complete user state restoration in all test scenarios
+- [ ] Zero user directory pollution from testing
+- [ ] All tests run in isolated environments
 
-## Technical Debt
+**Distribution Quality**:
+- [ ] NPM package tests pass with new structure
+- [ ] All commands work correctly when installed via npm
+- [ ] Path resolution works in both development and npm environments
+- [ ] Documentation accurately reflects current architecture
 
-### 1. Test Coverage Gaps 🔧
-**Priority**: Medium
+**Architecture Validation**:
+- [ ] All hardcoded paths eliminated from codebase
+- [ ] PathManager provides single source of truth for all path resolution
+- [ ] Future directory changes require only PathManager updates
+- [ ] System follows CLI best practices consistently
 
-**Missing Coverage**:
-- Voice system edge cases
-- Complex AFk failure scenarios
-- Cross-platform compatibility testing
-- Performance regression testing
+### 🔍 Current System State
 
-### 2. Code Organization 🔧
-**Priority**: Low
+**What's Working**:
+- ✅ All core commands functional (chat, run, afk, voice, tui, config)
+- ✅ Command aliases working (a, c, r, t, v)
+- ✅ Namespace separation complete and clean
+- ✅ Centralized path management operational
+- ✅ Claude Code template compatibility maintained
 
-**Improvements**:
-- Extract common utilities to `/lib/utils/`
-- Standardize error handling patterns
-- Add JSDoc comments for all public APIs
-- Consolidate configuration management
+**What Needs Attention**:
+- ⚠️ Test cleanup and process management
+- ⚠️ NPM package distribution validation
+- ⚠️ Documentation updates for new architecture
+- ⚠️ User state preservation during testing
 
-### 3. Dependency Management 🔧
-**Priority**: Low
+### 📈 Impact Assessment
 
-**Issues**:
-- sqlite3 binary compatibility across platforms
-- blessed TUI framework alternatives evaluation
-- Reduce dependency count where possible
+**Positive Impact**:
+- **Architecture**: Now follows proper CLI conventions
+- **Maintainability**: Centralized path management simplifies future changes
+- **Compatibility**: Preserves Claude Code integration seamlessly
+- **Professionalism**: Eliminates namespace collision anti-pattern
 
-## Feature Requests from Users
+**Areas for Improvement**:
+- **Testing**: Need better operational discipline in test execution
+- **Documentation**: Must reflect architectural improvements
+- **Distribution**: Ensure npm package works with new structure
 
-### 1. AFk Session Templates 💭
-**Request**: Save common AFk task patterns as reusable templates
-**Complexity**: Medium
-**Value**: High for power users
+### 🎯 Vision Forward
 
-### 2. Session Orchestration Platform 💭
-**Request**: Enterprise workflow management beyond basic parallel sessions (which already work)
-**Complexity**: High (requires workflow engine, dependency management)
-**Value**: Very High for complex automation pipelines and enterprise use cases
+**Short-term** (Next Session):
+- Fix all test hygiene issues completely
+- Validate npm package distribution
+- Update documentation to reflect new architecture
 
-### 3. Integration with External Tools 💭
-**Request**: Hooks for Slack/Discord notifications, GitHub PR creation
-**Complexity**: Medium
-**Value**: Medium for team workflows
+**Medium-term**:
+- Leverage centralized path management for additional features
+- Consider additional architectural improvements enabled by clean namespace
+- Enhance development experience with better tooling
 
-### 4. AFk Session Sharing 💭
-**Request**: Export/import session configurations and results
-**Complexity**: Low
-**Value**: Medium for collaboration
-
-## Enterprise-Level Research
-
-### 1. Distributed Processing 🔬
-**Current**: Single-machine parallel sessions
-**Research**: Multi-machine session distribution, load balancing, worker nodes
-**Impact**: Scale beyond single machine limits for massive automation
-
-### 2. Event-Driven Architecture 🔬
-**Current**: Manual session management
-**Research**: Webhook triggers, reactive workflows, event sourcing, message queues
-**Impact**: Automated workflows, external system integration, real-time responses
-
-### 3. Advanced Resource Management 🔬
-**Current**: Basic process isolation
-**Research**: CPU/memory limits, priority queues, resource pools, containerization
-**Impact**: Better performance control for enterprise deployments
-
-## Next Sprint Planning
-
-### Immediate Priorities (Next 1-2 weeks)
-1. **Cross-Platform Sleep Prevention** - Expand user base beyond macOS
-2. **Session Resumption/Checkpointing** - High impact for reliability
-3. **Documentation Cleanup** - ✅ COMPLETED
-
-### Medium-term (Next month)
-1. **Session Orchestration MVP** - Workflow dependencies and chaining
-2. **Enhanced Resource Management** - CPU/memory limits, priority queues
-3. **REST API for External Integration** - Enable external system integration
-
-### Long-term (Next quarter)
-1. **Distributed Processing** - Multi-machine session distribution
-2. **Event-Driven Workflows** - Webhooks, triggers, reactive patterns
-3. **Enterprise Analytics Platform** - Cost tracking, performance optimization insights
-
-## Big Picture Vision: Calmhive Enterprise
-
-### Current State: Individual Parallel Sessions ✅
-- Multiple AFk sessions run simultaneously with unique IDs
-- Each session is independent with isolated execution
-- Manual management through CLI commands
-
-### Next Level: Session Orchestration Platform 🚀
-**What this unlocks**:
-- **Workflow Automation**: Complex multi-step processes with dependencies
-- **Enterprise Integration**: Connect with CI/CD, monitoring, alerting systems
-- **Team Collaboration**: Shared session templates, results, and workflows
-- **Resource Optimization**: Intelligent scheduling and resource allocation
-- **Advanced Analytics**: Cost tracking, performance optimization, trend analysis
-
-### Transformative Features:
-1. **Workflow Engine**: Define complex automation pipelines
-2. **REST API**: External systems can trigger and monitor sessions
-3. **Team Dashboard**: Web UI for managing organization-wide automation
-4. **Session Marketplace**: Share and discover automation patterns
-5. **Distributed Workers**: Scale across multiple machines/cloud instances
-6. **Event Streaming**: Real-time notifications and reactive workflows
-
-This would transform Calmhive from a personal automation tool into an enterprise automation platform.
+**Long-term**:
+- Use this architectural foundation for future enhancements
+- Maintain operational excellence standards established
+- Continue building practical tools for developers
 
 ---
 
-**Delta Version**: 3.4.9+
-**Last Updated**: 2025-06-13
+**Delta Status**: Namespace architecture complete, moving to operational excellence
+**Next Priority**: Test hygiene and distribution validation
+**Key Learning**: Technical solutions must include operational discipline
+**Success Metric**: Zero system pollution + clean architecture + working distribution
+
+---
+
+**Updated**: 2025-06-14 17:00
+**Reviewed**: Technical implementation complete, operational improvements needed
+**Next Review**: After test hygiene fixes and npm validation complete

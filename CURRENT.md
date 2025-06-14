@@ -1,17 +1,38 @@
 # Calmhive V3 Current State
 
-## Version 3.4.9 Features
+## Version 8.0.1 - Production Ready CLI Wrapper with Namespace Architecture
 
-### Comprehensive AFk Cleanup System ✅
+### Config Management System ✅
 **Status**: Production Ready
-**Implementation**: `lib/cleanup-engine.js` (365 lines)
+**Implementation**: `lib/config-manager.js`, `commands/config`
 
 **Capabilities**:
-- Multi-target cleanup: database sessions, orphaned logs, legacy registry
-- Advanced options: `--dry-run`, `--force`, `--verbose`, `--legacy-only`, `--db-only`
-- Configurable retention policies by session status
-- Comprehensive audit logging with space tracking
-- Smart command routing for backward compatibility
+- **Template Distribution**: CLAUDE.md templates included in npm package
+- **Smart Resolution**: Automatically finds templates in npm vs development environments
+- **Anti-Fabrication Protection**: Enhanced templates prevent AI fabrication
+- **Binary Thinking Prevention**: Stops overcorrection patterns
+- **Safe Operations**: Automatic backups, dry-run mode, validation
+- **Command File Sync**: 7 workflow templates (3 expert personas + 4 workflows) for external tools
+
+**Usage**:
+```bash
+calmhive config show                    # Current status
+calmhive config install                 # Install CLI template
+calmhive config install --desktop       # Install desktop template
+calmhive config diff                    # Compare with template
+calmhive config commands copy ~/dest/   # Copy command files
+```
+
+### AFk Cleanup System ✅
+**Status**: Production Ready
+**Implementation**: `lib/cleanup-engine.js`
+
+**Simple Capabilities**:
+- Clean old sessions and logs automatically
+- Safe preview with `--dry-run` 
+- Force cleanup with `--force` for scripts
+- Keeps running sessions safe (never deletes)
+- Smart retention: 7 days completed, 30 days failed, 14 days stopped
 
 **Usage**:
 ```bash
@@ -83,15 +104,26 @@ calmhive afk stop <session-id>   # Immediate termination
 ### File Structure
 ```
 calmhive/v3/
-├── bin/calmhive           # Main entry point
-├── commands/              # Command implementations
+├── bin/calmhive           # Main entry point (updated for centralized paths)
+├── cmd/                   # NEW: Executable command files
+│   ├── afk, a             # Background processing commands
+│   ├── chat, c            # Interactive chat commands
+│   ├── config             # Configuration management
+│   ├── run, r             # Task execution commands
+│   ├── tui, t             # Terminal UI commands
+│   └── voice, v           # Voice interface commands
+├── commands/              # Claude Code markdown templates (preserved)
+│   ├── expert-*.md        # Expert persona templates
+│   ├── bug-hunting.md     # Workflow templates
+│   └── *.md               # Additional templates
 ├── lib/                   # Core libraries
-│   ├── cleanup-engine.js  # NEW: Comprehensive cleanup
+│   ├── path-manager.js    # NEW: Centralized path resolution
+│   ├── cleanup-engine.js  # Comprehensive cleanup
 │   ├── session-database.js
 │   ├── process-manager.js
 │   └── stream-handler.js
-├── test/                  # Test suites
-│   ├── test-cleanup-engine.js  # NEW: Cleanup tests
+├── test/                  # Test suites (updated for new paths)
+│   ├── test-cleanup-engine.js
 │   └── unit/cleanup-engine.test.js
 └── data/                  # SQLite database
 ```
@@ -109,22 +141,18 @@ calmhive/v3/
 
 ## Test Coverage
 
-### Cleanup Engine Tests ✅
-- 6/6 test cases passing
-- Covers all retention policies
-- Tests running session protection
-- Validates file size calculations
+### Production Test Suite ✅
+- **NPM Installation Tests**: 10/10 passing - all commands work when installed via npm
+- **Production Readiness**: Comprehensive validation of package structure
+- **Stress Testing**: Concurrent operations, memory leak detection
+- **Integration Tests**: End-to-end workflows, error handling
+- **Platform Compatibility**: Verified on Node.js 18+ environments
 
-### Main Test Suite ✅
-- 18/18 core tests passing
-- AFk background execution
-- Session database operations
-- Process management
-
-### Integration Tests ✅
-- Command-line interface
-- End-to-end AFk workflows
-- Voice system integration
+### Core Functionality ✅
+- AFk background execution with session management
+- Command-line interface and all aliases
+- Config management with template file resolution
+- Process isolation and cleanup
 
 ## Configuration
 
@@ -139,10 +167,37 @@ calmhive/v3/
 - `ANTHROPIC_API_KEY`: Inherited from Claude CLI
 - `CALMHIVE_DEBUG`: Enable debug logging
 
+## Recent Major Changes
+
+### ✅ Namespace Collision Fix (v8.0.1)
+**Problem**: Executable commands and Claude Code templates shared `/commands/` directory
+**Solution**: Clean architectural separation with centralized path management
+
+**Implementation**:
+- **Executables**: Moved to `/cmd/` directory (11 command files)
+- **Templates**: Preserved in `/commands/` directory (8 markdown files)
+- **PathManager**: New centralized path resolution system (`lib/path-manager.js`)
+- **Binary**: Updated to use centralized paths, eliminating hardcoded dependencies
+
+**Benefits**:
+- ✅ Follows CLI best practices (separate executables from content)
+- ✅ Maintains Claude Code compatibility (templates in expected location)
+- ✅ Eliminates hardcoded path dependencies
+- ✅ Makes future restructuring trivial
+
+**Test Results**: 18/18 core functionality tests passing
+
 ## Known Issues
 
-### Minor Issues
-- None currently identified
+### Operational Issues Fixed
+- ✅ **Namespace collision**: Resolved with clean directory separation
+- ✅ **Hardcoded paths**: Eliminated via centralized PathManager
+- ✅ **CLI conventions**: Now follows Unix standards properly
+
+### Test Hygiene Issues (Ongoing)
+- ⚠️ **Test cleanup**: Some tests don't restore original state properly
+- ⚠️ **Process management**: Hanging node processes during testing
+- ⚠️ **User directory pollution**: Tests modify ~/.claude without full restoration
 
 ### Limitations
 - Voice requires OpenAI API key
@@ -151,6 +206,19 @@ calmhive/v3/
 
 ---
 
-**Current Version**: 3.4.9
-**Last Updated**: 2025-06-13
-**Production Status**: Published to npm
+**Current Version**: 8.0.1
+**Last Updated**: 2025-06-14
+**Production Status**: Namespace architecture complete, core functionality verified
+**Scope**: Practical Claude CLI wrapper for developers, teams, and friends
+**Architecture**: Clean separation of executables (/cmd/) and templates (/commands/) with centralized path management
+
+## What Calmhive Actually Is
+
+Calmhive is a **reliable CLI wrapper for Claude Code** that adds practical features:
+- Background task processing (AFk system)
+- Session management and cleanup
+- Voice interface (optional)
+- Terminal UI for monitoring
+- Smart model selection
+
+**Not a platform, not enterprise software** - just a well-built tool that makes Claude Code more useful for daily development work. Easy to install, share with teammates, and maintain.

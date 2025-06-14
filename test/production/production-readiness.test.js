@@ -117,12 +117,12 @@ class ProductionReadinessTest {
     
     const tests = [
       { cmd: 'node', args: ['bin/calmhive', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/afk', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/chat', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/config', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/run', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/tui', '--help'], expectCode: 0 },
-      { cmd: 'node', args: ['commands/voice', '--help'], expectCode: 0 }
+      { cmd: 'node', args: ['cmd/afk', '--help'], expectCode: 0 },
+      { cmd: 'node', args: ['cmd/chat', '--help'], expectCode: 0 },
+      { cmd: 'node', args: ['cmd/config', '--help'], expectCode: 0 },
+      { cmd: 'node', args: ['cmd/run', '--help'], expectCode: 0 },
+      { cmd: 'node', args: ['cmd/tui', '--help'], expectCode: 0 },
+      { cmd: 'node', args: ['cmd/voice', '--help'], expectCode: 0 }
     ];
 
     for (const test of tests) {
@@ -191,8 +191,10 @@ class ProductionReadinessTest {
       // Validate CLAUDE.md files
       if (file.includes('CLAUDE')) {
         const content = fs.readFileSync(filePath, 'utf8');
-        if (!content.includes('Version: 8.0.0')) {
-          this.errors.push(`${file} missing version 8.0.0`);
+        const pkg = JSON.parse(fs.readFileSync(path.join(this.projectRoot, 'package.json'), 'utf8'));
+        const expectedVersion = `Version: ${pkg.version}`;
+        if (!content.includes(expectedVersion)) {
+          this.errors.push(`${file} missing ${expectedVersion}`);
         }
         if (!content.includes('lets bee friends')) {
           this.errors.push(`${file} missing confirmation protocol`);

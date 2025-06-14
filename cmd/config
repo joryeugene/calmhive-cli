@@ -34,6 +34,7 @@ Commands:
   backup                  Create manual backup of current config
   restore [filename]      Restore from backup (latest if no filename)
   list-backups           Show available backup files
+  commands                Manage command files for external tools like prompthive
 
 Options:
   --desktop              Use desktop-optimized template instead of CLI version
@@ -51,6 +52,9 @@ Examples:
   calmhive config backup                  # Create manual backup
   calmhive config restore                 # Restore latest backup
   calmhive config list-backups           # Show all backups
+  calmhive config commands list           # List available command files
+  calmhive config commands copy <dest>    # Copy commands to destination directory
+  calmhive config commands copy <dest> --pattern expert # Copy only expert commands
 
 Files:
   ~/.claude/CLAUDE.md                     # Your active configuration
@@ -261,6 +265,138 @@ Note: All destructive operations create automatic backups for safety.
   }
 
   /**
+   * Handle commands subcommand
+   */
+  async handleCommandsSubcommand(args) {
+    const subcommand = args[1]; // commands <subcommand>
+    
+    switch (subcommand) {
+      case 'list':
+        this.listCommandFiles();
+        break;
+        
+      case 'copy':
+        const destDir = args[2];
+        if (!destDir) {
+          console.log('❌ Missing destination directory');
+          console.log('💡 Usage: calmhive config commands copy <destination>');
+          console.log('💡 Example: calmhive config commands copy ./my-commands/');
+          console.log('💡 Example: calmhive config commands copy ~/.prompthive/commands/');
+          process.exit(1);
+        }
+        
+        const patterns = args.includes('--pattern') ? 
+          args.slice(args.indexOf('--pattern') + 1).filter(arg => !arg.startsWith('--')) : [];
+        const force = args.includes('--force');
+        const dryRun = args.includes('--dry-run');
+        
+        await this.copyCommandFiles(destDir, { patterns, force, dryRun });
+        break;
+        
+      default:
+        console.log('❌ Unknown commands subcommand:', subcommand);
+        console.log('💡 Available: list, copy');
+        process.exit(1);
+    }
+  }
+
+  /**
+   * List available command files
+   */
+  listCommandFiles() {
+    const summary = this.configManager.getCommandFilesSummary();
+    
+    console.log(`📁 Command Files Summary:\n`);
+    console.log(`📊 Total files: ${summary.totalFiles}`);
+    console.log(`📏 Total size: ${Math.round(summary.totalSize / 1024)}KB\n`);
+    
+    Object.keys(summary.categories).sort().forEach(category => {
+      const files = summary.categories[category];
+      console.log(`📂 ${category === 'root' ? 'Root Directory' : category}/ (${files.length} files)`);
+      
+      files.slice(0, 10).forEach(file => {
+        const sizeKB = Math.round(file.size / 1024);
+        console.log(`   📄 ${file.name} (${sizeKB}KB)`);
+      });
+      
+      if (files.length > 10) {
+        console.log(`   ... and ${files.length - 10} more files`);
+      }
+      console.log('');
+    });
+    
+    console.log('💡 Use `calmhive config commands copy <destination>` to copy files');
+    console.log('💡 Use `--pattern <text>` to filter files (e.g., --pattern expert)');
+  }
+
+  /**
+   * Copy command files to destination
+   */
+  async copyCommandFiles(destDir, options = {}) {
+    const { patterns = [], force = false, dryRun = false } = options;
+    
+    try {
+      console.log(`📋 ${dryRun ? 'Previewing' : 'Copying'} command files to: ${destDir}`);
+      if (patterns.length > 0) {
+        console.log(`🔍 Filtering with patterns: ${patterns.join(', ')}`);
+      }
+      console.log('');
+      
+      const result = this.configManager.copyCommandFiles(destDir, { patterns, force, dryRun });
+      
+      if (result.totalFiles === 0) {
+        console.log('❌ No files match the specified criteria');
+        return;
+      }
+      
+      console.log(`📊 Summary:`);
+      console.log(`   Total files: ${result.totalFiles}`);
+      console.log(`   ${dryRun ? 'Would copy' : 'Copied'}: ${result.copied.length}`);
+      console.log(`   Skipped: ${result.skipped.length}`);
+      console.log(`   Errors: ${result.errors.length}`);
+      console.log('');
+      
+      // Show copied files
+      if (result.copied.length > 0) {
+        console.log(`✅ ${dryRun ? 'Would copy' : 'Copied'} files:`);
+        result.copied.forEach(item => {
+          const action = dryRun ? item.action : (item.action === 'created' ? '📝 Created' : '🔄 Updated');
+          console.log(`   ${action}: ${item.file} (${Math.round(item.size / 1024)}KB)`);
+        });
+        console.log('');
+      }
+      
+      // Show skipped files
+      if (result.skipped.length > 0) {
+        console.log(`⏭️  Skipped files (already exist, use --force to overwrite):`);
+        result.skipped.forEach(item => {
+          console.log(`   📄 ${item.file}`);
+        });
+        console.log('');
+      }
+      
+      // Show errors
+      if (result.errors.length > 0) {
+        console.log(`❌ Errors:`);
+        result.errors.forEach(item => {
+          console.log(`   ❌ ${item.file}: ${item.error}`);
+        });
+        console.log('');
+      }
+      
+      if (dryRun) {
+        console.log('💡 Remove --dry-run to perform the actual copy');
+      } else if (result.copied.length > 0) {
+        console.log('🎉 Command files copied successfully!');
+      }
+      
+    } catch (error) {
+      console.error('❌ Copy failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
    * List available backups
    */
   listBackups() {
@@ -345,6 +481,13 @@ Note: All destructive operations create automatic backups for safety.
         return;
       }
       
+      // Handle special case: 'commands' with no subcommand defaults to 'list'
+      if (command === 'commands' && args.length === 1) {
+        this.listCommandFiles();
+        return;
+      }
+      
+      
       switch (command) {
         case 'show':
           this.showStatus();
@@ -371,6 +514,10 @@ Note: All destructive operations create automatic backups for safety.
           this.listBackups();
           break;
           
+        case 'commands':
+          await this.handleCommandsSubcommand(args);
+          break;
+          
         default:
           console.log(`❌ Unknown command: ${command}`);
           console.log('💡 Use `calmhive config --help` for available commands');
@@ -382,6 +529,104 @@ Note: All destructive operations create automatic backups for safety.
       process.exit(1);
     } finally {
       this.cleanup();
+    }
+  }
+
+  /**
+   * Handle commands subcommand
+   */
+  async handleCommandsSubcommand(args) {
+    const subcommand = args[1]; // commands <subcommand>
+    
+    switch (subcommand) {
+      case 'list':
+        this.listCommandFiles();
+        break;
+        
+      case 'copy':
+        const destDir = args[2];
+        if (!destDir) {
+          console.log('❌ Missing destination directory');
+          console.log('💡 Usage: calmhive config commands copy <destination>');
+          console.log('💡 Example: calmhive config commands copy ./my-commands/');
+          console.log('💡 Example: calmhive config commands copy ~/.prompthive/commands/');
+          process.exit(1);
+        }
+        
+        const patterns = args.includes('--pattern') ? 
+          args.slice(args.indexOf('--pattern') + 1).filter(arg => !arg.startsWith('--')) : [];
+        const force = args.includes('--force');
+        const dryRun = args.includes('--dry-run');
+        
+        await this.copyCommandFiles(destDir, { patterns, force, dryRun });
+        break;
+        
+      default:
+        console.log('❌ Unknown commands subcommand:', subcommand);
+        console.log('💡 Available: list, copy');
+        process.exit(1);
+    }
+  }
+
+  /**
+   * List available command files
+   */
+  listCommandFiles() {
+    const summary = this.configManager.getCommandFilesSummary();
+    
+    console.log(`📁 Command Files Summary:\n`);
+    console.log(`📊 Total files: ${summary.totalFiles}`);
+    console.log(`📏 Total size: ${Math.round(summary.totalSize / 1024)}KB\n`);
+    
+    Object.keys(summary.categories).sort().forEach(category => {
+      const files = summary.categories[category];
+      console.log(`📂 ${category === 'root' ? 'Root Directory' : category}/ (${files.length} files)`);
+      
+      files.slice(0, 10).forEach(file => {
+        const sizeKB = Math.round(file.size / 1024);
+        console.log(`   📄 ${file.name} (${sizeKB}KB)`);
+      });
+      
+      if (files.length > 10) {
+        console.log(`   ... and ${files.length - 10} more files`);
+      }
+      console.log('');
+    });
+    
+    console.log('💡 Use `calmhive config commands copy <destination>` to copy files');
+    console.log('💡 Use `--pattern <text>` to filter files (e.g., --pattern expert)');
+  }
+
+  /**
+   * Copy command files to destination
+   */
+  async copyCommandFiles(destDir, options = {}) {
+    const { patterns = [], force = false, dryRun = false } = options;
+    
+    try {
+      console.log(`📋 ${dryRun ? 'Previewing' : 'Copying'} command files to: ${destDir}`);
+      if (patterns.length > 0) {
+        console.log(`🔍 Filtering with patterns: ${patterns.join(', ')}`);
+      }
+      console.log('');
+      
+      const result = this.configManager.copyCommandFiles(destDir, { patterns, force, dryRun });
+      
+      if (result.totalFiles === 0) {
+        console.log('❌ No matching files found');
+        return;
+      }
+      
+      console.log(`📋 ${dryRun ? 'Would copy' : 'Copied'} ${result.copiedFiles} files`);
+      console.log(`📏 Total size: ${Math.round(result.totalSize / 1024)}KB`);
+      
+      if (result.skippedFiles > 0) {
+        console.log(`⚠️ Skipped ${result.skippedFiles} existing files (use --force to overwrite)`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Copy operation failed:', error.message);
+      process.exit(1);
     }
   }
 }

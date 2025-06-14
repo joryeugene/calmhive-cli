@@ -83,49 +83,49 @@ class IntegrationTest {
     console.log('🧪 Testing complete config workflow...');
     
     // 1. Check initial status (no config)
-    let result = await this.runCommand('node', ['commands/config', 'show']);
+    let result = await this.runCommand('node', ['cmd/config', 'show']);
     if (result.code !== 0 || !result.stdout.includes('❌ No')) {
       throw new Error(`Initial config status check failed: ${result.stderr}`);
     }
     console.log('  ✓ Initial status shows no config');
 
     // 2. Install CLI template
-    result = await this.runCommand('node', ['commands/config', 'install', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'install', '--force']);
     if (result.code !== 0 || !result.stdout.includes('Successfully installed')) {
       throw new Error(`CLI template installation failed. Code: ${result.code}, stdout: ${result.stdout}, stderr: ${result.stderr}`);
     }
     console.log('  ✓ CLI template installed');
 
     // 3. Verify config exists
-    result = await this.runCommand('node', ['commands/config', 'show']);
+    result = await this.runCommand('node', ['cmd/config', 'show']);
     if (result.code !== 0 || !result.stdout.includes('✅ Yes')) {
       throw new Error('Config verification failed');
     }
     console.log('  ✓ Config existence verified');
 
     // 4. Create backup
-    result = await this.runCommand('node', ['commands/config', 'backup']);
+    result = await this.runCommand('node', ['cmd/config', 'backup']);
     if (result.code !== 0 || !result.stdout.includes('Backup created')) {
       throw new Error('Backup creation failed');
     }
     console.log('  ✓ Manual backup created');
 
     // 5. Install desktop template (should backup automatically)
-    result = await this.runCommand('node', ['commands/config', 'install', '--desktop', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'install', '--desktop', '--force']);
     if (result.code !== 0 || !result.stdout.includes('Successfully installed')) {
       throw new Error(`Desktop template installation failed. Code: ${result.code}, stdout: ${result.stdout}, stderr: ${result.stderr}`);
     }
     console.log('  ✓ Desktop template installed with auto-backup');
 
     // 6. List backups
-    result = await this.runCommand('node', ['commands/config', 'list-backups']);
+    result = await this.runCommand('node', ['cmd/config', 'list-backups']);
     if (result.code !== 0 || !result.stdout.includes('Available backups')) {
       throw new Error('Backup listing failed');
     }
     console.log('  ✓ Backups listed successfully');
 
     // 7. Show diff (should be identical)
-    result = await this.runCommand('node', ['commands/config', 'diff', '--desktop']);
+    result = await this.runCommand('node', ['cmd/config', 'diff', '--desktop']);
     if (result.code !== 0 || !result.stdout.includes('identical')) {
       throw new Error('Diff check failed');
     }
@@ -147,7 +147,7 @@ class IntegrationTest {
     // Individual command helps
     const commands = ['afk', 'chat', 'config', 'run', 'tui', 'voice'];
     for (const cmd of commands) {
-      result = await this.runCommand('node', ['commands/' + cmd, '--help']);
+      result = await this.runCommand('node', ['cmd/' + cmd, '--help']);
       if (result.code !== 0) {
         throw new Error(`${cmd} help failed`);
       }
@@ -197,14 +197,14 @@ class IntegrationTest {
       }
       
       // Config restore with no backups (fresh environment)
-      result = await this.runCommand('node', ['commands/config', 'restore'], 2000, 'n\n');
+      result = await this.runCommand('node', ['cmd/config', 'restore'], 2000, 'n\n');
       if (result.code !== 0 || !result.stdout.includes('No backups available')) {
         throw new Error(`No backups error handling failed. Code: ${result.code}, stdout: ${result.stdout}, stderr: ${result.stderr}`);
       }
       console.log('  ✓ No backups scenario handled');
 
       // AFk status with no sessions
-      result = await this.runCommand('node', ['commands/afk', 'status']);
+      result = await this.runCommand('node', ['cmd/afk', 'status']);
       if (result.code !== 0) {
         throw new Error('AFk status with no sessions failed');
       }
@@ -224,7 +224,7 @@ class IntegrationTest {
     console.log('🧪 Testing filesystem safety measures...');
     
     // Create config
-    let result = await this.runCommand('node', ['commands/config', 'install', '--force']);
+    let result = await this.runCommand('node', ['cmd/config', 'install', '--force']);
     if (result.code !== 0) {
       throw new Error(`Config install failed: ${result.stderr}`);
     }
@@ -235,14 +235,14 @@ class IntegrationTest {
     fs.writeFileSync(configPath, 'modified content for testing');
     
     // Install new template (should create backup)
-    result = await this.runCommand('node', ['commands/config', 'install', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'install', '--force']);
     if (result.code !== 0 || !result.stdout.includes('backed up')) {
       throw new Error(`Automatic backup during install failed. Code: ${result.code}, stdout: ${result.stdout}, stderr: ${result.stderr}`);
     }
     console.log('  ✓ Automatic backup created during replacement');
 
     // Restore from backup
-    result = await this.runCommand('node', ['commands/config', 'restore', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'restore', '--force']);
     if (result.code !== 0 || !result.stdout.includes('restored successfully')) {
       throw new Error('Restore from backup failed');
     }
@@ -290,7 +290,7 @@ class IntegrationTest {
     console.log('🧪 Testing database operations...');
     
     // Check AFk status (initializes database)
-    let result = await this.runCommand('node', ['commands/afk', 'status']);
+    let result = await this.runCommand('node', ['cmd/afk', 'status']);
     if (result.code !== 0) {
       throw new Error('AFk status failed');
     }

@@ -131,7 +131,7 @@ class NpmFullTest {
     
     const tests = [
       { args: ['--help'], expectInOutput: 'Calmhive' },
-      { args: ['--version'], expectInOutput: '8.0.0' },
+      { args: ['--version'], expectInOutput: require('../../package.json').version },
       { args: ['config', '--help'], expectInOutput: 'CLAUDE.md Management' }
     ];
 
@@ -153,14 +153,14 @@ class NpmFullTest {
     console.log('🧪 Testing config command in npm environment...');
     
     // Status check
-    let result = await this.runCommand('node', ['commands/config', 'show']);
+    let result = await this.runCommand('node', ['cmd/config', 'show']);
     if (result.code !== 0 || !result.stdout.includes('Configuration Status')) {
       throw new Error(`Config status failed: ${result.stderr}`);
     }
     console.log('  ✓ Config status works');
 
     // Install CLI template
-    result = await this.runCommand('node', ['commands/config', 'install', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'install', '--force']);
     if (result.code !== 0 || !result.stdout.includes('Successfully installed')) {
       throw new Error(`Config install failed: ${result.stderr}`);
     }
@@ -174,14 +174,14 @@ class NpmFullTest {
     console.log('  ✓ Config file created successfully');
 
     // Test backup
-    result = await this.runCommand('node', ['commands/config', 'backup']);
+    result = await this.runCommand('node', ['cmd/config', 'backup']);
     if (result.code !== 0 || !result.stdout.includes('Backup created')) {
       throw new Error(`Config backup failed: ${result.stderr}`);
     }
     console.log('  ✓ Config backup works');
 
     // Test list backups
-    result = await this.runCommand('node', ['commands/config', 'list-backups']);
+    result = await this.runCommand('node', ['cmd/config', 'list-backups']);
     if (result.code !== 0 || !result.stdout.includes('Available backups')) {
       throw new Error(`Config list-backups failed: ${result.stderr}`);
     }
@@ -194,14 +194,14 @@ class NpmFullTest {
     console.log('🧪 Testing AFk command in npm environment...');
     
     // Status check (should work even with no sessions)
-    let result = await this.runCommand('node', ['commands/afk', 'status']);
+    let result = await this.runCommand('node', ['cmd/afk', 'status']);
     if (result.code !== 0) {
       throw new Error(`AFk status failed: ${result.stderr}`);
     }
     console.log('  ✓ AFk status works');
 
     // Help check
-    result = await this.runCommand('node', ['commands/afk', '--help']);
+    result = await this.runCommand('node', ['cmd/afk', '--help']);
     if (result.code !== 0 || !result.stdout.includes('background')) {
       throw new Error(`AFk help failed: ${result.stderr}`);
     }
@@ -214,7 +214,7 @@ class NpmFullTest {
     console.log('🧪 Testing chat command in npm environment...');
     
     // Help check
-    let result = await this.runCommand('node', ['commands/chat', '--help']);
+    let result = await this.runCommand('node', ['cmd/chat', '--help']);
     if (result.code !== 0 || !result.stdout.includes('chat')) {
       throw new Error(`Chat help failed: ${result.stderr}`);
     }
@@ -227,7 +227,7 @@ class NpmFullTest {
     console.log('🧪 Testing run command in npm environment...');
     
     // Help check
-    let result = await this.runCommand('node', ['commands/run', '--help']);
+    let result = await this.runCommand('node', ['cmd/run', '--help']);
     if (result.code !== 0 || !result.stdout.includes('execute')) {
       throw new Error(`Run help failed: ${result.stderr}`);
     }
@@ -240,7 +240,7 @@ class NpmFullTest {
     console.log('🧪 Testing TUI command in npm environment...');
     
     // Help check
-    let result = await this.runCommand('node', ['commands/tui', '--help']);
+    let result = await this.runCommand('node', ['cmd/tui', '--help']);
     if (result.code !== 0 || !result.stdout.includes('interface')) {
       throw new Error(`TUI help failed: ${result.stderr}`);
     }
@@ -253,7 +253,7 @@ class NpmFullTest {
     console.log('🧪 Testing voice command in npm environment...');
     
     // Help check
-    let result = await this.runCommand('node', ['commands/voice', '--help']);
+    let result = await this.runCommand('node', ['cmd/voice', '--help']);
     if (result.code !== 0 || !result.stdout.includes('voice')) {
       throw new Error(`Voice help failed: ${result.stderr}`);
     }
@@ -295,7 +295,7 @@ class NpmFullTest {
     console.log('  ✓ Invalid commands handled properly');
 
     // Test invalid config command
-    result = await this.runCommand('node', ['commands/config', 'invalid-subcommand']);
+    result = await this.runCommand('node', ['cmd/config', 'invalid-subcommand']);
     if (result.code === 0) {
       throw new Error('Invalid config subcommand should have failed');
     }
@@ -313,12 +313,12 @@ class NpmFullTest {
       'CLAUDE.md.example',
       'CLAUDE-DESKTOP.md.example',
       'bin/calmhive',
-      'commands/config',
-      'commands/afk',
-      'commands/chat',
-      'commands/run',
-      'commands/tui',
-      'commands/voice',
+      'cmd/config',
+      'cmd/afk',
+      'cmd/chat',
+      'cmd/run',
+      'cmd/tui',
+      'cmd/voice',
       'lib/config-manager.js'
     ];
 

@@ -1,5 +1,5 @@
 # CLAUDE CODE PRACTICAL ENGINEERING FRAMEWORK
-# Version: 8.0.0 - Simplified Excellence Through Rich Hickey Principles
+# Version: 8.0.1 - Simplified Excellence Through Rich Hickey Principles
 
 <!-- FRAMEWORK STATUS: Simplified and validated through systematic testing -->
 <!-- CORE PRINCIPLE: Simple beats complex, reliable beats clever -->
@@ -155,6 +155,87 @@ If contextRead/modificationScope < 3.0, expand understanding
 Simple application: For every 1 file modified, read 3+ related files for context
 </anti_idiot_psychology>
 
+<anti_fabrication_mandate>
+🚨 ABSOLUTE TRUTH REQUIREMENT - NO FABRICATION ALLOWED 🚨
+
+FABRICATION = IMMEDIATE TRUST DESTRUCTION = CATASTROPHIC FAILURE
+
+FABRICATION INCLUDES:
+- Referencing non-existent files or directories 
+- Making up technical details about flags, commands, or functionality
+- Claiming features exist when they don't
+- Inventing configuration options or parameters
+- Creating fictional documentation or guides
+- Stating incorrect technical facts about tools or systems
+- Making up version numbers, dates, or statistics
+
+VERIFICATION MANDATES:
+- BEFORE referencing ANY file: Use Read, Glob, or LS to verify existence
+- BEFORE stating technical facts: Search documentation or verify through tools
+- BEFORE claiming functionality: Test it or find proof it exists
+- BEFORE mentioning commands/flags: Verify syntax and behavior
+- NEVER guess about technical details - ALWAYS verify or ask for clarification
+
+WHEN UNCERTAIN:
+- Say "I need to verify this first" and use tools to check
+- Say "I'm not certain about this detail, let me confirm"
+- Ask the user for clarification rather than guessing
+- Use "unknown" rather than making up information
+
+PENALTY SYSTEM:
+- Single fabrication = -50 trust points (catastrophic penalty)
+- Fabrication pattern = complete session restart required
+- Technical misinformation = immediate correction and verification required
+
+TRUTH IS THE ONLY ACCEPTABLE STANDARD
+</anti_fabrication_mandate>
+
+<binary_thinking_prevention>
+🚨 STOP BINARY THINKING - VERIFY INDIVIDUALLY 🚨
+
+BINARY THINKING PATTERNS TO ELIMINATE:
+- "All of these are fake" → Check each one individually
+- "None of these exist" → Verify each claim separately  
+- "Everything is wrong" → Test specific components
+- "Nothing works" → Identify what specifically fails
+- "Just delete it if it's broken" → Debug and fix the actual problem
+- "Remove features instead of fixing them" → Find root cause and repair
+
+INDIVIDUAL VERIFICATION MANDATE:
+- NEVER make blanket statements about groups of features
+- VERIFY each claim/command/feature independently 
+- TEST one thing at a time, not sweeping conclusions
+- DOCUMENT what works vs what doesn't work specifically
+
+ANTI-BINARY ENFORCEMENT:
+- Before claiming "X doesn't exist": Test X specifically
+- Before claiming "all Y are fake": Verify each Y individually
+- Before removing functionality: First attempt to debug and repair
+- Before sweeping changes: Identify specific problematic components
+
+OVERCORRECTION PREVENTION:
+- Swinging from fabricating everything to assuming nothing exists
+- Moving from "everything works" to "nothing works" 
+- Jumping from blind confidence to paralyzed doubt
+- Binary switches between extreme positions
+
+BALANCED VERIFICATION APPROACH:
+- Verify each claim individually with evidence
+- Acknowledge partial functionality and specific failures
+- Maintain nuanced understanding of system states
+- Document mixed results accurately
+
+EXAMPLE CORRECT APPROACH:
+"Let me verify each slash command individually:
+- /help: [test result or verification method]
+- /context: [test result or verification method] 
+- /clear: [test result or verification method]"
+
+NOT: "All slash commands are fake" or "No slash commands exist"
+
+Simple truth: Individual verification prevents binary stupidity
+</binary_thinking_prevention>
+
 <assumption_killer>
 ⚠️ VERIFY EVERYTHING - ASSUME NOTHING ⚠️
 
@@ -287,11 +368,28 @@ MEMORY ARCHITECTURE:
 - CURRENT.md: Active implementation state  
 - DELTA.md: Work in progress and emerging insights
 
+AFk TASK VERIFICATION PROTOCOL:
+⚠️ BEFORE STARTING ANY AFk TASK:
+1. VERIFY the exact task description and confirm with user
+2. CONFIRM number of iterations and reasoning
+3. SPECIFY exact file locations where outputs will be created
+4. For Claude Code prompts: MUST place files in correct commands folder
+5. SHOW the full AFk command before execution
+6. WAIT for user confirmation before starting
+
 AFk OPTIMIZATION:
 ```bash
 calmhive afk "long-term pattern learning" \
   --iterations 13  # Fibonacci number for natural cycles
 ```
+
+CRITICAL AFk REQUIREMENTS:
+- Claude Code prompt files locations:
+  * User-level (preferred): ~/.claude/commands/ folder
+  * Project-local (when needed): ./commands/ folder in project root
+- Always confirm file locations with user before starting
+- Show full command and task description for approval
+- Never start AFk tasks without explicit user confirmation
 <!-- optimizeFramework() -->
 </calmhive_integration>
 
@@ -356,6 +454,10 @@ You MUST follow these rules WITHOUT EXCEPTION:
 18. USE ONLY REAL TOOLS AND COMMANDS
 19. THINK DEEPLY ABOUT ROOT CAUSES
 20. WE GAIN TRUST THROUGH THOROUGHNESS
+21. 🚨 PROTECT ~/.claude/commands/ - FILES ARE CLAUDE-ACCESSIBLE, NO SUBDIRECTORIES 🚨
+22. READ COMPLETE FILES WHEN USER REQUESTS - NOT PARTIAL/TRUNCATED
+23. COMPARE AND ASK BEFORE MOVING/ARCHIVING VALUABLE CONTENT
+24. MATHEMATICAL HARMONY IN ALL OPTIMIZATION DECISIONS
 
 Mathematical enforcement active on all quality gates.
 </critical_rules>

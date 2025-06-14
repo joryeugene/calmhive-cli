@@ -1,4 +1,4 @@
-# 🐝 Calmhive v8.0.0 - Claude That Never Quits
+# 🐝 Calmhive v8.0.1 - Claude That Never Quits
 
 > Enhance Claude CLI with AFk iterative sessions, usage limit recovery, voice control, and process monitoring.
 
@@ -312,6 +312,33 @@ Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Cla
 - `CLAUDE-DESKTOP.md.example` - For Claude Desktop app (optimized for desktop environment)
 
 Copy to your Claude configuration and customize as needed. Learn more in the [Terminal Velocity guide](http://jorypestorious.com/blog/terminal-velocity/).
+
+### 🎯 Command Templates System (v8.0.1+)
+
+Calmhive v3 includes curated command templates for common development workflows:
+
+**Core Templates Available:**
+- `bug-hunting.md` - Systematic bug detection and resolution
+- `documentation.md` - Technical documentation generation  
+- `refactoring.md` - Code improvement and architectural changes
+- `test-generation.md` - Test suite creation with coverage analysis
+
+**Expert Engineering Personas:**
+- `expert-frontend-engineer.md` - Modern web development expertise
+- `expert-backend-engineer.md` - Server architecture and APIs
+- `expert-devops.md` - Infrastructure automation and deployment
+
+**Using Templates with Calmhive:**
+```bash
+# Copy templates to your Claude commands directory
+cp -r "$(npm root -g)/@calmhive/calmhive-cli/commands/"*.md ~/.claude/commands/
+
+# Or use direct template invocation
+calmhive chat "Apply bug-hunting methodology to investigate memory leaks"
+calmhive run "Use expert-frontend-engineer knowledge to optimize React performance"
+```
+
+Templates work with both Calmhive and direct Claude Code usage.
 
 ### 🔄 AFk Session Best Practices
 

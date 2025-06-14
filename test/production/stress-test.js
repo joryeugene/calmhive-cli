@@ -99,7 +99,7 @@ class StressTest {
   async testConfigCommandLoad() {
     console.log('🔥 Testing config command under load...');
     
-    const result = await this.runConcurrentCommands('node', ['commands/config', 'show'], 15, 2);
+    const result = await this.runConcurrentCommands('node', ['cmd/config', 'show'], 15, 2);
     this.results.push({ test: 'config-load', ...result });
     
     return result.successful > result.total * 0.90; // 90% success rate (file operations)
@@ -110,12 +110,12 @@ class StressTest {
     
     const commands = [
       ['node', ['bin/calmhive', '--help']],
-      ['node', ['commands/afk', '--help']],
-      ['node', ['commands/chat', '--help']],
-      ['node', ['commands/config', 'show']],
-      ['node', ['commands/run', '--help']],
-      ['node', ['commands/tui', '--help']],
-      ['node', ['commands/voice', '--help']]
+      ['node', ['cmd/afk', '--help']],
+      ['node', ['cmd/chat', '--help']],
+      ['node', ['cmd/config', 'show']],
+      ['node', ['cmd/run', '--help']],
+      ['node', ['cmd/tui', '--help']],
+      ['node', ['cmd/voice', '--help']]
     ];
 
     let successful = 0;
@@ -155,8 +155,8 @@ class StressTest {
     
     const commands = [
       ['node', ['bin/calmhive', '--help']],
-      ['node', ['commands/config', 'show']],
-      ['node', ['commands/afk', 'status']]
+      ['node', ['cmd/config', 'show']],
+      ['node', ['cmd/afk', 'status']]
     ];
 
     let memoryLeaks = 0;
@@ -200,7 +200,7 @@ class StressTest {
     console.log('🔥 Testing filesystem operations under stress...');
     
     // Test config operations that involve file I/O
-    const result = await this.runConcurrentCommands('node', ['commands/config', 'show'], 10, 2);
+    const result = await this.runConcurrentCommands('node', ['cmd/config', 'show'], 10, 2);
     
     // Check if session database survives concurrent access
     const dbPath = path.join(this.projectRoot, 'data', 'sessions.db');

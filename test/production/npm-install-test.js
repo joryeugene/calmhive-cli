@@ -156,7 +156,7 @@ class NpmInstallTest {
     fs.mkdirSync(path.join(this.testDir, '.claude'), { recursive: true });
     
     // Test config status
-    let result = await this.runCommand('node', ['commands/config', 'show']);
+    let result = await this.runCommand('node', ['cmd/config', 'show']);
     if (result.code !== 0) {
       throw new Error(`Config status failed: ${result.stderr}`);
     }
@@ -168,7 +168,7 @@ class NpmInstallTest {
     console.log('  ✓ Config status works from npm structure');
     
     // Test config install
-    result = await this.runCommand('node', ['commands/config', 'install', '--force']);
+    result = await this.runCommand('node', ['cmd/config', 'install', '--force']);
     if (result.code !== 0) {
       throw new Error(`Config install failed: ${result.stderr}`);
     }

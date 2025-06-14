@@ -7,16 +7,11 @@
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const pathManager = require('../lib/path-manager');
 
-// Get version from package.json
+// Get version from path manager
 function getVersion() {
-  try {
-    const packagePath = path.join(__dirname, '..', 'package.json');
-    const packageData = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
-    return packageData.version;
-  } catch (error) {
-    return 'unknown';
-  }
+  return pathManager.getVersion();
 }
 
 // Available commands
@@ -124,12 +119,13 @@ if (ALIASES[command]) {
 }
 
 // Check if command exists
-const commandPath = path.join(__dirname, '..', 'commands', command);
-if (!fs.existsSync(commandPath)) {
+if (!pathManager.commandExists(command)) {
   console.error(`❌ Unknown command: ${command}`);
   console.log('Run "calmhive --help" for available commands');
   process.exit(1);
 }
+
+const commandPath = pathManager.getCommandPath(command);
 
 // Execute command
 const child = spawn('node', [commandPath, ...args.slice(1)], {

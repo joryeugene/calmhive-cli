@@ -9,12 +9,12 @@ cd "$(dirname "$0")/../.."
 
 # Test that voice command exists and shows help
 echo "  ▶ Testing voice command help..."
-node commands/voice --help > /dev/null
+node cmd/voice --help > /dev/null
 echo "  ✓ Voice command help works"
 
 # Test voice test mode (if available)
 echo "  ▶ Testing voice test mode..."
-timeout 5 node commands/voice --test 2>/dev/null || echo "  ⚠ Voice test requires uv and dependencies"
+timeout 5 node cmd/voice --test 2>/dev/null || echo "  ⚠ Voice test requires uv and dependencies"
 
 # Test that voice script exists
 echo "  ▶ Checking voice script..."
