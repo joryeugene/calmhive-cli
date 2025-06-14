@@ -25,6 +25,7 @@ const COMMANDS = {
   'a': 'Alias for afk',
   'chat': 'Interactive chat with Claude',
   'c': 'Alias for chat',
+  'config': 'Manage CLAUDE.md configuration files',
   'run': 'Execute one-shot tasks headlessly',
   'r': 'Alias for run',
   'tui': 'Terminal UI for process management',

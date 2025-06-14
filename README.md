@@ -1,4 +1,4 @@
-# 🐝 Calmhive v7.0.0 - Claude That Never Quits
+# 🐝 Calmhive v8.0.0 - Claude That Never Quits
 
 > Enhance Claude CLI with AFk iterative sessions, usage limit recovery, voice control, and process monitoring.
 

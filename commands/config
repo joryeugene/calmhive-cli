@@ -1,0 +1,395 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Config Command
+ * Manages CLAUDE.md configuration files with safety and simplicity
+ */
+
+const ConfigManager = require('../lib/config-manager');
+const readline = require('readline');
+
+class ConfigCommand {
+  constructor() {
+    this.configManager = new ConfigManager();
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
+
+  /**
+   * Show help information
+   */
+  showHelp() {
+    console.log(`
+🐝 Calmhive Config - CLAUDE.md Management
+
+Safely manage your CLAUDE.md configuration files with backups and validation.
+
+Usage: calmhive config <command> [options]
+
+Commands:
+  show                    Show current configuration status
+  diff [--desktop]        Show differences with template  
+  install [--desktop]     Install/update configuration from template
+  backup                  Create manual backup of current config
+  restore [filename]      Restore from backup (latest if no filename)
+  list-backups           Show available backup files
+
+Options:
+  --desktop              Use desktop-optimized template instead of CLI version
+  --dry-run              Preview changes without making them (install only)
+  --force                Skip confirmation prompts
+  -h, --help             Show this help message
+
+Examples:
+  calmhive config show                    # Check current status
+  calmhive config diff                    # Preview CLI template changes  
+  calmhive config diff --desktop          # Preview desktop template changes
+  calmhive config install --dry-run       # See what would be installed
+  calmhive config install                 # Install CLI template (with backup)
+  calmhive config install --desktop       # Install desktop template
+  calmhive config backup                  # Create manual backup
+  calmhive config restore                 # Restore latest backup
+  calmhive config list-backups           # Show all backups
+
+Files:
+  ~/.claude/CLAUDE.md                     # Your active configuration
+  ~/.claude/backups/                      # Timestamped backups
+  CLAUDE.md.example                       # CLI-optimized template
+  CLAUDE-DESKTOP.md.example               # Desktop-optimized template
+
+Note: All destructive operations create automatic backups for safety.
+`);
+  }
+
+  /**
+   * Show current configuration status
+   */
+  showStatus() {
+    console.log('🔍 Configuration Status:\n');
+    
+    const status = this.configManager.getStatus();
+    
+    console.log(`📍 Config location: ${status.configPath}`);
+    console.log(`📁 Exists: ${status.configExists ? '✅ Yes' : '❌ No'}`);
+    
+    if (status.configExists) {
+      console.log(`📅 Last modified: ${status.lastModified.toLocaleString()}`);
+      console.log(`📏 Size: ${Math.round(status.size / 1024)}KB`);
+      console.log(`🏷️  Version: ${status.version}`);
+      console.log(`🖥️  Type: ${status.isDesktop ? 'Desktop Optimized' : 'CLI Standard'}`);
+    }
+    
+    console.log(`🔄 Available backups: ${status.backups.length}`);
+    
+    // Template availability
+    console.log('\n📋 Templates:');
+    console.log(`   CLI template: ${status.cliTemplateExists ? '✅ Available' : '❌ Missing'}`);
+    console.log(`   Desktop template: ${status.desktopTemplateExists ? '✅ Available' : '❌ Missing'}`);
+    
+    // Environment detection
+    const env = this.configManager.detectEnvironment();
+    console.log(`\n🌍 Environment: ${env.platform} (${env.likelyDesktop ? 'Desktop' : 'CLI'} likely)`);
+    console.log(`💡 Recommendation: Use ${env.recommendation} template`);
+  }
+
+  /**
+   * Show diff with template
+   */
+  async showDiff(desktop = false) {
+    try {
+      const templateName = desktop ? 'CLAUDE-DESKTOP.md.example' : 'CLAUDE.md.example';
+      console.log(`🔍 Comparing with ${templateName}...\n`);
+      
+      const diff = await this.configManager.getDiff(desktop);
+      
+      if (diff.isNewFile) {
+        console.log('📄 No existing CLAUDE.md found');
+        console.log(`📋 Would create new file from: ${diff.templateName}`);
+        console.log(`📏 Template size: ${Math.round(diff.templateSize / 1024)}KB`);
+        console.log('\n💡 Run `calmhive config install' + (desktop ? ' --desktop' : '') + '` to create it');
+        return;
+      }
+      
+      if (diff.isIdentical) {
+        console.log('✅ Your configuration is identical to the template');
+        console.log('🎉 No updates needed!');
+        return;
+      }
+      
+      console.log(`📝 Differences found (- current, + template):\n`);
+      console.log(diff.diff);
+      console.log('\n💡 Run `calmhive config install' + (desktop ? ' --desktop' : '') + '` to update');
+      
+    } catch (error) {
+      console.error('❌ Error showing diff:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Install configuration from template
+   */
+  async installConfig(desktop = false, dryRun = false, force = false) {
+    try {
+      // Validate template first
+      const validation = this.configManager.validateTemplate(desktop);
+      if (!validation.valid) {
+        console.error(`❌ Template validation failed: ${validation.error}`);
+        process.exit(1);
+      }
+      
+      console.log(`🔍 Installing ${validation.isDesktop ? 'desktop' : 'CLI'} template v${validation.version}...`);
+      
+      if (dryRun) {
+        const result = await this.configManager.installConfig(desktop, true);
+        console.log('\n📋 Dry run - here\'s what would happen:');
+        console.log(`   Template: ${result.templateName}`);
+        console.log(`   Target: ${result.configPath}`);
+        console.log(`   Operation: ${result.isUpdate ? 'Update existing' : 'Create new'}`);
+        console.log(`   Size: ${Math.round(result.templateSize / 1024)}KB`);
+        if (result.isUpdate) {
+          console.log('   Backup: Would be created automatically');
+        }
+        console.log('\n💡 Remove --dry-run to perform the installation');
+        return;
+      }
+      
+      // Show diff if updating existing file
+      const status = this.configManager.getStatus();
+      if (status.configExists && !force) {
+        console.log('\n📝 Current vs Template differences:');
+        try {
+          const diff = await this.configManager.getDiff(desktop);
+          if (diff.isIdentical) {
+            console.log('✅ No changes needed - files are identical');
+            return;
+          }
+          console.log(diff.diff);
+        } catch (error) {
+          console.log('⚠️  Could not show diff, proceeding with install...');
+        }
+        
+        // Ask for confirmation
+        if (!await this.askConfirmation('\n❓ Continue with installation? (y/N): ')) {
+          console.log('❌ Installation cancelled');
+          return;
+        }
+      }
+      
+      // Perform installation
+      const result = await this.configManager.installConfig(desktop, false);
+      
+      console.log(`\n✅ Successfully installed ${result.templateName}`);
+      console.log(`📍 Location: ${result.configPath}`);
+      console.log(`📏 Size: ${Math.round(result.size / 1024)}KB`);
+      
+      if (result.backupCreated) {
+        console.log(`💾 Previous version backed up to: ${require('path').basename(result.backupCreated.backupPath)}`);
+      }
+      
+      if (result.isUpdate) {
+        console.log('\n🎉 Configuration updated successfully!');
+      } else {
+        console.log('\n🎉 Configuration created successfully!');
+      }
+      
+    } catch (error) {
+      console.error('❌ Installation failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Create manual backup
+   */
+  createBackup() {
+    try {
+      const backup = this.configManager.createBackup();
+      console.log('💾 Backup created successfully!');
+      console.log(`📍 Location: ${backup.backupPath}`);
+      console.log(`📏 Size: ${Math.round(backup.size / 1024)}KB`);
+    } catch (error) {
+      console.error('❌ Backup failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Restore from backup
+   */
+  async restoreFromBackup(filename, force = false) {
+    try {
+      const backups = this.configManager.listBackups();
+      
+      if (backups.length === 0) {
+        console.log('❌ No backups available to restore');
+        return;
+      }
+      
+      if (filename && !backups.find(b => b.filename === filename)) {
+        console.log(`❌ Backup file not found: ${filename}`);
+        console.log('💡 Use `calmhive config list-backups` to see available backups');
+        return;
+      }
+      
+      const targetBackup = filename 
+        ? backups.find(b => b.filename === filename)
+        : backups[0]; // Most recent
+      
+      console.log(`🔄 Restoring from: ${targetBackup.filename}`);
+      console.log(`📅 Created: ${targetBackup.created.toLocaleString()}`);
+      console.log(`📏 Size: ${Math.round(targetBackup.size / 1024)}KB`);
+      
+      if (!force && !await this.askConfirmation('\n❓ Continue with restore? (y/N): ')) {
+        console.log('❌ Restore cancelled');
+        return;
+      }
+      
+      const result = this.configManager.restoreFromBackup(filename);
+      
+      console.log('\n✅ Configuration restored successfully!');
+      console.log(`📍 Restored from: ${require('path').basename(result.restoredFrom)}`);
+      if (result.currentBackedUpTo) {
+        console.log(`💾 Previous version backed up to: ${require('path').basename(result.currentBackedUpTo)}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Restore failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * List available backups
+   */
+  listBackups() {
+    const backups = this.configManager.listBackups();
+    
+    if (backups.length === 0) {
+      console.log('📂 No backups found');
+      console.log('💡 Create one with: calmhive config backup');
+      return;
+    }
+    
+    console.log(`📂 Available backups (${backups.length}):\n`);
+    
+    backups.forEach((backup, index) => {
+      const isLatest = index === 0;
+      const ageMs = Date.now() - backup.created.getTime();
+      const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+      const ageHours = Math.floor((ageMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      
+      let ageStr;
+      if (ageDays > 0) {
+        ageStr = `${ageDays}d ago`;
+      } else if (ageHours > 0) {
+        ageStr = `${ageHours}h ago`;
+      } else {
+        ageStr = 'Recent';
+      }
+      
+      console.log(`   ${isLatest ? '📌' : '  '} ${backup.filename}`);
+      console.log(`      📅 ${backup.created.toLocaleString()} (${ageStr})`);
+      console.log(`      📏 ${Math.round(backup.size / 1024)}KB`);
+      console.log('');
+    });
+    
+    console.log('💡 Restore with: calmhive config restore [filename]');
+  }
+
+  /**
+   * Ask for user confirmation
+   */
+  askConfirmation(question) {
+    return new Promise((resolve) => {
+      this.rl.question(question, (answer) => {
+        resolve(answer.toLowerCase().startsWith('y'));
+      });
+    });
+  }
+
+  /**
+   * Clean up readline interface
+   */
+  cleanup() {
+    this.rl.close();
+  }
+
+  /**
+   * Main execution function
+   */
+  async execute() {
+    // When called directly: ['node', '/path/to/config', 'install', '--force']
+    // When called via calmhive: ['node', '/path/to/calmhive', 'config', 'install', '--force']
+    const isDirectCall = process.argv[1].includes('/commands/config');
+    const args = isDirectCall ? process.argv.slice(2) : process.argv.slice(3);
+    
+    // Parse flags
+    const desktop = args.includes('--desktop');
+    const dryRun = args.includes('--dry-run');
+    const force = args.includes('--force');
+    const help = args.includes('--help') || args.includes('-h');
+    
+    // Get command (first non-flag argument)
+    const command = args.find(arg => !arg.startsWith('--') && !arg.startsWith('-'));
+    
+    try {
+      if (help) {
+        this.showHelp();
+        return;
+      }
+      
+      if (!command) {
+        this.showStatus();
+        return;
+      }
+      
+      switch (command) {
+        case 'show':
+          this.showStatus();
+          break;
+          
+        case 'diff':
+          await this.showDiff(desktop);
+          break;
+          
+        case 'install':
+          await this.installConfig(desktop, dryRun, force);
+          break;
+          
+        case 'backup':
+          this.createBackup();
+          break;
+          
+        case 'restore':
+          const filename = args.find(arg => !arg.startsWith('--') && arg !== 'restore');
+          await this.restoreFromBackup(filename, force);
+          break;
+          
+        case 'list-backups':
+          this.listBackups();
+          break;
+          
+        default:
+          console.log(`❌ Unknown command: ${command}`);
+          console.log('💡 Use `calmhive config --help` for available commands');
+          process.exit(1);
+      }
+      
+    } catch (error) {
+      console.error('❌ Command failed:', error.message);
+      process.exit(1);
+    } finally {
+      this.cleanup();
+    }
+  }
+}
+
+// Execute if called directly
+if (require.main === module) {
+  const configCommand = new ConfigCommand();
+  configCommand.execute();
+}
+
+module.exports = ConfigCommand;

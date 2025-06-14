@@ -1,6 +1,6 @@
 {
   "name": "@calmhive/calmhive-cli",
-  "version": "7.0.0",
+  "version": "8.0.0",
   "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
   "main": "index.js",
   "bin": {
@@ -15,6 +15,9 @@
     "test:unit": "bash test/integration/commands.test.sh",
     "test:integration": "bash test/integration/commands.test.sh",
     "test:e2e": "bash test/e2e/voice-system.test.sh",
+    "test:production": "node test/production/production-readiness.test.js",
+    "test:npm": "node test/production/npm-full-test.js",
+    "test:stress": "node test/production/stress-test.js",
     "start:tui": "node commands/tui",
     "start:afk": "node commands/afk"
   },
@@ -41,6 +44,17 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "files": [
+    "bin/",
+    "commands/",
+    "lib/",
+    "config/",
+    "index.js",
+    "README.md",
+    "CHANGELOG.md",
+    "CLAUDE.md.example",
+    "CLAUDE-DESKTOP.md.example"
+  ],
   "dependencies": {
     "blessed": "^0.1.81",
     "fs-extra": "^11.3.0",
