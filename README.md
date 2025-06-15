@@ -38,7 +38,7 @@ calmhive voice  # Say "hey friend" to activate
 ```
 
 **🔧 70+ MCP Tools** (requires Claude Code CLI setup):
-- **Quick setup**: Follow [this comprehensive MCP setup guide](https://jory.dev/claude-desktop-with-mcp-tools) 
+- **Quick setup**: See internal documentation for MCP setup instructions 
 - **Essential tools**: Sequential Thinking, OmniSearch, GitHub integration, Playwright
 - **Verify setup**: `calmhive chat "test sequential thinking"`
 
