@@ -1,6 +1,6 @@
 {
   "name": "@calmhive/calmhive-cli",
-  "version": "9.1.0",
+  "version": "9.1.1",
   "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
   "main": "index.js",
   "bin": {
