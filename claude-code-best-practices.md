@@ -183,7 +183,7 @@ think < think hard < think harder < ultrathink
 ### Token Allocations
 - `think`: ~4,000 tokens
 - `think hard`: ~6,000 tokens
-- `megathink`: ~10,000 tokens  
+- `megathink`: ~10,000 tokens
 - `ultrathink`: ~32,000 tokens
 
 ### When to Use
@@ -399,4 +399,4 @@ claude "run the test suite and fix any failures"
 - [Claude Code Best Practices (Anthropic)](https://www.anthropic.com/engineering/claude-code-best-practices)
 - [Community Examples](https://github.com/hesreallyhim/awesome-claude-code)
 
-*This guide is based on official Anthropic documentation and community best practices as of 2024.*
+*This guide is based on official Anthropic documentation and community best practices as of 2025.*
