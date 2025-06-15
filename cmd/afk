@@ -43,6 +43,10 @@ class AfkCommand {
           await this.cleanup(args);
           break;
           
+        case 'resume':
+          await this.resumeSession(args);
+          break;
+          
         case 'stats':
           await this.showStats();
           break;
@@ -537,6 +541,7 @@ USAGE:
   calmhive afk start "task" [options]          Start background task  
   calmhive afk stop <session-id>               Stop running session
   calmhive afk stop --all                      Stop all running sessions
+  calmhive afk resume [session-id]             Resume interrupted session (auto-detects if no ID)
   calmhive afk status                          Show all sessions (compact view)
   calmhive afk status -d                       Show detailed status (full info)
   calmhive afk status --validate               Show status with comprehensive system validation
@@ -575,6 +580,94 @@ FEATURES:
   ✅ Resource usage tracking and limits
   ☕ Automatic sleep prevention for long sessions (>5 iterations)
     `);
+  }
+
+  /**
+   * Resume an interrupted session
+   */
+  async resumeSession(args) {
+    const sessionId = args[0];
+    
+    if (!sessionId) {
+      // Find most recent interrupted session
+      const sessions = await this.processManager.db.getAllSessions();
+      const interrupted = sessions.filter(s => 
+        s.status === 'failed' || s.status === 'error' || s.status === 'stopped'
+      ).sort((a, b) => b.updated_at - a.updated_at);
+      
+      if (interrupted.length === 0) {
+        console.log('❌ No interrupted sessions found to resume');
+        return;
+      }
+      
+      const session = interrupted[0];
+      console.log(`🔄 Resuming most recent interrupted session: ${session.id}`);
+      console.log(`   Task: ${session.task}`);
+      console.log(`   Last status: ${session.status}`);
+      
+      await this.attemptResume(session);
+    } else {
+      // Resume specific session
+      const session = await this.processManager.db.getSession(sessionId);
+      if (!session) {
+        console.log(`❌ Session ${sessionId} not found`);
+        return;
+      }
+      
+      if (session.status === 'running') {
+        console.log(`❌ Session ${sessionId} is already running`);
+        return;
+      }
+      
+      console.log(`🔄 Resuming session: ${sessionId}`);
+      await this.attemptResume(session);
+    }
+  }
+
+  /**
+   * Attempt to resume a session
+   */
+  async attemptResume(session) {
+    try {
+      // Validate session is resumable (< 24 hours old)
+      const ageHours = (Date.now() - session.updated_at) / (1000 * 60 * 60);
+      if (ageHours > 24) {
+        console.log(`❌ Session is too old to resume (${Math.round(ageHours)} hours)`);
+        return;
+      }
+      
+      // Create new session with resume context
+      const resumeTask = `[RESUME from iteration ${session.iterations_completed || 0}] ${session.task}`;
+      const resumeIterations = Math.max(1, (session.iterations_planned || 5) - (session.iterations_completed || 0));
+      
+      console.log(`📝 Creating resume session with ${resumeIterations} remaining iterations...`);
+      
+      // Start new session with resume context
+      const metadata = {
+        resumed_from: session.id,
+        original_task: session.task,
+        resume_iteration: (session.iterations_completed || 0) + 1
+      };
+      
+      const newSession = await this.processManager.startAfkSession(
+        resumeTask,
+        {
+          iterations: resumeIterations,
+          background: true,
+          metadata
+        }
+      );
+      
+      const newSessionId = newSession.id;
+      
+      console.log(`✅ Resume session started: ${newSessionId}`);
+      console.log(`📊 Use 'calmhive afk status' to monitor progress`);
+      console.log(`🔍 Use 'calmhive afk tail ${newSessionId}' to view logs`);
+      
+    } catch (error) {
+      console.error(`❌ Resume failed: ${error.message}`);
+      throw error;
+    }
   }
 }
 

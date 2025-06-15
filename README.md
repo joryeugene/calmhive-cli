@@ -1,4 +1,4 @@
-# 🐝 Calmhive v9.0.0 - Production-Ready Claude CLI
+# 🐝 Calmhive v10.0.0 - Production-Ready Claude CLI
 
 > **The intelligent Claude CLI wrapper with smart defaults and powerful automation.** Enhanced with background processing, voice control, and curated tool configurations.
 
@@ -53,7 +53,7 @@ calmhive voice  # Say "hey friend" to activate
 
 ## ✨ Why Calmhive?
 
-### 🎯 V9.0.0 - Production-Ready Excellence
+### 🎯 V10.0.0 - Hierarchical Framework Architecture for Real Prevention
 **Major Cleanup Achievement**: Streamlined from 300+ files to 57 clean files (81% reduction), optimized package size by 58%, and achieved complete separation of internal development docs from public distribution. Pure, production-ready CLI experience.
 
 ### 🚀 Core Features
@@ -133,6 +133,9 @@ calmhive c "debug this error"    # Quick question
 calmhive chat -c                 # Continue previous conversation
 ```
 
+**💡 Pro Tip: Plan Mode (Shift+Tab)**  
+In interactive chat sessions, press **Shift+Tab** to enter plan mode - Claude will research and create a detailed plan before executing complex tasks.
+
 ### `run` - Task Execution (alias: `r`)
 Wrapper for `claude run` with automatic tool approval. Perfect for scripts and CI/CD.
 ```bash
@@ -193,7 +196,7 @@ Iteration 10 ✓
 
 Calmhive automatically detects and handles usage limits with exponential backoff.
 
-### Sleep Prevention for Long Sessions (v9.0.0+)
+### Sleep Prevention for Long Sessions
 Your MacBook won't sleep during long AFk sessions:
 
 ```
@@ -205,7 +208,7 @@ Your MacBook won't sleep during long AFk sessions:
 
 Automatic for sessions >5 iterations, disable with `--no-prevent-sleep`.
 
-### Automatic Context Compression (v9.0.0+)
+### Automatic Context Compression
 When Claude hits context limits, Calmhive automatically attempts multiple strategies to compress the conversation:
 
 ```
@@ -324,7 +327,7 @@ Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Cla
 - Frequently used tools and workflows
 - Custom instructions for your AI assistant
 
-The enhanced CLAUDE.md includes the v9.0.0 Live System Verification mandate to prevent false "not yet implemented" claims.
+The enhanced CLAUDE.md includes hierarchical decision framework to prevent catastrophic mistakes.
 
 Learn more in the [Terminal Velocity guide](http://jorypestorious.com/blog/terminal-velocity/).
 
@@ -357,7 +360,7 @@ Templates work with both Calmhive and direct Claude Code usage.
 
 ### 🔄 AFk Session Best Practices
 
-**Sleep Prevention (v9.0.0+)**
+**Sleep Prevention**
 ```bash
 # Automatic for >5 iterations - your Mac stays awake!
 calmhive afk "big project" --iterations 20  # ☕ caffeinate enabled
@@ -507,7 +510,7 @@ claude mcp list
 calmhive chat "analyze this codebase"  # Watch the difference!
 ```
 
-The **v9.0.0 CLAUDE.md** transforms Claude from a helpful assistant into an engineering powerhouse that:
+The **v10.0.0 CLAUDE.md** transforms Claude from a helpful assistant into an engineering powerhouse that:
 - ✅ Reads every detail before acting
 - ✅ Uses parallel operations for maximum speed
 - ✅ Tests solutions comprehensively before reporting success
