@@ -1,0 +1,63 @@
+{
+  "name": "@calmhive/calmhive-cli",
+  "version": "9.1.0",
+  "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
+  "main": "index.js",
+  "bin": {
+    "calmhive": "bin/calmhive"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start:tui": "node cmd/tui",
+    "start:afk": "node cmd/afk"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "ai",
+    "assistant",
+    "automation",
+    "afk",
+    "voice",
+    "mcp"
+  ],
+  "author": "Jory Pestorious",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joryeugene/calmhive-cli.git"
+  },
+  "homepage": "https://github.com/joryeugene/calmhive-cli#readme",
+  "bugs": {
+    "url": "https://github.com/joryeugene/calmhive-cli/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "cmd/",
+    "commands/",
+    "lib/",
+    "config/",
+    "index.js",
+    "README.md",
+    "README-TEMPLATES.md",
+    "claude-code-best-practices.md",
+    "CLAUDE.md"
+  ],
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "fs-extra": "^11.3.0",
+    "ink": "^6.0.0",
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  }
+}
