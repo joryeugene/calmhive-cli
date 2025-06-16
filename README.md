@@ -190,6 +190,24 @@ calmhive tui                     # Launch the UI
 # Now automatically finds logs from V3, AFk, or legacy locations
 ```
 
+**🖥️ TUI Features:**
+- **Real-time Monitoring** - Watch sessions update live
+- **Vim-style Navigation** - `j/k` to move, `gg/G` for top/bottom
+- **Session Control** - Stop (`s`), Resume (`r`), or view logs (`Enter`)
+- **Smart Search** - Press `/` to search through sessions
+- **Progress Tracking** - Visual progress bars and ETAs
+- **Log Viewer** - Scroll through detailed session logs
+
+**Keyboard Shortcuts:**
+- `j/k` or `↑/↓` - Navigate up/down
+- `Enter` - View session logs
+- `s` - Stop selected session
+- `r` - Resume paused session
+- `gg` - Jump to first session
+- `G` - Jump to last session
+- `/` - Search sessions
+- `q` or `Esc` - Exit TUI
+
 ## 🔥 Killer Features
 
 ### Adaptive Retry with Usage Limits
@@ -357,15 +375,20 @@ Calmhive v3 includes curated command templates for common development workflows:
 
 **Using Templates with Calmhive:**
 ```bash
-# Copy templates to your Claude commands directory
+# Templates are .md files that need to be copied to Claude's commands directory
 cp -r "$(npm root -g)/@calmhive/calmhive-cli/commands/"*.md ~/.claude/commands/
 
-# Or use direct template invocation
-calmhive chat "Apply bug-hunting methodology to investigate memory leaks"
-calmhive run "Use expert-frontend-engineer knowledge to optimize React performance"
+# Then use them in interactive chat sessions with /user:
+calmhive chat
+> /user:bug-hunting
+> Find memory leaks in this application
+
+# Or load expert personas:
+> /user:expert-frontend-engineer
+> Optimize this React component for performance
 ```
 
-Templates work with both Calmhive and direct Claude Code usage.
+Note: Templates can only be invoked with `/user:command-name` in interactive sessions.
 
 ### 🔄 AFk Session Best Practices
 

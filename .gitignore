@@ -65,3 +65,7 @@ justfile
 # Unoptimized images
 assets/calmhive-logo.png
 assets/calmhive-logo-512.png
+
+# Test files
+fixed-test.js
+test-fix-direct.js
