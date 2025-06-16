@@ -1,6 +1,11 @@
-# 🐝 Calmhive v10.0.0 - Production-Ready Claude CLI
+<div align="center">
+  <img src="assets/calmhive-logo.png" alt="Calmhive Logo" width="200">
+  
+  # 🐝 Calmhive v10.0.1 - Production-Ready Claude CLI
 
-> **The intelligent Claude CLI wrapper with smart defaults and powerful automation.** Enhanced with background processing, voice control, and curated tool configurations.
+  > **The intelligent Claude CLI wrapper with smart defaults and powerful automation.**  
+  > Enhanced with background processing, voice control, and curated tool configurations.
+</div>
 
 ✨ **What makes Calmhive special?**
 - 🔄 **Smart retry in AFk mode** - Auto-recovers from Claude usage limits during background tasks
@@ -11,9 +16,13 @@
 
 **Perfect for:** Developers, researchers, content creators, and anyone who wants a well-configured Claude CLI setup with powerful automation capabilities.
 
+<div align="center">
+
 [![npm version](https://img.shields.io/npm/v/@calmhive/calmhive-cli.svg)](https://www.npmjs.com/package/@calmhive/calmhive-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Downloads](https://img.shields.io/npm/dm/@calmhive/calmhive-cli.svg)](https://www.npmjs.com/package/@calmhive/calmhive-cli)
+
+</div>
 
 ## 🚀 Quick Install
 

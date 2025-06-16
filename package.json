@@ -42,6 +42,7 @@
     "commands/",
     "lib/",
     "config/",
+    "assets/",
     "index.js",
     "README.md",
     "README-TEMPLATES.md",
