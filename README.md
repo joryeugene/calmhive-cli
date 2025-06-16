@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="assets/calmhive-logo.png" alt="Calmhive Logo" width="200">
+  <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Logo" width="200">
   
-  # 🐝 Calmhive v10.0.1 - Production-Ready Claude CLI
+  # 🐝 Calmhive v10.0.3 - Production-Ready Claude CLI
 
   > **The intelligent Claude CLI wrapper with smart defaults and powerful automation.**  
   > Enhanced with background processing, voice control, and curated tool configurations.

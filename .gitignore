@@ -61,3 +61,7 @@ sync-to-repo.sh
 
 # justfile
 justfile
+
+# Unoptimized images
+assets/calmhive-logo.png
+assets/calmhive-logo-512.png
