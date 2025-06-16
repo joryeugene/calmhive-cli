@@ -85,3 +85,7 @@ test-afk-output.txt
 
 # Keep empty directories with .gitkeep
 !**/.gitkeep
+
+# Large unoptimized images
+assets/calmhive-logo.png
+assets/calmhive-logo-512.png

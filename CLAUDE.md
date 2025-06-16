@@ -1,4 +1,4 @@
-# CLAUDE CODE DECISION FRAMEWORK v10.0.3
+# CLAUDE CODE DECISION FRAMEWORK v10.0.4
 <!-- Strategic Automaticity Engine - Implementation Intentions & Behavioral Interrupts -->
 <!-- Based on cognitive science: if-then planning, nudge theory, pre-commit behavioral architecture -->
 
@@ -581,7 +581,7 @@ Measured by zero destructive mistakes, not speed of completion.
 ### Framework Validation
 **Key Focus**: Creating automatic behavioral responses through implementation intentions.
 
-**Version**: 10.0.3 - Strategic Automaticity Engine
+**Version**: 10.0.4 - Strategic Automaticity Engine
 **Philosophy**: Automatic Response > Conscious Decision, Facts > Assumptions
 **Core Innovation**: If-then implementation intentions create strategic automaticity
 **Competitive Advantage**: Zero cognitive load safety through behavioral programming
