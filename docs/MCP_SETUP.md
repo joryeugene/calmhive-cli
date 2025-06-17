@@ -225,4 +225,4 @@ calmhive chat "what is my favorite framework?"
 
 ---
 
-**Pro Tip**: You can customize which tools are available by editing `config/allowed-tools.json` in the Calmhive directory, but the default 85+ tools (15 core + 70+ MCP integrations) should cover most use cases!
+**Pro Tip**: You can customize which tools are available by editing `config/allowed-tools.json` in the Calmhive directory, but the default 86 tools (15 core + 71 MCP integrations) should cover most use cases!

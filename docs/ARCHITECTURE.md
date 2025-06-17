@@ -1,9 +1,9 @@
-# Calmhive v9.0.0 Architecture
+# Calmhive v11.0.0 Architecture
 
 > Technical guide for understanding and extending Calmhive CLI
 
 ## Overview
-Calmhive v9.0.0 features a **streamlined 5-command architecture** that provides clear separation between interactive chat, headless automation, and background processing. Built on Node.js with MCP integration for powerful tools.
+Calmhive v11.0.0 features a **streamlined 5-command architecture** that provides clear separation between interactive chat, headless automation, and background processing. Built on Node.js with MCP integration for powerful tools.
 
 **[⬅️ Back to README](../README.md)**
 
@@ -34,7 +34,7 @@ calmhive chat --model opus "complex analysis task"
 
 **Features**:
 - ✅ Supports ALL Claude flags (`-c`, `-r`, `-p`, `--model`, etc.)
-- ✅ Auto tool access (85+ tools: 15 core + 70+ MCP integrations)
+- ✅ Auto tool access (86 tools: 15 core + 71 MCP integrations)
 - ✅ True interactive experience
 - ✅ Perfect for Q&A, exploration, debugging
 
@@ -103,14 +103,14 @@ calmhive afk stop <session-id>   # Stop session
 - **True Automation**: Proper stdin handling enables genuinely non-interactive execution
 - **MCP Integration**: 70+ tools available including Sequential Thinking, Playwright, GitHub, Asana
 - **Adaptive Retry**: Intelligent handling of Claude API usage limits
-- **Context Compression** (v9.0.0+): Automatic `/compact` handling when approaching context limits
+- **Context Compression**: Automatic `/compact` handling when approaching context limits
 - **Process Management**: SQLite-backed session tracking with beautiful TUI
 
 ## Implementation Details
 
 ### Chat Command
 - Direct passthrough to Claude
-- Automatically adds all 85+ tools (15 core + 70+ MCP integrations)
+- Automatically adds all 86 tools (15 core + 71 MCP integrations)
 - Supports all Claude flags unchanged
 - Uses `stdio: 'inherit'` for full interactivity
 
@@ -131,9 +131,9 @@ The `run` command automatically enhances your task with:
 
 ## Tool Access & MCP Setup
 
-All commands have access to 85+ tools:
-- **16 Default Tools**: File ops, search, bash, web tools, etc.
-- **81 Safe MCP Tools**: Read-only operations across 10 MCP servers
+All commands have access to 86 tools:
+- **15 Default Tools**: File ops, search, bash, web tools, etc.
+- **71 Safe MCP Tools**: Read-only operations across 10 MCP servers
   - Memento: Knowledge graph operations
   - Sequential Thinking: Structured analysis  
   - GitHub/GitMCP: Code research
@@ -155,7 +155,7 @@ All commands have access to 85+ tools:
    ```
 3. **Verify**: Run `calmhive chat "test memento search"` to confirm tools work
 
-For detailed MCP setup instructions, see the [Terminal Velocity blog post](https://github.com/joryeugene/ai-dev-tooling/blob/main/blog/02-terminal-velocity.md#must-use-mcp-tools-amplify-your-ai) which covers installation of essential tools like Memento and Sequential Thinking.
+For detailed MCP setup instructions, see the [Terminal Velocity blog post](http://jorypestorious.com/blog/terminal-velocity/) which covers installation of essential tools like Memento and Sequential Thinking.
 
 ## File Structure
 
@@ -173,10 +173,10 @@ v3/
 │   ├── process-manager.js    # AFk process control
 │   ├── session-database.js   # SQLite session storage
 │   ├── tool-manager.js       # MCP tool integration
-│   ├── compact-handler.js    # Context compression (v9.0.0+)
-│   └── context-monitor.js    # Usage tracking (v9.0.0+)
+│   ├── compact-handler.js    # Context compression 
+│   └── context-monitor.js    # Usage tracking
 └── config/
-    └── allowed-tools.json    # 85+ available tools (15 core + 70+ MCP)
+    └── allowed-tools.json    # 86 available tools (15 core + 71 MCP)
 ```
 
 ## Testing
@@ -210,18 +210,18 @@ calmhive tui                   # Process UI
 Handles Claude API usage limits with exponential backoff (30s → 60s → 120s → 240s...)
 
 ### Process Manager (`lib/process-manager.js`)
-Manages AFk background processes with proper cleanup and iteration tracking. In v9.0.0+, includes integrated context compression handling.
+Manages AFk background processes with proper cleanup and iteration tracking. Includes integrated context compression handling.
 
 ### Session Database (`lib/session-database.js`)
 SQLite storage for process metadata, logs, and state management
 
-### Compact Handler (`lib/compact-handler.js`) - v9.0.0+
+### Compact Handler (`lib/compact-handler.js`)
 Automatically handles context compression when Claude approaches limits:
 - Tries multiple `/compact` command formats for compatibility
 - Provides fallback manual compression strategies
 - Integrates seamlessly with AFk sessions
 
-### Context Monitor (`lib/context-monitor.js`) - v9.0.0+
+### Context Monitor (`lib/context-monitor.js`)
 Tracks and analyzes context usage patterns:
 - Monitors context consumption across iterations
 - Logs compression attempts and success rates

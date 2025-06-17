@@ -1,10 +1,12 @@
 <div align="center">
   <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Logo" width="200">
   
-  # 🐝 Calmhive v10.0.4 - Production-Ready Claude CLI
+  # 🐝 Calmhive v11.0.0 - Claude CLI That Works When Claude Doesn't
 
-  > **The intelligent Claude CLI wrapper with smart defaults and powerful automation.**  
-  > Enhanced with background processing, voice control, and curated tool configurations.
+  ## lets bee friends 🐝
+
+  > **The secret sauce: Intelligent background processing that recovers from Claude usage limits**  
+  > Voice-activated automation with 70+ MCP tools and adaptive retry logic.
 </div>
 
 ✨ **What makes Calmhive special?**
@@ -62,16 +64,16 @@ calmhive voice  # Say "hey friend" to activate
 
 ## ✨ Why Calmhive?
 
-### 🎯 V10.0.0 - Hierarchical Framework Architecture for Real Prevention
-**Major Cleanup Achievement**: Streamlined from 300+ files to 57 clean files (81% reduction), optimized package size by 58%, and achieved complete separation of internal development docs from public distribution. Pure, production-ready CLI experience.
+### 🎯 The Secret Sauce
+**Intelligent Background Processing**: Calmhive automatically recovers from Claude usage limits with exponential backoff, turning failed overnight tasks into successful automation. Your long-running sessions complete reliably while you sleep.
 
 ### 🚀 Core Features
 - **🔄 Adaptive Retry** - Automatically recovers from Claude usage limits with exponential backoff
 - **🎙️ Voice Control** - Say "hey friend" or "calmhive" to activate voice commands
-- **🔧 MCP Tools** - Optional access to 70+ powerful integrations: Sequential Thinking, GitHub, web search, Figma, Asana, and more
+- **🔧 MCP Ecosystem** - 70+ powerful integrations: Sequential Thinking, GitHub, web search, Figma, Asana, and more
 - **🏃 AFk Iterations** - Run multiple Claude sessions sequentially in the background
 - **🖥️ Process Management** - Beautiful TUI to monitor all your AFk sessions
-- **🧹 Clean Architecture** - No development artifacts, optimized package structure, clear boundaries
+- **🧹 Production Ready** - Clean architecture with optimized package distribution
 
 ## 🎯 Quick Start
 
@@ -135,7 +137,7 @@ calmhive c "review the implementation and suggest improvements"
 ## 📚 Commands
 
 ### `chat` - Interactive Conversation (alias: `c`)
-Talk to Claude with full access to 85+ tools (15 core + 70+ MCP integrations). Supports all Claude flags.
+Talk to Claude with full access to 86 tools (15 core + 71 MCP integrations). Supports all Claude flags.
 ```bash
 calmhive chat                    # Start interactive session
 calmhive c "debug this error"    # Quick question
@@ -356,9 +358,9 @@ Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Cla
 
 The enhanced CLAUDE.md includes hierarchical decision framework to prevent catastrophic mistakes.
 
-Learn more in the [Terminal Velocity guide](http://jorypestorious.com/blog/terminal-velocity/).
+Learn more about optimal AI development workflows in the project documentation.
 
-### 🎯 Command Templates System (v8.0.1+)
+### 🎯 Command Templates System
 
 Calmhive v3 includes curated command templates for common development workflows:
 
@@ -522,12 +524,12 @@ calmhive voice
 
 Calmhive includes an advanced **CLAUDE.md.example** file with powerful directives that transform Claude's behavior:
 
-### 🔥 "Secret Sauce" Features
-- **Thoroughness Engine**: "We gain trust through thoroughness" - ensures Claude reads every detail
-- **Specification-First Development**: Clear specs → flawless execution ([based on this approach](http://jorypestorious.com/blog/ai-engineer-spec/))
-- **Parallelization Strategy**: MultiEdit batch operations, concurrent tool usage
-- **Verification Protocol**: Never claims "it's fixed" without concrete proof
-- **Optional MCP Integration**: Sequential Thinking, Playwright, GitHub integration (if configured)
+### 🔥 Core Intelligence Features
+- **Adaptive Retry Logic**: Automatically recovers from Claude usage limits with exponential backoff
+- **Background Processing**: AFk mode runs long tasks while you work on other things
+- **Voice Activation**: Say "hey friend" to control Claude hands-free
+- **Process Monitoring**: Beautiful TUI to track all your automation sessions
+- **MCP Integration**: 70+ tools including Sequential Thinking, GitHub, Playwright, and more
 
 ### ⚡ Quick Setup
 ```bash
@@ -542,21 +544,23 @@ claude mcp list
 calmhive chat "analyze this codebase"  # Watch the difference!
 ```
 
-The **v10.0.0 CLAUDE.md** transforms Claude from a helpful assistant into an engineering powerhouse that:
-- ✅ Reads every detail before acting
-- ✅ Uses parallel operations for maximum speed
-- ✅ Tests solutions comprehensively before reporting success
-- ✅ Follows specification-first development principles
-- ✅ Prevents false "not yet implemented" claims with Live System Verification
-- ✅ Integrates with optional MCP tools when configured
+The **CLAUDE.md configuration** transforms Claude into a reliable automation partner that:
+- ✅ Searches before making destructive changes
+- ✅ Tests solutions before claiming success
+- ✅ Uses configuration over deletion for cleanup tasks
+- ✅ Shows actual evidence instead of assumptions
+- ✅ Recovers gracefully from failures
+- ✅ Integrates seamlessly with MCP tools when available
 
 ## 📖 Documentation
 
-- **[Blog Post](http://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
+- **[Calmhive Blog Post](http://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
+- **[Terminal Velocity Guide](http://jorypestorious.com/blog/terminal-velocity/)** - CLI-first AI development workflow
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Detailed command documentation
 - **[MCP Setup Guide](docs/MCP_SETUP.md)** - Configure powerful MCP tools
-- **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Version history
+- **[README Templates](README-TEMPLATES.md)** - Template file documentation
 - **[GitHub Repository](https://github.com/joryeugene/calmhive-cli)** - Source code & issues
+- **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Version history
 
 ## 🛡️ Security & Responsible Usage
 
@@ -615,4 +619,6 @@ MIT © 2025 Jory Pestorious
 
 ---
 
-**lets bee friends** 🐝🌟
+## lets bee friends 🐝
+
+> The intelligent Claude CLI that works when Claude doesn't
