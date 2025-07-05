@@ -5,7 +5,7 @@
 ## Overview
 Calmhive v14.0.0 features a **comprehensive 6-command architecture** that provides clear separation between interactive chat, headless automation, background processing, and scheduled automation. Built on Node.js with MCP integration for powerful tools and natural language scheduling.
 
-**[⬅️ Back to README](../README.md)**
+**[⬅️ Back to README](../README.md)** | **[🌐 Calmhive.com](https://calmhive.com/)** | **[🔗 Prompthive.sh](https://prompthive.sh/)**
 
 ## Core Commands
 
@@ -277,3 +277,12 @@ Tracks and analyzes context usage patterns:
 ---
 
 **Need help?** Check the [README](../README.md) or run `calmhive <command> --help`
+
+---
+
+## 🔗 Links & Resources
+
+- **[Calmhive.com](https://calmhive.com/)** - Official website with demos and getting started guides  
+- **[Prompthive.sh](https://prompthive.sh/)** - Perfect companion for prompt management and automation
+- **[GitHub Repository](https://github.com/joryeugene/calmhive-cli)** - Source code, issues, and contributions
+- **[npm Package](https://www.npmjs.com/package/@calmhive/calmhive-cli)** - Installation and version history

@@ -6,7 +6,7 @@
   ## lets bee friends 🐝
 
   > **The secret sauce: Intelligent background processing that recovers from Claude usage limits**  
-  > Voice-activated automation with 70+ MCP tools and adaptive retry logic.
+  > Voice-activated automation with 95+ tools and adaptive retry logic.
 </div>
 
 ✨ **What makes Calmhive special?**
@@ -17,7 +17,7 @@
 - 📈 **Enhanced Progress Tracking** - Track iterations, milestones, and achievements in real-time
 - 🖥️ **Process monitoring** - Beautiful TUI to track all your sessions
 - 📋 **Task Templates** - Pre-built workflows for common development tasks
-- 🧰 **Curated tool setup** - 15 core tools + 70+ optional MCP integrations with smart defaults
+- 🧰 **Curated tool setup** - 15 core tools + 95+ optional MCP integrations with smart defaults
 
 **Perfect for:** Developers, researchers, content creators, and anyone who wants a well-configured Claude CLI setup with powerful automation capabilities.
 
@@ -662,8 +662,18 @@ The **CLAUDE.md configuration** transforms Claude into a reliable automation par
 
 ## 🔗 Ecosystem Integration
 
-### Prompthive.sh - Companion Tool
-**[Prompthive.sh](https://prompthive.sh/)** is the perfect companion to Calmhive for prompt management and complex automation workflows.
+### 🌐 Official Websites
+- **[Calmhive.com](https://calmhive.com/)** - Main website with full documentation, demos, and getting started guides
+- **[Prompthive.sh](https://prompthive.sh/)** - Perfect companion tool for prompt management and complex automation workflows
+
+### Prompthive.sh Integration
+**[Prompthive.sh](https://prompthive.sh/)** is the ideal companion to Calmhive, providing sophisticated prompt management, workflow templates, and automation patterns. Together they create a complete AI development platform.
+
+**What Prompthive.sh Adds:**
+- 🎯 Advanced prompt engineering tools
+- 📚 Workflow template libraries  
+- 🔄 Complex automation patterns
+- 🧠 Prompt optimization frameworks
 
 **Integration Examples:**
 ```bash
@@ -682,11 +692,13 @@ calmhive schedule create "weekly on Friday at 4pm" \
 
 **Why Use Both Together:**
 - **Prompthive.sh**: Manages complex prompts, templates, and workflows
-- **Calmhive**: Provides AI automation, scheduling, and background processing
+- **Calmhive**: Provides AI automation, scheduling, and background processing  
 - **Combined**: Complete automation ecosystem for development workflows
 
 ## 📖 Documentation
 
+- **[Calmhive.com](https://calmhive.com/)** - Official website with demos, features showcase, and getting started guides
+- **[Prompthive.sh](https://prompthive.sh/)** - Companion tool for advanced prompt management and workflow automation
 - **[Calmhive Blog Post](http://jorypestorious.com/blog/calmhive/)** - Full story behind Calmhive
 - **[Terminal Velocity Guide](http://jorypestorious.com/blog/terminal-velocity/)** - CLI-first AI development workflow
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Detailed command documentation
