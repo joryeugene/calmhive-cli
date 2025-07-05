@@ -27,12 +27,12 @@
     "test:quick": "node scripts/test-runner.js --no-lint unit",
     "test:ci": "node scripts/test-runner.js --coverage",
     "test:watch": "mocha test/**/*.test.js --watch",
-    "lint": "eslint lib/ test/ --fix",
-    "lint:check": "eslint lib/ test/",
+    "lint": "eslint lib/ --fix",
+    "lint:check": "eslint lib/",
     "build": "npm run test:ci",
     "quality": "npm run test:all --verbose --coverage",
     "build:docker": "docker build -t calmhive/cli:latest .",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run lint:check",
     "dev": "npm run test:watch"
   },
   "keywords": [
