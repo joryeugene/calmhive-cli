@@ -1,0 +1,629 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Config Command
+ * Manages CLAUDE.md configuration files with safety and simplicity
+ */
+
+const ConfigManager = require('../lib/config-manager');
+const readline = require('readline');
+
+class ConfigCommand {
+  constructor() {
+    this.configManager = new ConfigManager();
+    this.rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+  }
+
+  /**
+   * Show help information
+   */
+  showHelp() {
+    console.log(`
+🐝 Calmhive Config - CLAUDE.md Management
+
+Safely manage your CLAUDE.md configuration files with backups and validation.
+
+Usage: calmhive config <command> [options]
+
+Commands:
+  show                    Show current configuration status
+  diff                    Show differences with template  
+  install                 Install/update configuration from template
+  backup                  Create manual backup of current config
+  restore [filename]      Restore from backup (latest if no filename)
+  list-backups           Show available backup files
+  commands                Manage command files for external tools like prompthive
+
+Options:
+  --dry-run              Preview changes without making them (install only)
+  --force                Skip confirmation prompts
+  -h, --help             Show this help message
+
+Examples:
+  calmhive config show                    # Check current status
+  calmhive config diff                    # Preview template changes  
+  calmhive config install --dry-run       # See what would be installed
+  calmhive config install                 # Install CLAUDE.md template (with backup)
+  calmhive config backup                  # Create manual backup
+  calmhive config restore                 # Restore latest backup
+  calmhive config list-backups           # Show all backups
+  calmhive config commands list           # List available command files
+  calmhive config commands copy <dest>    # Copy commands to destination directory
+  calmhive config commands copy <dest> --pattern expert # Copy only expert commands
+
+Files:
+  ~/.claude/CLAUDE.md                     # Your active configuration
+  ~/.claude/backups/                      # Timestamped backups
+  CLAUDE.md.example                       # CLI-optimized template
+  CLAUDE-DESKTOP.md.example               # Desktop-optimized template
+
+Note: All destructive operations create automatic backups for safety.
+`);
+  }
+
+  /**
+   * Show current configuration status
+   */
+  showStatus() {
+    console.log('🔍 Configuration Status:\n');
+    
+    const status = this.configManager.getStatus();
+    
+    console.log(`📍 Config location: ${status.configPath}`);
+    console.log(`📁 Exists: ${status.configExists ? '✅ Yes' : '❌ No'}`);
+    
+    if (status.configExists) {
+      console.log(`📅 Last modified: ${status.lastModified.toLocaleString()}`);
+      console.log(`📏 Size: ${Math.round(status.size / 1024)}KB`);
+      console.log(`🏷️  Version: ${status.version}`);
+    }
+    
+    console.log(`🔄 Available backups: ${status.backups.length}`);
+    
+    // Template availability
+    console.log('\n📋 Template:');
+    console.log(`   CLAUDE.md: ${status.templateExists ? '✅ Available' : '❌ Missing'}`);
+  }
+
+  /**
+   * Show diff with template
+   */
+  async showDiff() {
+    try {
+      const templateName = 'CLAUDE.md';
+      console.log(`🔍 Comparing with ${templateName}...\n`);
+      
+      const diff = await this.configManager.getDiff();
+      
+      if (diff.isNewFile) {
+        console.log('📄 No existing CLAUDE.md found');
+        console.log(`📋 Would create new file from: ${diff.templateName}`);
+        console.log(`📏 Template size: ${Math.round(diff.templateSize / 1024)}KB`);
+        console.log('\n💡 Run `calmhive config install` to create it');
+        return;
+      }
+      
+      if (diff.isIdentical) {
+        console.log('✅ Your configuration is identical to the template');
+        console.log('🎉 No updates needed!');
+        return;
+      }
+      
+      console.log(`📝 Differences found (- current, + template):\n`);
+      console.log(diff.diff);
+      console.log('\n💡 Run `calmhive config install` to update');
+      
+    } catch (error) {
+      console.error('❌ Error showing diff:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Install configuration from template
+   */
+  async installConfig(dryRun = false, force = false) {
+    try {
+      // Validate template first
+      const validation = this.configManager.validateTemplate();
+      if (!validation.valid) {
+        console.error(`❌ Template validation failed: ${validation.error}`);
+        process.exit(1);
+      }
+      
+      console.log(`🔍 Installing CLAUDE.md template v${validation.version}...`);
+      
+      if (dryRun) {
+        const result = await this.configManager.installConfig(true);
+        console.log('\n📋 Dry run - here\'s what would happen:');
+        console.log(`   Template: ${result.templateName}`);
+        console.log(`   Target: ${result.configPath}`);
+        console.log(`   Operation: ${result.isUpdate ? 'Update existing' : 'Create new'}`);
+        console.log(`   Size: ${Math.round(result.templateSize / 1024)}KB`);
+        if (result.isUpdate) {
+          console.log('   Backup: Would be created automatically');
+        }
+        console.log('\n💡 Remove --dry-run to perform the installation');
+        return;
+      }
+      
+      // Show diff if updating existing file
+      const status = this.configManager.getStatus();
+      if (status.configExists && !force) {
+        console.log('\n📝 Current vs Template differences:');
+        try {
+          const diff = await this.configManager.getDiff();
+          if (diff.isIdentical) {
+            console.log('✅ No changes needed - files are identical');
+            return;
+          }
+          console.log(diff.diff);
+        } catch (error) {
+          console.log('⚠️  Could not show diff, proceeding with install...');
+        }
+        
+        // Ask for confirmation
+        if (!await this.askConfirmation('\n❓ Continue with installation? (y/N): ')) {
+          console.log('❌ Installation cancelled');
+          return;
+        }
+      }
+      
+      // Perform installation
+      const result = await this.configManager.installConfig(false);
+      
+      console.log(`\n✅ Successfully installed ${result.templateName}`);
+      console.log(`📍 Location: ${result.configPath}`);
+      console.log(`📏 Size: ${Math.round(result.size / 1024)}KB`);
+      
+      if (result.backupCreated) {
+        console.log(`💾 Previous version backed up to: ${require('path').basename(result.backupCreated.backupPath)}`);
+      }
+      
+      if (result.isUpdate) {
+        console.log('\n🎉 Configuration updated successfully!');
+      } else {
+        console.log('\n🎉 Configuration created successfully!');
+      }
+      
+    } catch (error) {
+      console.error('❌ Installation failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Create manual backup
+   */
+  createBackup() {
+    try {
+      const backup = this.configManager.createBackup();
+      console.log('💾 Backup created successfully!');
+      console.log(`📍 Location: ${backup.backupPath}`);
+      console.log(`📏 Size: ${Math.round(backup.size / 1024)}KB`);
+    } catch (error) {
+      console.error('❌ Backup failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Restore from backup
+   */
+  async restoreFromBackup(filename, force = false) {
+    try {
+      const backups = this.configManager.listBackups();
+      
+      if (backups.length === 0) {
+        console.log('❌ No backups available to restore');
+        return;
+      }
+      
+      if (filename && !backups.find(b => b.filename === filename)) {
+        console.log(`❌ Backup file not found: ${filename}`);
+        console.log('💡 Use `calmhive config list-backups` to see available backups');
+        return;
+      }
+      
+      const targetBackup = filename 
+        ? backups.find(b => b.filename === filename)
+        : backups[0]; // Most recent
+      
+      console.log(`🔄 Restoring from: ${targetBackup.filename}`);
+      console.log(`📅 Created: ${targetBackup.created.toLocaleString()}`);
+      console.log(`📏 Size: ${Math.round(targetBackup.size / 1024)}KB`);
+      
+      if (!force && !await this.askConfirmation('\n❓ Continue with restore? (y/N): ')) {
+        console.log('❌ Restore cancelled');
+        return;
+      }
+      
+      const result = this.configManager.restoreFromBackup(filename);
+      
+      console.log('\n✅ Configuration restored successfully!');
+      console.log(`📍 Restored from: ${require('path').basename(result.restoredFrom)}`);
+      if (result.currentBackedUpTo) {
+        console.log(`💾 Previous version backed up to: ${require('path').basename(result.currentBackedUpTo)}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Restore failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * Handle commands subcommand
+   */
+  async handleCommandsSubcommand(args) {
+    const subcommand = args[1]; // commands <subcommand>
+    
+    switch (subcommand) {
+      case 'list':
+        this.listCommandFiles();
+        break;
+        
+      case 'copy':
+        const destDir = args[2];
+        if (!destDir) {
+          console.log('❌ Missing destination directory');
+          console.log('💡 Usage: calmhive config commands copy <destination>');
+          console.log('💡 Example: calmhive config commands copy ./my-commands/');
+          console.log('💡 Example: calmhive config commands copy ~/.prompthive/commands/');
+          process.exit(1);
+        }
+        
+        const patterns = args.includes('--pattern') ? 
+          args.slice(args.indexOf('--pattern') + 1).filter(arg => !arg.startsWith('--')) : [];
+        const force = args.includes('--force');
+        const dryRun = args.includes('--dry-run');
+        
+        await this.copyCommandFiles(destDir, { patterns, force, dryRun });
+        break;
+        
+      default:
+        console.log('❌ Unknown commands subcommand:', subcommand);
+        console.log('💡 Available: list, copy');
+        process.exit(1);
+    }
+  }
+
+  /**
+   * List available command files
+   */
+  listCommandFiles() {
+    const summary = this.configManager.getCommandFilesSummary();
+    
+    console.log(`📁 Command Files Summary:\n`);
+    console.log(`📊 Total files: ${summary.totalFiles}`);
+    console.log(`📏 Total size: ${Math.round(summary.totalSize / 1024)}KB\n`);
+    
+    Object.keys(summary.categories).sort().forEach(category => {
+      const files = summary.categories[category];
+      console.log(`📂 ${category === 'root' ? 'Root Directory' : category}/ (${files.length} files)`);
+      
+      files.slice(0, 10).forEach(file => {
+        const sizeKB = Math.round(file.size / 1024);
+        console.log(`   📄 ${file.name} (${sizeKB}KB)`);
+      });
+      
+      if (files.length > 10) {
+        console.log(`   ... and ${files.length - 10} more files`);
+      }
+      console.log('');
+    });
+    
+    console.log('💡 Use `calmhive config commands copy <destination>` to copy files');
+    console.log('💡 Use `--pattern <text>` to filter files (e.g., --pattern expert)');
+  }
+
+  /**
+   * Copy command files to destination
+   */
+  async copyCommandFiles(destDir, options = {}) {
+    const { patterns = [], force = false, dryRun = false } = options;
+    
+    try {
+      console.log(`📋 ${dryRun ? 'Previewing' : 'Copying'} command files to: ${destDir}`);
+      if (patterns.length > 0) {
+        console.log(`🔍 Filtering with patterns: ${patterns.join(', ')}`);
+      }
+      console.log('');
+      
+      const result = this.configManager.copyCommandFiles(destDir, { patterns, force, dryRun });
+      
+      if (result.totalFiles === 0) {
+        console.log('❌ No files match the specified criteria');
+        return;
+      }
+      
+      console.log(`📊 Summary:`);
+      console.log(`   Total files: ${result.totalFiles}`);
+      console.log(`   ${dryRun ? 'Would copy' : 'Copied'}: ${result.copied.length}`);
+      console.log(`   Skipped: ${result.skipped.length}`);
+      console.log(`   Errors: ${result.errors.length}`);
+      console.log('');
+      
+      // Show copied files
+      if (result.copied.length > 0) {
+        console.log(`✅ ${dryRun ? 'Would copy' : 'Copied'} files:`);
+        result.copied.forEach(item => {
+          const action = dryRun ? item.action : (item.action === 'created' ? '📝 Created' : '🔄 Updated');
+          console.log(`   ${action}: ${item.file} (${Math.round(item.size / 1024)}KB)`);
+        });
+        console.log('');
+      }
+      
+      // Show skipped files
+      if (result.skipped.length > 0) {
+        console.log(`⏭️  Skipped files (already exist, use --force to overwrite):`);
+        result.skipped.forEach(item => {
+          console.log(`   📄 ${item.file}`);
+        });
+        console.log('');
+      }
+      
+      // Show errors
+      if (result.errors.length > 0) {
+        console.log(`❌ Errors:`);
+        result.errors.forEach(item => {
+          console.log(`   ❌ ${item.file}: ${item.error}`);
+        });
+        console.log('');
+      }
+      
+      if (dryRun) {
+        console.log('💡 Remove --dry-run to perform the actual copy');
+      } else if (result.copied.length > 0) {
+        console.log('🎉 Command files copied successfully!');
+      }
+      
+    } catch (error) {
+      console.error('❌ Copy failed:', error.message);
+      process.exit(1);
+    }
+  }
+
+  /**
+   * List available backups
+   */
+  listBackups() {
+    const backups = this.configManager.listBackups();
+    
+    if (backups.length === 0) {
+      console.log('📂 No backups found');
+      console.log('💡 Create one with: calmhive config backup');
+      return;
+    }
+    
+    console.log(`📂 Available backups (${backups.length}):\n`);
+    
+    backups.forEach((backup, index) => {
+      const isLatest = index === 0;
+      const ageMs = Date.now() - backup.created.getTime();
+      const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+      const ageHours = Math.floor((ageMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      
+      let ageStr;
+      if (ageDays > 0) {
+        ageStr = `${ageDays}d ago`;
+      } else if (ageHours > 0) {
+        ageStr = `${ageHours}h ago`;
+      } else {
+        ageStr = 'Recent';
+      }
+      
+      console.log(`   ${isLatest ? '📌' : '  '} ${backup.filename}`);
+      console.log(`      📅 ${backup.created.toLocaleString()} (${ageStr})`);
+      console.log(`      📏 ${Math.round(backup.size / 1024)}KB`);
+      console.log('');
+    });
+    
+    console.log('💡 Restore with: calmhive config restore [filename]');
+  }
+
+  /**
+   * Ask for user confirmation
+   */
+  askConfirmation(question) {
+    return new Promise((resolve) => {
+      this.rl.question(question, (answer) => {
+        resolve(answer.toLowerCase().startsWith('y'));
+      });
+    });
+  }
+
+  /**
+   * Clean up readline interface
+   */
+  cleanup() {
+    this.rl.close();
+  }
+
+  /**
+   * Main execution function
+   */
+  async execute() {
+    // When called directly: ['node', '/path/to/config', 'install', '--force']
+    // When called via calmhive: ['node', '/path/to/calmhive', 'config', 'install', '--force']
+    const isDirectCall = process.argv[1].includes('/cmd/config');
+    const args = isDirectCall ? process.argv.slice(2) : process.argv.slice(3);
+    
+    // Parse flags
+    const dryRun = args.includes('--dry-run');
+    const force = args.includes('--force');
+    const help = args.includes('--help') || args.includes('-h');
+    
+    // Get command (first non-flag argument)
+    const command = args.find(arg => !arg.startsWith('--') && !arg.startsWith('-'));
+    
+    try {
+      if (help) {
+        this.showHelp();
+        return;
+      }
+      
+      if (!command) {
+        this.showStatus();
+        return;
+      }
+      
+      // Handle special case: 'commands' with no subcommand defaults to 'list'
+      if (command === 'commands' && args.length === 1) {
+        this.listCommandFiles();
+        return;
+      }
+      
+      
+      switch (command) {
+        case 'show':
+          this.showStatus();
+          break;
+          
+        case 'diff':
+          await this.showDiff();
+          break;
+          
+        case 'install':
+          await this.installConfig(dryRun, force);
+          break;
+          
+        case 'backup':
+          this.createBackup();
+          break;
+          
+        case 'restore':
+          const filename = args.find(arg => !arg.startsWith('--') && arg !== 'restore');
+          await this.restoreFromBackup(filename, force);
+          break;
+          
+        case 'list-backups':
+          this.listBackups();
+          break;
+          
+        case 'commands':
+          await this.handleCommandsSubcommand(args);
+          break;
+          
+        default:
+          console.log(`❌ Unknown command: ${command}`);
+          console.log('💡 Use `calmhive config --help` for available commands');
+          process.exit(1);
+      }
+      
+    } catch (error) {
+      console.error('❌ Command failed:', error.message);
+      process.exit(1);
+    } finally {
+      this.cleanup();
+    }
+  }
+
+  /**
+   * Handle commands subcommand
+   */
+  async handleCommandsSubcommand(args) {
+    const subcommand = args[1]; // commands <subcommand>
+    
+    switch (subcommand) {
+      case 'list':
+        this.listCommandFiles();
+        break;
+        
+      case 'copy':
+        const destDir = args[2];
+        if (!destDir) {
+          console.log('❌ Missing destination directory');
+          console.log('💡 Usage: calmhive config commands copy <destination>');
+          console.log('💡 Example: calmhive config commands copy ./my-commands/');
+          console.log('💡 Example: calmhive config commands copy ~/.prompthive/commands/');
+          process.exit(1);
+        }
+        
+        const patterns = args.includes('--pattern') ? 
+          args.slice(args.indexOf('--pattern') + 1).filter(arg => !arg.startsWith('--')) : [];
+        const force = args.includes('--force');
+        const dryRun = args.includes('--dry-run');
+        
+        await this.copyCommandFiles(destDir, { patterns, force, dryRun });
+        break;
+        
+      default:
+        console.log('❌ Unknown commands subcommand:', subcommand);
+        console.log('💡 Available: list, copy');
+        process.exit(1);
+    }
+  }
+
+  /**
+   * List available command files
+   */
+  listCommandFiles() {
+    const summary = this.configManager.getCommandFilesSummary();
+    
+    console.log(`📁 Command Files Summary:\n`);
+    console.log(`📊 Total files: ${summary.totalFiles}`);
+    console.log(`📏 Total size: ${Math.round(summary.totalSize / 1024)}KB\n`);
+    
+    Object.keys(summary.categories).sort().forEach(category => {
+      const files = summary.categories[category];
+      console.log(`📂 ${category === 'root' ? 'Root Directory' : category}/ (${files.length} files)`);
+      
+      files.slice(0, 10).forEach(file => {
+        const sizeKB = Math.round(file.size / 1024);
+        console.log(`   📄 ${file.name} (${sizeKB}KB)`);
+      });
+      
+      if (files.length > 10) {
+        console.log(`   ... and ${files.length - 10} more files`);
+      }
+      console.log('');
+    });
+    
+    console.log('💡 Use `calmhive config commands copy <destination>` to copy files');
+    console.log('💡 Use `--pattern <text>` to filter files (e.g., --pattern expert)');
+  }
+
+  /**
+   * Copy command files to destination
+   */
+  async copyCommandFiles(destDir, options = {}) {
+    const { patterns = [], force = false, dryRun = false } = options;
+    
+    try {
+      console.log(`📋 ${dryRun ? 'Previewing' : 'Copying'} command files to: ${destDir}`);
+      if (patterns.length > 0) {
+        console.log(`🔍 Filtering with patterns: ${patterns.join(', ')}`);
+      }
+      console.log('');
+      
+      const result = this.configManager.copyCommandFiles(destDir, { patterns, force, dryRun });
+      
+      if (result.totalFiles === 0) {
+        console.log('❌ No matching files found');
+        return;
+      }
+      
+      console.log(`📋 ${dryRun ? 'Would copy' : 'Copied'} ${result.copiedFiles} files`);
+      console.log(`📏 Total size: ${Math.round(result.totalSize / 1024)}KB`);
+      
+      if (result.skippedFiles > 0) {
+        console.log(`⚠️ Skipped ${result.skippedFiles} existing files (use --force to overwrite)`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Copy operation failed:', error.message);
+      process.exit(1);
+    }
+  }
+}
+
+// Execute if called directly
+if (require.main === module) {
+  const configCommand = new ConfigCommand();
+  configCommand.execute();
+}
+
+module.exports = ConfigCommand;

@@ -1,0 +1,127 @@
+#!/usr/bin/env node
+
+// Progress Command - View detailed progress for AFk sessions
+const ProgressTracker = require('../lib/progress-tracker');
+const SessionDatabase = require('../lib/session-database');
+const fs = require('fs').promises;
+const path = require('path');
+
+class ProgressCommand {
+  constructor() {
+    this.db = new SessionDatabase();
+  }
+
+  async execute() {
+    const [,, sessionId] = process.argv;
+    
+    if (!sessionId || sessionId === '--help' || sessionId === '-h') {
+      this.showHelp();
+      process.exit(0);
+    }
+    
+    try {
+      await this.showProgress(sessionId);
+    } catch (error) {
+      console.error(`❌ Error: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async showProgress(sessionId) {
+    // Get session info
+    const session = await this.db.getSession(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+    
+    // Try to load progress data
+    const progressTracker = new ProgressTracker(sessionId);
+    const progressFile = progressTracker.progressFile;
+    
+    try {
+      const data = await fs.readFile(progressFile, 'utf8');
+      const progress = JSON.parse(data);
+      
+      console.log(`\n📊 Progress Report for Session ${sessionId}`);
+      console.log(`${'='.repeat(60)}\n`);
+      
+      console.log(`📋 Task: ${session.task}`);
+      console.log(`⏱️  Started: ${new Date(progress.startTime).toLocaleString()}`);
+      console.log(`📈 Status: ${progress.status}`);
+      console.log(`🔄 Progress: ${progress.currentIteration}/${progress.totalIterations} iterations\n`);
+      
+      // Show milestones
+      if (progress.milestones && progress.milestones.length > 0) {
+        console.log('🏆 Milestones:');
+        progress.milestones.forEach(milestone => {
+          console.log(`   ✅ ${milestone.description} (Iteration ${milestone.iteration})`);
+        });
+        console.log('');
+      }
+      
+      // Show iteration summaries
+      if (progress.iterations && progress.iterations.length > 0) {
+        console.log('📝 Iteration Summaries:');
+        progress.iterations.forEach(iter => {
+          const status = iter.success ? '✅' : '❌';
+          console.log(`\n   ${status} Iteration ${iter.number}:`);
+          if (iter.summary) {
+            console.log(`      ${iter.summary.substring(0, 200)}${iter.summary.length > 200 ? '...' : ''}`);
+          }
+          if (iter.actions && iter.actions.length > 0) {
+            console.log(`      Actions: ${iter.actions.length} recorded`);
+          }
+        });
+      }
+      
+      // Show overall summary
+      if (progress.overallSummary) {
+        console.log(`\n📊 Overall Summary:`);
+        console.log(`   ${progress.overallSummary}`);
+      }
+      
+      console.log(`\n⏰ Last Updated: ${new Date(progress.lastUpdate).toLocaleString()}`);
+      
+    } catch (error) {
+      console.log(`\n📊 Progress tracking not available for session ${sessionId}`);
+      console.log(`   This session may have been started before progress tracking was implemented.`);
+      console.log(`\n📋 Basic Session Info:`);
+      console.log(`   Status: ${session.status}`);
+      console.log(`   Iterations: ${session.iterations_completed}/${session.iterations_planned}`);
+    }
+  }
+
+  showHelp() {
+    console.log(`
+📊 Calmhive Progress - View detailed progress for AFk sessions
+
+Usage:
+  calmhive progress <sessionId>
+
+Arguments:
+  sessionId    The AFk session ID to view progress for
+
+Examples:
+  calmhive progress afk-01234567-abcd1234
+  calmhive progress afk-latest    # View latest session
+
+Options:
+  -h, --help   Show this help message
+
+Description:
+  Shows detailed progress information for AFk sessions including:
+  - Iteration summaries and outcomes
+  - Milestones achieved
+  - Actions taken
+  - Overall progress summary
+  - Real-time status updates
+`);
+  }
+}
+
+// Execute
+const cmd = new ProgressCommand();
+cmd.execute().catch(error => {
+  console.error('💥 Fatal error:', error);
+  process.exit(1);
+});

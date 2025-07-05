@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment variables
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Build outputs
+dist/
+build/
+
+# Session data
+data/sessions.db
+data/*.db
+
+# Archive directories (for development)
+archive*/
+
+# Development scripts
+demo.sh
+prepare-release.sh
+test-before-publish.sh
+sync-to-repo.sh
+
+# justfile
+justfile
+
+# Unoptimized images
+assets/calmhive-logo.png
+assets/calmhive-logo-512.png
+
+# Test files
+fixed-test.js
+test-fix-direct.js

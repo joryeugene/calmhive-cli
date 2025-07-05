@@ -1,0 +1,42 @@
+{
+  "include": [
+    "lib/**/*.js",
+    "bin/**",
+    "cmd/**/*.js"
+  ],
+  "exclude": [
+    "test/**",
+    "docs/**",
+    "commands/**",
+    "config/**",
+    "assets/**",
+    "*.test.js",
+    "**/*.test.js",
+    "coverage/**",
+    ".eslintrc.js"
+  ],
+  "extension": [
+    ".js"
+  ],
+  "reporter": [
+    "text",
+    "text-summary",
+    "html",
+    "lcov"
+  ],
+  "report-dir": "coverage",
+  "temp-dir": ".nyc_output",
+  "cache": true,
+  "check-coverage": true,
+  "lines": 8,
+  "statements": 8,
+  "functions": 10,
+  "branches": 6,
+  "per-file": false,
+  "all": true,
+  "exclude-after-remap": false,
+  "skip-full": false,
+  "produce-source-map": true,
+  "instrument": true,
+  "source-map": true
+}

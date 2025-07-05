@@ -1,0 +1,7 @@
+#!/usr/bin/env node
+/**
+ * Calmhive 'w' command - Alias for 'work'
+ * Quick access to intelligent task execution
+ */
+
+require('./work');

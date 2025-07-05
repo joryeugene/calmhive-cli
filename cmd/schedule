@@ -1,0 +1,659 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Schedule Command
+ * Natural language scheduling interface using Claude Code integration
+ */
+
+const ScheduleEngine = require('../lib/scheduler/schedule-engine');
+const path = require('path');
+
+class ScheduleCommand {
+  constructor() {
+    this.engine = null;
+    this.dataDir = path.join(process.env.HOME || process.env.USERPROFILE, '.claude', 'calmhive', 'schedules');
+  }
+
+  async init() {
+    this.engine = new ScheduleEngine({
+      dataDir: this.dataDir,
+      parserOptions: { timeout: 20000, retries: 2 }
+    });
+    await this.engine.initializeDataDir();
+  }
+
+  showHelp() {
+    console.log(`
+🐝 Calmhive Schedule - Natural Language Task Scheduling
+
+USAGE:
+  calmhive schedule <subcommand> [options]
+
+SUBCOMMANDS:
+  create <natural_language> <command> [options]  Create new scheduled task
+  list                                          List all schedules
+  status                                        Show scheduler status
+  start <schedule_id>                          Start a schedule
+  stop <schedule_id>                           Stop a schedule  
+  delete <schedule_id>                         Delete a schedule
+  run <schedule_id>                            Execute schedule immediately
+  update <schedule_id> [options]               Update existing schedule
+  restore                                      Start scheduler with all enabled schedules
+
+CREATE OPTIONS:
+  --name <name>              Custom name for the schedule
+  --timezone <timezone>      Timezone (default: auto-detected)
+  --disabled                 Create schedule in disabled state
+
+UPDATE OPTIONS:
+  --time <natural_language>  Update schedule time
+  --command <command>        Update command to execute
+  --name <name>             Update schedule name
+  --timezone <timezone>     Update timezone
+  --enable                  Enable the schedule
+  --disable                 Disable the schedule
+
+EXAMPLES:
+  calmhive schedule create "daily at 9am" "calmhive chat 'daily standup'"
+  calmhive schedule create "every Monday at 2pm" "calmhive afk 'weekly report' --iterations 5" --name "Weekly Report"
+  calmhive schedule update abc123 --time "daily at 3pm" --command "new command"
+  calmhive schedule restore    # Start scheduler with all enabled schedules
+  calmhive schedule list
+  calmhive schedule status
+  calmhive schedule stop abc123
+  calmhive schedule delete abc123
+
+NATURAL LANGUAGE EXAMPLES:
+  "daily at 2pm"                  → Every day at 2:00 PM
+  "every Monday at 9am"           → Every Monday at 9:00 AM  
+  "weekly on Friday at 5pm"       → Every Friday at 5:00 PM
+  "monthly on the 1st at noon"    → 1st of every month at 12:00 PM
+  "in 30 minutes"                 → One-time, 30 minutes from now
+  "tomorrow at 8am"               → One-time, tomorrow at 8:00 AM
+  "every other day at 6am"        → Every 2 days at 6:00 AM
+  "weekends at 10am"              → Saturday and Sunday at 10:00 AM
+
+The scheduler uses Claude Code to intelligently parse natural language into cron expressions.
+`);
+  }
+
+  async create(naturalLanguage, command, options = {}) {
+    if (!naturalLanguage || !command) {
+      console.error('❌ Error: Both natural language and command are required');
+      console.log('\nUsage: calmhive schedule create <natural_language> <command> [options]');
+      console.log('Example: calmhive schedule create "daily at 9am" "calmhive chat \'morning standup\'"');
+      process.exit(1);
+    }
+
+    try {
+      console.log('🚀 Creating scheduled task...');
+      console.log(`   Natural Language: "${naturalLanguage}"`);
+      console.log(`   Command: "${command}"`);
+
+      const schedule = await this.engine.createSchedule(naturalLanguage, command, {
+        name: options.name,
+        timezone: options.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        enabled: !options.disabled
+      });
+
+      console.log('\n✅ Schedule created successfully!');
+      console.log(`   ID: ${schedule.id}`);
+      console.log(`   Name: ${schedule.name}`);
+      console.log(`   Cron Expression: "${schedule.cron}"`);
+      console.log(`   Type: ${schedule.type}`);
+      console.log(`   Explanation: ${schedule.explanation}`);
+      console.log(`   Enabled: ${schedule.enabled}`);
+      console.log(`   Next Run: ${schedule.nextRun}`);
+      console.log(`   Timezone: ${schedule.timezone}`);
+
+      if (schedule.enabled) {
+        console.log('\n🎯 Schedule is active and will execute automatically.');
+      } else {
+        console.log('\n⏸️ Schedule created in disabled state. Use "calmhive schedule start" to activate.');
+      }
+
+    } catch (error) {
+      console.error(`❌ Failed to create schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async list() {
+    try {
+      const schedules = await this.engine.listSchedules();
+      
+      if (schedules.length === 0) {
+        console.log('📝 No schedules found.');
+        console.log('\nTo create your first schedule:');
+        console.log('  calmhive schedule create "daily at 9am" "calmhive chat \'morning standup\'"');
+        return;
+      }
+
+      console.log(`📋 Found ${schedules.length} schedule(s):\n`);
+      
+      schedules.forEach((schedule, index) => {
+        const statusIcon = schedule.status === 'running' ? '🟢' : 
+                          schedule.status === 'disabled' ? '🔴' : '🟡';
+        
+        console.log(`${index + 1}. ${statusIcon} ${schedule.name}`);
+        console.log(`   ID: ${schedule.id}`);
+        console.log(`   Natural: "${schedule.naturalLanguage}"`);
+        console.log(`   Cron: "${schedule.cron}" (${schedule.explanation})`);
+        console.log(`   Command: "${schedule.command}"`);
+        console.log(`   Status: ${schedule.status.toUpperCase()}`);
+        console.log(`   Type: ${schedule.type}`);
+        console.log(`   Timezone: ${schedule.timezone}`);
+        
+        if (schedule.lastRun) {
+          const lastRun = new Date(schedule.lastRun).toLocaleString();
+          const result = schedule.lastResult?.success ? '✅ SUCCESS' : '❌ FAILED';
+          console.log(`   Last Run: ${lastRun} (${result})`);
+          console.log(`   Run Count: ${schedule.runCount}`);
+        } else {
+          console.log(`   Last Run: Never`);
+        }
+        
+        if (schedule.nextRun && schedule.status === 'running') {
+          const nextRun = new Date(schedule.nextRun).toLocaleString();
+          console.log(`   Next Run: ${nextRun}`);
+        }
+        
+        console.log('');
+      });
+
+      // Summary
+      const running = schedules.filter(s => s.status === 'running').length;
+      const disabled = schedules.filter(s => s.status === 'disabled').length;
+      
+      console.log(`📊 Summary: ${running} running, ${disabled} disabled`);
+
+    } catch (error) {
+      console.error(`❌ Failed to list schedules: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async status() {
+    try {
+      const engineStatus = this.engine.getStatus();
+      const schedules = await this.engine.listSchedules();
+      
+      console.log('🔧 Calmhive Scheduler Status:\n');
+      
+      console.log(`📊 Engine Status:`);
+      console.log(`   Active Tasks: ${engineStatus.activeTasks}`);
+      console.log(`   Data Directory: ${engineStatus.dataDir}`);
+      console.log(`   Schedules File: ${engineStatus.schedulesFile}`);
+      console.log(`   Claude Parser Available: ${engineStatus.parserAvailable ? '✅' : '❌'}`);
+      console.log(`   Uptime: ${Math.floor(engineStatus.uptime / 60)}m ${Math.floor(engineStatus.uptime % 60)}s`);
+      
+      console.log(`\n📋 Schedule Statistics:`);
+      console.log(`   Total Schedules: ${schedules.length}`);
+      
+      if (schedules.length > 0) {
+        const running = schedules.filter(s => s.status === 'running').length;
+        const disabled = schedules.filter(s => s.status === 'disabled').length;
+        const totalRuns = schedules.reduce((sum, s) => sum + (s.runCount || 0), 0);
+        const successful = schedules.filter(s => s.lastResult?.success).length;
+        const failed = schedules.filter(s => s.lastResult?.success === false).length;
+        
+        console.log(`   Running: ${running}`);
+        console.log(`   Disabled: ${disabled}`);
+        console.log(`   Total Executions: ${totalRuns}`);
+        
+        if (totalRuns > 0) {
+          console.log(`   Success Rate: ${successful}/${failed + successful} (${Math.round(successful / (successful + failed) * 100)}%)`);
+        }
+        
+        // Recent activity
+        const recentRuns = schedules
+          .filter(s => s.lastRun)
+          .sort((a, b) => new Date(b.lastRun) - new Date(a.lastRun))
+          .slice(0, 3);
+          
+        if (recentRuns.length > 0) {
+          console.log(`\n📅 Recent Activity:`);
+          recentRuns.forEach(s => {
+            const time = new Date(s.lastRun).toLocaleString();
+            const result = s.lastResult?.success ? '✅' : '❌';
+            console.log(`   ${result} ${s.name} - ${time}`);
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error(`❌ Failed to get status: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async start(scheduleId) {
+    if (!scheduleId) {
+      console.error('❌ Error: Schedule ID is required');
+      console.log('\nUsage: calmhive schedule start <schedule_id>');
+      console.log('Use "calmhive schedule list" to see available schedule IDs');
+      process.exit(1);
+    }
+
+    try {
+      const schedules = await this.engine.loadSchedules();
+      const schedule = schedules.find(s => s.id === scheduleId || s.name === scheduleId);
+      
+      if (!schedule) {
+        console.error(`❌ Schedule not found: ${scheduleId}`);
+        console.log('Use "calmhive schedule list" to see available schedules');
+        process.exit(1);
+      }
+
+      await this.engine.startTask(schedule);
+      
+      console.log(`✅ Started schedule: ${schedule.name}`);
+      console.log(`   Cron: "${schedule.cron}"`);
+      console.log(`   Command: "${schedule.command}"`);
+
+    } catch (error) {
+      console.error(`❌ Failed to start schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async stop(scheduleId) {
+    if (!scheduleId) {
+      console.error('❌ Error: Schedule ID is required');
+      console.log('\nUsage: calmhive schedule stop <schedule_id>');
+      process.exit(1);
+    }
+
+    try {
+      await this.engine.stopTask(scheduleId);
+      
+      console.log(`⏹️ Stopped schedule: ${scheduleId}`);
+
+    } catch (error) {
+      console.error(`❌ Failed to stop schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async delete(scheduleId) {
+    if (!scheduleId) {
+      console.error('❌ Error: Schedule ID is required');
+      console.log('\nUsage: calmhive schedule delete <schedule_id>');
+      process.exit(1);
+    }
+
+    try {
+      const schedules = await this.engine.loadSchedules();
+      const schedule = schedules.find(s => s.id === scheduleId || s.name === scheduleId);
+      
+      if (!schedule) {
+        console.error(`❌ Schedule not found: ${scheduleId}`);
+        process.exit(1);
+      }
+
+      // Confirm deletion
+      console.log(`⚠️ About to delete schedule: ${schedule.name}`);
+      console.log(`   Natural Language: "${schedule.naturalLanguage}"`);
+      console.log(`   Command: "${schedule.command}"`);
+      
+      // In real usage, we'd want interactive confirmation
+      // For now, proceed with deletion
+      
+      await this.engine.deleteSchedule(schedule.id);
+      
+      console.log(`🗑️ Deleted schedule: ${schedule.name}`);
+
+    } catch (error) {
+      console.error(`❌ Failed to delete schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async run(scheduleId) {
+    if (!scheduleId) {
+      console.error('❌ Error: Schedule ID is required');
+      console.log('\nUsage: calmhive schedule run <schedule_id>');
+      process.exit(1);
+    }
+
+    try {
+      const schedules = await this.engine.loadSchedules();
+      const schedule = schedules.find(s => s.id === scheduleId || s.name === scheduleId);
+      
+      if (!schedule) {
+        console.error(`❌ Schedule not found: ${scheduleId}`);
+        process.exit(1);
+      }
+
+      console.log(`🚀 Executing schedule immediately: ${schedule.name}`);
+      console.log(`   Command: "${schedule.command}"`);
+      
+      const startTime = Date.now();
+      await this.engine.executeTask(schedule);
+      const duration = Date.now() - startTime;
+      
+      if (schedule.lastResult.success) {
+        console.log(`\n✅ Execution successful (${duration}ms)`);
+        if (schedule.lastResult.output) {
+          console.log(`📄 Output:`);
+          console.log(schedule.lastResult.output);
+        }
+      } else {
+        console.log(`\n❌ Execution failed (${duration}ms)`);
+        console.log(`💥 Error: ${schedule.lastResult.error}`);
+      }
+
+    } catch (error) {
+      console.error(`❌ Failed to run schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async restore() {
+    try {
+      console.log('🔄 Starting scheduler service...');
+      
+      await this.engine.restoreSchedules();
+      
+      const status = this.engine.getStatus();
+      console.log(`✅ Restored ${status.activeTasks} active schedules`);
+      
+      if (status.activeTasks === 0) {
+        console.log('💡 No enabled schedules found to restore.');
+        console.log('Use "calmhive schedule list" to see all schedules.');
+      }
+      
+      console.log('\n🐝 Scheduler service is running');
+      console.log('   Press Ctrl+C to stop\n');
+      
+      // Use daemon mode internally
+      this.isDaemon = true;
+      
+      // Handle graceful shutdown
+      process.on('SIGINT', async () => {
+        console.log('\n🛑 Stopping scheduler service...');
+        await this.engine.shutdown();
+        process.exit(0);
+      });
+      
+      process.on('SIGTERM', async () => {
+        console.log('\n🛑 Stopping scheduler service...');
+        await this.engine.shutdown();
+        process.exit(0);
+      });
+      
+      // Keep process alive
+      setInterval(() => {}, 1000);
+
+    } catch (error) {
+      console.error(`❌ Failed to restore schedules: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async daemon(options = {}) {
+    try {
+      console.log('🚀 Starting scheduler daemon...');
+      
+      if (options.restore) {
+        await this.engine.restoreSchedules();
+        const status = this.engine.getStatus();
+        console.log(`✅ Restored ${status.activeTasks} active schedules`);
+      }
+      
+      console.log('\n🐝 Scheduler daemon started');
+      console.log('   Press Ctrl+C to stop\n');
+      
+      // Keep the process running
+      this.isDaemon = true;
+      
+      // Handle graceful shutdown
+      process.on('SIGINT', async () => {
+        console.log('\n🛑 Shutting down scheduler daemon...');
+        await this.engine.shutdown();
+        process.exit(0);
+      });
+      
+      process.on('SIGTERM', async () => {
+        console.log('\n🛑 Shutting down scheduler daemon...');
+        await this.engine.shutdown();
+        process.exit(0);
+      });
+      
+      // Keep process alive
+      setInterval(() => {
+        // Heartbeat to keep process alive
+      }, 1000);
+      
+    } catch (error) {
+      console.error(`❌ Failed to start daemon: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async update(scheduleId, options = {}) {
+    if (!scheduleId) {
+      console.error('❌ Error: Schedule ID is required');
+      console.log('\nUsage: calmhive schedule update <schedule_id> [options]');
+      console.log('Use "calmhive schedule list" to see available schedule IDs');
+      process.exit(1);
+    }
+
+    try {
+      const schedules = await this.engine.loadSchedules();
+      const schedule = schedules.find(s => s.id === scheduleId || s.name === scheduleId);
+      
+      if (!schedule) {
+        console.error(`❌ Schedule not found: ${scheduleId}`);
+        console.log('Use "calmhive schedule list" to see available schedules');
+        process.exit(1);
+      }
+
+      console.log(`🔄 Updating schedule: ${schedule.name}`);
+      
+      // Build update object
+      const updates = {};
+      
+      if (options.time) {
+        updates.naturalLanguage = options.time;
+        console.log(`   Time: "${options.time}"`);
+      }
+      
+      if (options.command) {
+        updates.command = options.command;
+        console.log(`   Command: "${options.command}"`);
+      }
+      
+      if (options.name) {
+        updates.name = options.name;
+        console.log(`   Name: "${options.name}"`);
+      }
+      
+      if (options.timezone) {
+        updates.timezone = options.timezone;
+        console.log(`   Timezone: "${options.timezone}"`);
+      }
+      
+      if (options.enable) {
+        updates.enabled = true;
+        console.log(`   Enabled: true`);
+      }
+      
+      if (options.disable) {
+        updates.enabled = false;
+        console.log(`   Enabled: false`);
+      }
+      
+      // Parse natural language time if provided
+      if (updates.naturalLanguage) {
+        const parser = this.engine.parser || new (require('../lib/scheduler/claude-cron-parser'))();
+        // For relative times like "in X minutes", use system timezone as reference
+        // For absolute times, use the target schedule timezone
+        const isRelativeTime = updates.naturalLanguage.includes('in ') || updates.naturalLanguage.includes('from now');
+        const referenceTimezone = isRelativeTime ? 
+          Intl.DateTimeFormat().resolvedOptions().timeZone : 
+          (updates.timezone || schedule.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone);
+        
+        const referenceTime = new Date().toLocaleString('en-US', { 
+          timeZone: referenceTimezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+        const parsed = await parser.parseNaturalLanguage(updates.naturalLanguage, referenceTime);
+        updates.cron = parsed.cron;
+        updates.type = parsed.type;
+        updates.explanation = parsed.explanation;
+      }
+      
+      // Create updated schedule object
+      const updatedSchedule = {
+        ...schedule,
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Update the schedule
+      await this.engine.updateSchedule(updatedSchedule);
+      
+      // If schedule is active, restart it with new settings
+      if (this.engine.activeTasks.has(schedule.id)) {
+        await this.engine.stopSchedule(schedule.id);
+        if (updatedSchedule.enabled) {
+          await this.engine.startSchedule(updatedSchedule);
+        }
+      }
+      
+      console.log('\n✅ Updated schedule successfully!');
+      console.log(`   ID: ${updatedSchedule.id}`);
+      console.log(`   Name: ${updatedSchedule.name}`);
+      console.log(`   Natural Language: "${updatedSchedule.naturalLanguage}"`);
+      console.log(`   Cron Expression: "${updatedSchedule.cron}"`);
+      console.log(`   Command: "${updatedSchedule.command}"`);
+      console.log(`   Enabled: ${updatedSchedule.enabled}`);
+      console.log(`   Timezone: ${updatedSchedule.timezone}`);
+      
+      if (updatedSchedule.explanation) {
+        console.log(`   Schedule: ${updatedSchedule.explanation}`);
+      }
+
+    } catch (error) {
+      console.error(`❌ Failed to update schedule: ${error.message}`);
+      process.exit(1);
+    }
+  }
+}
+
+// Parse command line arguments
+function parseArgs(args) {
+  const options = {};
+  const positional = [];
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg.startsWith('--')) {
+      const key = arg.slice(2);
+      if (key === 'disabled' || key === 'restore' || key === 'enable' || key === 'disable') {
+        options[key] = true;
+      } else {
+        const value = args[i + 1];
+        if (value && !value.startsWith('--')) {
+          options[key] = value;
+          i++; // Skip next arg as it's the value
+        }
+      }
+    } else {
+      positional.push(arg);
+    }
+  }
+  
+  return { options, positional };
+}
+
+// Main execution
+async function main() {
+  const args = process.argv.slice(2);
+  
+  if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+    const cmd = new ScheduleCommand();
+    cmd.showHelp();
+    return;
+  }
+
+  const { options, positional } = parseArgs(args);
+  const [subcommand, ...subArgs] = positional;
+
+  const cmd = new ScheduleCommand();
+  
+  try {
+    await cmd.init();
+    
+    switch (subcommand) {
+      case 'create':
+        await cmd.create(subArgs[0], subArgs[1], options);
+        break;
+        
+      case 'list':
+        await cmd.list();
+        break;
+        
+      case 'status':
+        await cmd.status();
+        break;
+        
+      case 'start':
+        await cmd.start(subArgs[0]);
+        break;
+        
+      case 'stop':
+        await cmd.stop(subArgs[0]);
+        break;
+        
+      case 'delete':
+        await cmd.delete(subArgs[0]);
+        break;
+        
+      case 'run':
+        await cmd.run(subArgs[0]);
+        break;
+        
+      case 'restore':
+        await cmd.restore();
+        break;
+        
+      case 'daemon':
+        await cmd.daemon(options);
+        break;
+        
+      case 'update':
+        await cmd.update(subArgs[0], options);
+        break;
+        
+      default:
+        console.error(`❌ Unknown subcommand: ${subcommand}`);
+        console.log('\nRun "calmhive schedule --help" to see available commands');
+        process.exit(1);
+    }
+    
+  } catch (error) {
+    console.error(`❌ Command failed: ${error.message}`);
+    process.exit(1);
+  } finally {
+    // Only shutdown if not running as daemon
+    if (cmd.engine && !cmd.isDaemon) {
+      await cmd.engine.shutdown();
+    }
+  }
+}
+
+if (require.main === module) {
+  main().catch(error => {
+    console.error(`💥 Unexpected error: ${error.message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = ScheduleCommand;

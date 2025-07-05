@@ -1,0 +1,144 @@
+#!/usr/bin/env node
+/**
+ * Calmhive TUI Command
+ * 
+ * Terminal User Interface for visual process management
+ */
+
+const TUIManager = require('../lib/tui/tui-manager');
+
+/**
+ * Parse command line arguments
+ */
+function parseArgs(args) {
+  const options = {
+    monitorOnly: false,
+    help: false
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    
+    if (arg === '--help' || arg === '-h') {
+      options.help = true;
+    } else if (arg === '--monitor-only' || arg === '-m') {
+      options.monitorOnly = true;
+    }
+  }
+
+  return options;
+}
+
+/**
+ * Display help information
+ */
+function showHelp() {
+  console.log(`
+🐝 Calmhive TUI - Terminal User Interface
+
+Usage: calmhive tui [options]
+
+Description:
+  Launch the Terminal User Interface for visual process management.
+  Monitor all Calmhive sessions, view logs, and control processes.
+
+Options:
+  -m, --monitor-only   Read-only mode (no create/stop/restart)
+  -h, --help          Show this help message
+
+Keyboard Controls:
+  Navigation:
+    ↑/k         Move up one item
+    ↓/j         Move down one item
+    gg          Go to top (first item)
+    G           Go to bottom (last item)
+    H/M/L       Go to high/middle/low of current view
+    Ctrl+u/d    Half page up/down
+    PageUp/Down Full page up/down
+    Enter       View session details
+    
+  Search:
+    /           Forward search
+    ?           Backward search
+    n           Next search result
+    N           Previous search result
+    
+  Actions:
+    n           Create new AFk session (with custom iterations)
+    s           Stop selected session
+    r           Restart selected session
+    l           View session logs
+    c           Cleanup completed sessions
+    o           Kill orphan processes
+    
+  General:
+    ESC         Go back / Return to list
+    q/Ctrl+C    Quit
+
+Features:
+  ✓ Real-time session monitoring
+  ✓ Process lifecycle management
+  ✓ Live log viewing
+  ✓ Resource usage tracking
+  ✓ Session creation interface
+
+The TUI provides a comprehensive view of all Calmhive processes
+with real-time updates and full control capabilities.
+`);
+}
+
+/**
+ * Main entry point
+ */
+async function main() {
+  const args = process.argv.slice(2);
+  const options = parseArgs(args);
+
+  if (options.help) {
+    showHelp();
+    process.exit(0);
+  }
+
+  console.log('🚀 Starting Calmhive TUI...');
+
+  try {
+    const tuiManager = new TUIManager();
+    
+    // Set monitor-only mode if requested
+    if (options.monitorOnly) {
+      console.log('📊 Running in monitor-only mode');
+      // TODO: Implement read-only restrictions
+    }
+
+    // Initialize and run
+    await tuiManager.init();
+
+    // The TUI is now running
+    // Control is handled by blessed event loop
+
+  } catch (error) {
+    console.error('❌ Failed to start TUI:', error.message);
+    console.error('\nTroubleshooting:');
+    console.error('1. Make sure your terminal supports Unicode');
+    console.error('2. Try running in a larger terminal window');
+    console.error('3. Check that all dependencies are installed');
+    process.exit(1);
+  }
+}
+
+// Handle process termination
+process.on('SIGINT', () => {
+  // Blessed handles cleanup
+  process.exit(0);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  process.exit(1);
+});
+
+// Run main
+main().catch(error => {
+  console.error('❌ Fatal error:', error);
+  process.exit(1);
+});

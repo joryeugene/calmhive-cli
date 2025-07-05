@@ -1,0 +1,97 @@
+{
+  "name": "@calmhive/calmhive-cli",
+  "version": "14.0.0",
+  "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
+  "main": "index.js",
+  "bin": {
+    "calmhive": "bin/calmhive"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "start:tui": "node cmd/tui",
+    "start:afk": "node cmd/afk",
+    "test": "mocha test/**/*.test.js --timeout 10000",
+    "test:unit": "mocha test/unit/**/*.test.js",
+    "test:integration": "mocha test/integration/**/*.test.js",
+    "test:e2e": "mocha test/e2e/**/*.test.js --timeout 30000",
+    "test:production": "mocha test/production/**/*.test.js --timeout 60000",
+    "test:coverage": "nyc npm test",
+    "test:coverage:report": "nyc report --reporter=html --reporter=text",
+    "test:coverage:check": "nyc check-coverage",
+    "coverage:status": "node scripts/raise-coverage-bar.js status",
+    "coverage:update": "node scripts/raise-coverage-bar.js update",
+    "coverage:raise": "node scripts/raise-coverage-bar.js raise",
+    "test:all": "node scripts/test-runner.js",
+    "test:quick": "node scripts/test-runner.js --no-lint unit",
+    "test:ci": "node scripts/test-runner.js --coverage",
+    "test:watch": "mocha test/**/*.test.js --watch",
+    "lint": "eslint lib/ test/ --fix",
+    "lint:check": "eslint lib/ test/",
+    "build": "npm run test:ci",
+    "quality": "npm run test:all --verbose --coverage",
+    "build:docker": "docker build -t calmhive/cli:latest .",
+    "prepublishOnly": "npm run build",
+    "dev": "npm run test:watch"
+  },
+  "keywords": [
+    "claude",
+    "cli",
+    "ai",
+    "assistant",
+    "automation",
+    "afk",
+    "voice",
+    "mcp"
+  ],
+  "author": "Jory Pestorious",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joryeugene/calmhive-cli.git"
+  },
+  "homepage": "https://github.com/joryeugene/calmhive-cli#readme",
+  "bugs": {
+    "url": "https://github.com/joryeugene/calmhive-cli/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "cmd/",
+    "commands/",
+    "lib/",
+    "config/",
+    "assets/",
+    "docs/",
+    "templates/",
+    "index.js",
+    "README.md",
+    "README-TEMPLATES.md",
+    "ROADMAP-v14.md",
+    "CHANGELOG-v14.md",
+    "AFk-BEST-PRACTICES.md",
+    "API-REFERENCE.md",
+    "claude-code-best-practices.md",
+    "CLAUDE.md"
+  ],
+  "dependencies": {
+    "blessed": "^0.1.81",
+    "fs-extra": "^11.3.0",
+    "ink": "^6.0.0",
+    "node-cron": "^3.0.3",
+    "sqlite3": "^5.1.7",
+    "uuid": "^11.1.0",
+    "xml2js": "^0.6.2"
+  },
+  "devDependencies": {
+    "chai": "^5.2.0",
+    "eslint": "^8.57.0",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^4.0.0"
+  }
+}

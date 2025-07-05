@@ -1,0 +1,54 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Chat Command
+ * Interactive passthrough to Claude with auto tools
+ */
+
+const { spawn } = require('child_process');
+const toolManager = require('../lib/tool-manager');
+
+// Get all arguments
+const args = process.argv.slice(2);
+
+// Check for help
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`
+🐝 Calmhive 'chat' - Interactive Claude with Auto Tools
+
+Usage: calmhive chat [options] [question]
+
+This is a smart passthrough to Claude with automatic tool access.
+Supports all Claude flags: -c, -r, -p, --model, etc.
+
+Examples:
+  calmhive chat                          # Start interactive session
+  calmhive chat "analyze this code"      # Ask a question
+  calmhive chat -p "what is 2+2?"       # Pipe mode for scripts
+  calmhive chat -c "continue our work"   # Continue previous session
+  calmhive chat -r                       # Resume a session
+
+All Claude options work. This command invokes:
+  claude --allowedTools [97 tools] [your arguments]
+`);
+  process.exit(0);
+}
+
+// Add allowed tools unless user already specified them
+if (!args.some(arg => arg.startsWith('--allowedTools') || arg.startsWith('--disallowedTools'))) {
+  const allTools = toolManager.getAllToolsArray();
+  args.push('--allowedTools', ...allTools);
+}
+
+// Spawn claude with all arguments passed through
+const claude = spawn('claude', args, {
+  stdio: 'inherit'
+});
+
+claude.on('error', (err) => {
+  console.error('Failed to start claude:', err);
+  process.exit(1);
+});
+
+claude.on('exit', (code) => {
+  process.exit(code || 0);
+});

@@ -1,0 +1,264 @@
+#!/usr/bin/env node
+/**
+ * Calmhive v9.0.0 - Main Entry Point
+ * The intelligent Claude CLI wrapper
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs');
+const pathManager = require('../lib/path-manager');
+
+// Get version from path manager
+function getVersion() {
+  return pathManager.getVersion();
+}
+
+// Available commands
+const COMMANDS = {
+  'work': 'Intelligent task execution with automatic optimization',
+  'w': 'Alias for work',
+  'afk': 'Run long tasks in background with automatic retries',
+  'a': 'Alias for afk',
+  'chat': 'Interactive chat with Claude',
+  'c': 'Alias for chat',
+  'config': 'Manage CLAUDE.md configuration files',
+  'run': 'Execute one-shot tasks headlessly',
+  'r': 'Alias for run',
+  'schedule': 'Natural language task scheduling with Claude Code',
+  's': 'Alias for schedule',
+  'template': 'Manage task templates for common workflows',
+  'tmp': 'Alias for template',
+  'progress': 'View detailed progress for AFk sessions',
+  'p': 'Alias for progress',
+  'tui': 'Terminal UI for process management',
+  't': 'Alias for tui',
+  'voice': 'Voice interface to Claude',
+  'v': 'Alias for voice',
+  'update': 'Update calmhive and Claude Code to latest versions'
+};
+
+// Command aliases
+const ALIASES = {
+  'w': 'work',
+  'a': 'afk',
+  'c': 'chat',
+  'r': 'run',
+  's': 'schedule',
+  'tmp': 'template',
+  'p': 'progress',
+  't': 'tui',
+  'v': 'voice'
+};
+
+function showHelp() {
+  const version = getVersion();
+  console.log(`
+🐝 Calmhive v${version} - Claude That Never Quits
+
+Usage: calmhive <command> [options]
+
+Commands:
+`);
+  
+  Object.entries(COMMANDS).forEach(([cmd, desc]) => {
+    if (!ALIASES[cmd]) { // Only show main commands, not aliases
+      const aliases = Object.entries(ALIASES)
+        .filter(([alias, target]) => target === cmd)
+        .map(([alias]) => alias);
+      const aliasStr = aliases.length > 0 ? ` (${aliases.join(', ')})` : '';
+      console.log(`  ${cmd.padEnd(8)} ${desc}${aliasStr}`);
+    }
+  });
+  
+  console.log(`
+Examples:
+  calmhive work "fix the login bug"
+  calmhive chat "explain this code"
+  calmhive run "add tests to utils.js"
+  calmhive afk "migrate to TypeScript" --iterations 20
+  calmhive schedule create "daily at 9am" "calmhive chat 'morning standup'"
+  calmhive voice
+  calmhive tui
+
+For command-specific help:
+  calmhive <command> --help
+`);
+}
+
+// Main execution
+const args = process.argv.slice(2);
+
+if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+  showHelp();
+  process.exit(0);
+}
+
+if (args[0] === '--version' || args[0] === '-v') {
+  console.log(getVersion());
+  process.exit(0);
+}
+
+// Handle update command
+if (args[0] === 'update') {
+  const calmhiveOnly = args.includes('--calmhive-only');
+  const claudeOnly = args.includes('--claude-only');
+  
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log('Usage: calmhive update [options]');
+    console.log('');
+    console.log('Update calmhive and Claude Code to the latest versions');
+    console.log('');
+    console.log('Options:');
+    console.log('  --calmhive-only    Update only @calmhive/calmhive-cli');
+    console.log('  --claude-only      Update only @anthropic-ai/claude-code');
+    console.log('  -h, --help         Show this help message');
+    console.log('');
+    console.log('Examples:');
+    console.log('  calmhive update                    # Update both packages');
+    console.log('  calmhive update --calmhive-only    # Update only calmhive');
+    console.log('  calmhive update --claude-only      # Update only Claude Code');
+    process.exit(0);
+  }
+  
+  const { spawn } = require('child_process');
+  
+  if (claudeOnly) {
+    console.log('🔄 Updating Claude Code to latest version...');
+    console.log('📦 Updating @anthropic-ai/claude-code...');
+    const updateClaude = spawn('npm', ['install', '-g', '@anthropic-ai/claude-code@latest'], {
+      stdio: 'inherit'
+    });
+    
+    updateClaude.on('exit', (code) => {
+      if (code === 0) {
+        console.log('✅ Claude Code updated successfully!');
+        console.log('📦 Run \'claude --version\' to see the new version');
+      } else {
+        console.error('❌ Claude Code update failed. Try running manually:');
+        console.error('npm install -g @anthropic-ai/claude-code@latest');
+      }
+      process.exit(code || 0);
+    });
+    
+    updateClaude.on('error', (err) => {
+      console.error(`❌ Claude Code update failed: ${err.message}`);
+      process.exit(1);
+    });
+    
+    return;
+  }
+  
+  if (calmhiveOnly) {
+    console.log('🔄 Updating calmhive to latest version...');
+    console.log('📦 Updating @calmhive/calmhive-cli...');
+    const updateCalmhive = spawn('npm', ['install', '-g', '@calmhive/calmhive-cli@latest'], {
+      stdio: 'inherit'
+    });
+    
+    updateCalmhive.on('exit', (code) => {
+      if (code === 0) {
+        console.log('✅ Calmhive updated successfully!');
+        console.log('📦 Run \'calmhive --version\' to see the new version');
+      } else {
+        console.error('❌ Calmhive update failed. Try running manually:');
+        console.error('npm install -g @calmhive/calmhive-cli@latest');
+      }
+      process.exit(code || 0);
+    });
+    
+    updateCalmhive.on('error', (err) => {
+      console.error(`❌ Calmhive update failed: ${err.message}`);
+      process.exit(1);
+    });
+    
+    return;
+  }
+  
+  // Default: Update both packages
+  console.log('🔄 Updating calmhive and Claude Code to latest versions...');
+  
+  // Update calmhive first
+  console.log('📦 Updating @calmhive/calmhive-cli...');
+  const updateCalmhive = spawn('npm', ['install', '-g', '@calmhive/calmhive-cli@latest'], {
+    stdio: 'inherit'
+  });
+  
+  updateCalmhive.on('exit', (code) => {
+    if (code === 0) {
+      console.log('✅ Calmhive updated successfully!');
+      
+      // Now update Claude Code
+      console.log('\n📦 Updating @anthropic-ai/claude-code...');
+      const updateClaude = spawn('npm', ['install', '-g', '@anthropic-ai/claude-code@latest'], {
+        stdio: 'inherit'
+      });
+      
+      updateClaude.on('exit', (claudeCode) => {
+        if (claudeCode === 0) {
+          console.log('✅ Claude Code updated successfully!');
+          console.log('\n🎉 Both packages updated successfully!');
+          console.log('📦 Run \'calmhive --version\' and \'claude --version\' to see the new versions');
+        } else {
+          console.log('⚠️  Calmhive updated, but Claude Code update failed.');
+          console.error('💡 Try updating Claude Code manually:');
+          console.error('npm install -g @anthropic-ai/claude-code@latest');
+        }
+        process.exit(claudeCode || 0);
+      });
+      
+      updateClaude.on('error', (err) => {
+        console.log('⚠️  Calmhive updated, but Claude Code update failed.');
+        console.error(`❌ Claude Code update error: ${err.message}`);
+        console.error('💡 Try updating manually: npm install -g @anthropic-ai/claude-code@latest');
+        process.exit(1);
+      });
+      
+    } else {
+      console.error('❌ Calmhive update failed. Try running manually:');
+      console.error('npm install -g @calmhive/calmhive-cli@latest');
+      console.error('npm install -g @anthropic-ai/claude-code@latest');
+      process.exit(code || 0);
+    }
+  });
+  
+  updateCalmhive.on('error', (err) => {
+    console.error(`❌ Calmhive update failed: ${err.message}`);
+    console.error('💡 Try updating manually:');
+    console.error('npm install -g @calmhive/calmhive-cli@latest');
+    console.error('npm install -g @anthropic-ai/claude-code@latest');
+    process.exit(1);
+  });
+  
+  return;
+}
+
+// Get command (resolve aliases)
+let command = args[0];
+if (ALIASES[command]) {
+  command = ALIASES[command];
+}
+
+// Check if command exists
+if (!pathManager.commandExists(command)) {
+  console.error(`❌ Unknown command: ${command}`);
+  console.log('Run "calmhive --help" for available commands');
+  process.exit(1);
+}
+
+const commandPath = pathManager.getCommandPath(command);
+
+// Execute command
+const child = spawn('node', [commandPath, ...args.slice(1)], {
+  stdio: 'inherit',
+  env: { ...process.env }
+});
+
+child.on('error', (err) => {
+  console.error(`❌ Failed to execute command: ${err.message}`);
+  process.exit(1);
+});
+
+child.on('exit', (code) => {
+  process.exit(code || 0);
+});

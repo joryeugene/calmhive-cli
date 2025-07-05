@@ -1,0 +1,330 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Template Command
+ * Manage task templates for common workflows
+ */
+
+const TemplateManager = require('../lib/template-manager');
+
+class TemplateCommand {
+  constructor() {
+    this.manager = new TemplateManager();
+  }
+
+  showHelp() {
+    console.log(`
+🐝 Calmhive Templates - Predefined Task Workflows
+
+USAGE:
+  calmhive template <subcommand> [options]
+
+SUBCOMMANDS:
+  list                                List all available templates
+  show <template_name>               Show template details
+  apply <template_name> [variables]  Apply template with variables
+  search <query>                     Search templates by keyword
+  create <name> <title> <content>    Create new template
+  delete <template_name>             Delete a template
+  export <template_name> <file>      Export template to markdown
+  stats                              Show template statistics
+
+BUILT-IN TEMPLATES:
+  bug-fix                 Systematic bug investigation and fixing
+  feature-development     End-to-end feature implementation
+  refactoring            Safe code refactoring with testing
+  testing-setup          Test infrastructure implementation
+  performance-optimization  Performance analysis and improvement
+
+EXAMPLES:
+  calmhive template list
+  calmhive template show bug-fix
+  calmhive template apply bug-fix ISSUE_DESCRIPTION="login timeout"
+  calmhive template search testing
+  calmhive template apply feature-development FEATURE_NAME="user dashboard"
+
+USING WITH AFk:
+  calmhive afk "$(calmhive template apply bug-fix ISSUE_DESCRIPTION='auth bug')" --iterations 8
+  calmhive afk "$(calmhive template apply feature-development FEATURE_NAME='notifications')" --iterations 12
+
+Templates provide structured workflows with recommended iteration counts and clear phases.
+`);
+  }
+
+  async list() {
+    try {
+      const templates = await this.manager.listTemplates();
+      
+      if (templates.length === 0) {
+        console.log('📝 No templates found.');
+        return;
+      }
+
+      console.log(`📋 Available Templates (${templates.length}):\n`);
+      
+      templates.forEach(template => {
+        const tags = template.tags.length > 0 ? ` [${template.tags.join(', ')}]` : '';
+        console.log(`📄 ${template.name}`);
+        console.log(`   Title: ${template.title}`);
+        console.log(`   Description: ${template.description}`);
+        console.log(`   Iterations: ${template.iterations}${tags}`);
+        console.log('');
+      });
+
+      console.log('💡 Use "calmhive template show <name>" for details');
+      console.log('💡 Use "calmhive template apply <name>" to use with AFk');
+
+    } catch (error) {
+      console.error(`❌ Failed to list templates: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async show(templateName) {
+    if (!templateName) {
+      console.error('❌ Error: Template name is required');
+      console.log('\nUsage: calmhive template show <template_name>');
+      process.exit(1);
+    }
+
+    try {
+      const template = await this.manager.getTemplate(templateName);
+      
+      console.log(`📄 Template: ${template.title}\n`);
+      console.log(`**Name:** ${template.name}`);
+      console.log(`**Description:** ${template.description}`);
+      console.log(`**Recommended Iterations:** ${template.iterations}`);
+      
+      if (template.tags && template.tags.length > 0) {
+        console.log(`**Tags:** ${template.tags.join(', ')}`);
+      }
+      
+      console.log('\n**Template Content:**\n');
+      console.log(template.template);
+      
+      if (template.created) {
+        console.log(`\n*Created: ${new Date(template.created).toLocaleDateString()}*`);
+      }
+      
+      console.log('\n💡 To use this template:');
+      console.log(`   calmhive template apply ${template.name} VARIABLE="value"`);
+
+    } catch (error) {
+      console.error(`❌ Template not found: ${templateName}`);
+      console.log('\nUse "calmhive template list" to see available templates');
+      process.exit(1);
+    }
+  }
+
+  async apply(templateName, ...variableArgs) {
+    if (!templateName) {
+      console.error('❌ Error: Template name is required');
+      console.log('\nUsage: calmhive template apply <template_name> [VARIABLE="value" ...]');
+      process.exit(1);
+    }
+
+    try {
+      // Parse variables from command line (VARIABLE="value" format)
+      const variables = {};
+      for (const arg of variableArgs) {
+        const match = arg.match(/^([A-Z_]+)=(.+)$/);
+        if (match) {
+          variables[match[1]] = match[2].replace(/^["']|["']$/g, ''); // Remove quotes
+        }
+      }
+
+      const applied = await this.manager.applyTemplate(templateName, variables);
+      
+      // Output the applied template content
+      console.log(applied.appliedTemplate);
+
+    } catch (error) {
+      console.error(`❌ Failed to apply template: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async search(query) {
+    if (!query) {
+      console.error('❌ Error: Search query is required');
+      console.log('\nUsage: calmhive template search <query>');
+      process.exit(1);
+    }
+
+    try {
+      const results = await this.manager.searchTemplates(query);
+      
+      if (results.length === 0) {
+        console.log(`🔍 No templates found matching "${query}"`);
+        console.log('\nUse "calmhive template list" to see all available templates');
+        return;
+      }
+
+      console.log(`🔍 Found ${results.length} template(s) matching "${query}":\n`);
+      
+      results.forEach(template => {
+        const tags = template.tags.length > 0 ? ` [${template.tags.join(', ')}]` : '';
+        console.log(`📄 ${template.name}`);
+        console.log(`   ${template.description}${tags}`);
+      });
+
+    } catch (error) {
+      console.error(`❌ Search failed: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async create(name, title, content) {
+    if (!name || !title || !content) {
+      console.error('❌ Error: Name, title, and content are required');
+      console.log('\nUsage: calmhive template create <name> <title> <content>');
+      console.log('Example: calmhive template create "my-workflow" "My Workflow" "Step 1: Do something"');
+      process.exit(1);
+    }
+
+    try {
+      const template = await this.manager.createTemplate({
+        name,
+        title,
+        template: content,
+        description: `Custom template: ${title}`,
+        tags: ['custom'],
+        iterations: 5
+      });
+
+      console.log(`✅ Created template: ${template.name}`);
+      console.log(`   Title: ${template.title}`);
+      console.log(`   Path: ${this.manager.userTemplatesDir}/${template.name}.json`);
+      
+      console.log('\n💡 To use your template:');
+      console.log(`   calmhive template apply ${template.name}`);
+
+    } catch (error) {
+      console.error(`❌ Failed to create template: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async delete(templateName) {
+    if (!templateName) {
+      console.error('❌ Error: Template name is required');
+      console.log('\nUsage: calmhive template delete <template_name>');
+      process.exit(1);
+    }
+
+    try {
+      await this.manager.deleteTemplate(templateName);
+      console.log(`🗑️ Deleted template: ${templateName}`);
+
+    } catch (error) {
+      console.error(`❌ Failed to delete template: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async export(templateName, outputFile) {
+    if (!templateName || !outputFile) {
+      console.error('❌ Error: Template name and output file are required');
+      console.log('\nUsage: calmhive template export <template_name> <output_file>');
+      process.exit(1);
+    }
+
+    try {
+      const exportedPath = await this.manager.exportTemplate(templateName, outputFile);
+      console.log(`📤 Exported template to: ${exportedPath}`);
+
+    } catch (error) {
+      console.error(`❌ Failed to export template: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  async stats() {
+    try {
+      const stats = await this.manager.getStats();
+      
+      console.log('📊 Template Statistics:\n');
+      console.log(`   Total Templates: ${stats.totalTemplates}`);
+      console.log(`   Average Iterations: ${stats.averageIterations}`);
+      console.log(`   Templates Directory: ${stats.templatesDir}`);
+      
+      if (stats.popularTags.length > 0) {
+        console.log('\n   Popular Tags:');
+        stats.popularTags.forEach(({ tag, count }) => {
+          console.log(`     ${tag}: ${count} template(s)`);
+        });
+      }
+
+    } catch (error) {
+      console.error(`❌ Failed to get stats: ${error.message}`);
+      process.exit(1);
+    }
+  }
+}
+
+// Parse command line arguments
+async function main() {
+  const args = process.argv.slice(2);
+  
+  if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
+    const cmd = new TemplateCommand();
+    cmd.showHelp();
+    return;
+  }
+
+  const [subcommand, ...subArgs] = args;
+  const cmd = new TemplateCommand();
+
+  try {
+    switch (subcommand) {
+      case 'list':
+        await cmd.list();
+        break;
+        
+      case 'show':
+        await cmd.show(subArgs[0]);
+        break;
+        
+      case 'apply':
+        await cmd.apply(subArgs[0], ...subArgs.slice(1));
+        break;
+        
+      case 'search':
+        await cmd.search(subArgs[0]);
+        break;
+        
+      case 'create':
+        await cmd.create(subArgs[0], subArgs[1], subArgs[2]);
+        break;
+        
+      case 'delete':
+        await cmd.delete(subArgs[0]);
+        break;
+        
+      case 'export':
+        await cmd.export(subArgs[0], subArgs[1]);
+        break;
+        
+      case 'stats':
+        await cmd.stats();
+        break;
+        
+      default:
+        console.error(`❌ Unknown subcommand: ${subcommand}`);
+        console.log('\nRun "calmhive template --help" to see available commands');
+        process.exit(1);
+    }
+    
+  } catch (error) {
+    console.error(`❌ Command failed: ${error.message}`);
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  main().catch(error => {
+    console.error(`💥 Unexpected error: ${error.message}`);
+    process.exit(1);
+  });
+}
+
+module.exports = TemplateCommand;

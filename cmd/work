@@ -1,0 +1,210 @@
+#!/usr/bin/env node
+/**
+ * Calmhive v14.0.0 Work Command
+ * Intelligent task execution with automatic model selection and AFk orchestration
+ * Simplified version - wraps AFk with smart defaults
+ */
+
+const { spawn } = require('child_process');
+const path = require('path');
+const fs = require('fs-extra');
+
+const args = process.argv.slice(2);
+
+// Show help
+if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+  console.log(`
+🐝 Calmhive Work Command v14.0.0
+Intelligent task execution with automatic optimization
+
+Usage: calmhive work "<task description>" [options]
+
+Examples:
+  calmhive work "fix the login bug"
+  calmhive work "implement user profiles" --iterations 5
+  calmhive work "refactor authentication" --model opus
+  calmhive work "add dark mode toggle" --dry-run
+
+Options:
+  --iterations <n>    Number of AFk iterations (default: auto-detect)
+  --model <name>      Force model: haiku, sonnet, opus (default: auto)
+  --context <file>    Provide additional context file
+  --dry-run          Preview what would be executed
+  --help, -h         Show this help message
+
+Features:
+  🧠 Natural language understanding
+  🎯 Automatic complexity detection
+  🚀 Smart model selection
+  📈 Optimal iteration calculation
+  🔄 Seamless AFk integration
+
+The work command analyzes your task and automatically:
+- Selects the best model based on complexity
+- Determines optimal iteration count
+- Configures AFk for best results
+  `);
+  process.exit(0);
+}
+
+// Parse task and options
+const taskDescription = args[0];
+let options = {
+  iterations: null,
+  model: null,
+  context: null,
+  dryRun: false
+};
+
+// Parse command line options
+for (let i = 1; i < args.length; i++) {
+  const arg = args[i];
+  const value = args[i + 1];
+  
+  switch (arg) {
+    case '--iterations':
+      options.iterations = parseInt(value);
+      if (isNaN(options.iterations) || options.iterations < 1) {
+        console.error('❌ Iterations must be a positive number');
+        process.exit(1);
+      }
+      i++;
+      break;
+    case '--model':
+      if (!['haiku', 'sonnet', 'opus'].includes(value)) {
+        console.error('❌ Model must be: haiku, sonnet, or opus');
+        process.exit(1);
+      }
+      options.model = value;
+      i++;
+      break;
+    case '--context':
+      options.context = value;
+      i++;
+      break;
+    case '--dry-run':
+      options.dryRun = true;
+      break;
+    default:
+      console.error(`❌ Unknown option: ${arg}`);
+      process.exit(1);
+  }
+}
+
+// Analyze task complexity
+function analyzeTaskComplexity(task) {
+  const taskLower = task.toLowerCase();
+  
+  // Simple tasks (1-2 iterations, haiku/sonnet)
+  const simplePatterns = [
+    /^(fix|update|change|modify|adjust) (a |the |an )?(\w+\s)?bug/,
+    /^add (a |the |an )?simple/,
+    /^create (a |the |an )?basic/,
+    /^rename/,
+    /^move/,
+    /^delete (unused|old)/,
+    /^update (version|dependency|dependencies)/,
+    /^fix (typo|formatting|style)/
+  ];
+  
+  // Complex tasks (5-10 iterations, opus)
+  const complexPatterns = [
+    /refactor/,
+    /migrate/,
+    /implement.*system/,
+    /design.*architecture/,
+    /optimize.*performance/,
+    /add.*authentication/,
+    /create.*api/,
+    /build.*from scratch/,
+    /rewrite/,
+    /restructure/
+  ];
+  
+  // Check patterns
+  const isSimple = simplePatterns.some(p => p.test(taskLower));
+  const isComplex = complexPatterns.some(p => p.test(taskLower));
+  
+  // Word count heuristic
+  const wordCount = task.split(/\s+/).length;
+  
+  if (isComplex || wordCount > 15) {
+    return { complexity: 'complex', suggestedIterations: 8, suggestedModel: 'opus' };
+  } else if (isSimple || wordCount < 8) {
+    return { complexity: 'simple', suggestedIterations: 2, suggestedModel: 'sonnet' };
+  } else {
+    return { complexity: 'moderate', suggestedIterations: 5, suggestedModel: 'sonnet' };
+  }
+}
+
+// Main execution
+async function executeWork() {
+  console.log('🚀 Analyzing task...');
+  
+  const analysis = analyzeTaskComplexity(taskDescription);
+  
+  // Use provided options or smart defaults
+  const iterations = options.iterations || analysis.suggestedIterations;
+  const model = options.model || analysis.suggestedModel;
+  
+  console.log(`📊 Task Analysis:
+  - Complexity: ${analysis.complexity}
+  - Model: ${model}
+  - Iterations: ${iterations}
+  - Task: "${taskDescription}"`);
+  
+  if (options.dryRun) {
+    console.log('\n🔍 Dry run mode - would execute:');
+    console.log(`calmhive afk "${taskDescription}" --iterations ${iterations} --model ${model}`);
+    if (options.context) {
+      console.log(`  with context from: ${options.context}`);
+    }
+    process.exit(0);
+  }
+  
+  // Build AFk command
+  const afkArgs = [taskDescription, '--iterations', iterations.toString()];
+  
+  // Add model selection if not default
+  if (model !== 'sonnet') {
+    afkArgs.push('--model', model);
+  }
+  
+  // Add context if provided
+  if (options.context) {
+    // Read context file and append to task
+    try {
+      const contextContent = await fs.readFile(options.context, 'utf8');
+      afkArgs[0] = `${taskDescription}\n\nContext:\n${contextContent}`;
+    } catch (error) {
+      console.error(`⚠️ Could not read context file: ${error.message}`);
+    }
+  }
+  
+  console.log('\n🎯 Starting intelligent task execution...\n');
+  
+  // Execute AFk
+  const afkCmd = path.join(__dirname, 'afk');
+  const afkProcess = spawn('node', [afkCmd, ...afkArgs], {
+    stdio: 'inherit',
+    cwd: process.cwd()
+  });
+  
+  afkProcess.on('error', (error) => {
+    console.error(`❌ Failed to execute AFk: ${error.message}`);
+    process.exit(1);
+  });
+  
+  afkProcess.on('exit', (code) => {
+    if (code === 0) {
+      console.log('\n✅ Work completed successfully!');
+    }
+    process.exit(code || 0);
+  });
+}
+
+// Execute
+executeWork().catch(error => {
+  console.error('❌ Unexpected error:', error);
+  process.exit(1);
+});
