@@ -1,0 +1,277 @@
+#!/usr/bin/env node
+/**
+ * Calmhive Intercept Control Command
+ * Global control for rule injection across all commands
+ */
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+const settingsPath = path.join(os.homedir(), '.claude', 'calmhive-settings.json');
+const claudeMdPath = path.join(os.homedir(), '.claude', 'CLAUDE.md');
+
+// Parse arguments
+const args = process.argv.slice(2);
+const command = args[0];
+
+// Check for help
+if (args.includes('--help') || args.includes('-h') || !command) {
+  console.log(`
+🐝 Calmhive 'intercept' - Global Rule Injection Control
+
+Usage: calmhive intercept <command>
+
+Commands:
+  on           Enable rule injection globally
+  off          Disable rule injection globally  
+  status       Show current injection status
+  info         Show detailed injection information
+  test         Test injection functionality
+
+Examples:
+  calmhive intercept on        # Enable injection for all commands
+  calmhive intercept off       # Disable injection for all commands
+  calmhive intercept status    # Check if injection is enabled
+  calmhive intercept info      # Detailed status and configuration
+  calmhive intercept test      # Test injection with sample request
+
+Options:
+  --method METHOD    Set injection method (network|stdio|both)
+  --help, -h         Show this help message
+`);
+  process.exit(0);
+}
+
+/**
+ * Load current settings
+ */
+function loadSettings() {
+  try {
+    if (fs.existsSync(settingsPath)) {
+      return JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    }
+  } catch (error) {
+    // Invalid JSON, create new settings
+  }
+  return {};
+}
+
+/**
+ * Save settings
+ */
+function saveSettings(settings) {
+  try {
+    // Ensure directory exists
+    const dir = path.dirname(settingsPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to save settings:', error.message);
+    return false;
+  }
+}
+
+/**
+ * Get injection status
+ */
+function getInjectionStatus() {
+  const settings = loadSettings();
+  
+  // Handle both boolean and object formats
+  if (typeof settings.ruleInjection === 'boolean') {
+    return {
+      enabled: settings.ruleInjection,
+      method: 'network',
+      legacy: true
+    };
+  } else if (settings.ruleInjection && typeof settings.ruleInjection === 'object') {
+    return {
+      enabled: settings.ruleInjection.enabled !== false,
+      method: settings.ruleInjection.method || 'network',
+      legacy: false
+    };
+  }
+  
+  // Default (no settings file)
+  return {
+    enabled: true,
+    method: 'network',
+    legacy: false,
+    default: true
+  };
+}
+
+/**
+ * Set injection status
+ */
+function setInjectionStatus(enabled, method = null) {
+  const settings = loadSettings();
+  
+  if (method) {
+    settings.ruleInjection = {
+      enabled,
+      method
+    };
+  } else {
+    settings.ruleInjection = enabled;
+  }
+  
+  return saveSettings(settings);
+}
+
+/**
+ * Show status
+ */
+function showStatus() {
+  const status = getInjectionStatus();
+  
+  console.log('🔍 Calmhive Rule Injection Status\n');
+  
+  // Main status
+  if (status.enabled) {
+    console.log('✅ Status: ENABLED');
+    console.log(`📡 Method: ${status.method}`);
+  } else {
+    console.log('❌ Status: DISABLED');
+  }
+  
+  // Additional info
+  if (status.default) {
+    console.log('⚙️  Source: Default settings (no config file)');
+  } else if (status.legacy) {
+    console.log('⚙️  Source: Legacy boolean setting');
+  } else {
+    console.log('⚙️  Source: Configuration file');
+  }
+  
+  console.log(`📁 Settings: ${settingsPath}`);
+  
+  // CLAUDE.md status
+  if (fs.existsSync(claudeMdPath)) {
+    const stats = fs.statSync(claudeMdPath);
+    console.log(`📄 CLAUDE.md: Found (${stats.size} bytes)`);
+  } else {
+    console.log('⚠️  CLAUDE.md: Not found');
+  }
+}
+
+/**
+ * Show detailed info
+ */
+function showInfo() {
+  const status = getInjectionStatus();
+  const settings = loadSettings();
+  
+  console.log('📊 Calmhive Rule Injection Information\n');
+  
+  // Current status
+  showStatus();
+  
+  console.log('\n📋 Configuration Details:');
+  console.log('Settings file exists:', fs.existsSync(settingsPath));
+  
+  if (fs.existsSync(settingsPath)) {
+    console.log('Raw settings:', JSON.stringify(settings, null, 2));
+  }
+  
+  console.log('\n🛠️  Available Methods:');
+  console.log('  network  - Intercept HTTP requests (default, most reliable)');
+  console.log('  stdio    - Intercept stdin/stdout (enables syntax highlighting)');
+  console.log('  both     - Use both methods (maximum coverage)');
+  
+  console.log('\n💡 Control Commands:');
+  console.log('  calmhive intercept on     - Enable injection');
+  console.log('  calmhive intercept off    - Disable injection');
+  console.log('  chat --no-intercept       - Disable for single session');
+  
+  // Environment overrides
+  if (process.env.CALMHIVE_NO_INJECT) {
+    console.log('\n⚠️  Environment Override: CALMHIVE_NO_INJECT is set');
+  }
+}
+
+/**
+ * Test injection
+ */
+function testInjection() {
+  console.log('🧪 Testing Rule Injection\n');
+  
+  const status = getInjectionStatus();
+  
+  if (!status.enabled) {
+    console.log('❌ Injection is disabled');
+    console.log('   Run: calmhive intercept on');
+    return;
+  }
+  
+  if (!fs.existsSync(claudeMdPath)) {
+    console.log('❌ CLAUDE.md not found');
+    console.log(`   Create: ${claudeMdPath}`);
+    return;
+  }
+  
+  console.log('✅ Injection is enabled');
+  console.log(`✅ Method: ${status.method}`);
+  console.log('✅ CLAUDE.md found');
+  
+  // Test the interceptor
+  console.log('\n🔬 Testing interceptor...');
+  
+  try {
+    // Enable debug mode for test
+    process.env.CALMHIVE_DEBUG = '1';
+    
+    // Load interceptor and test
+    require('../lib/chat-interceptor.js');
+    
+    console.log('✅ Interceptor loaded successfully');
+    console.log('✅ Test complete - injection should work');
+    
+  } catch (error) {
+    console.log('❌ Interceptor failed to load:', error.message);
+  }
+}
+
+// Handle commands
+switch (command) {
+  case 'on':
+  case 'enable':
+    {
+      const method = args.find(arg => arg.startsWith('--method='))?.split('=')[1] || 'network';
+      if (setInjectionStatus(true, method)) {
+        console.log('✅ Rule injection enabled globally');
+        console.log(`📡 Method: ${method}`);
+      }
+    }
+    break;
+    
+  case 'off':
+  case 'disable':
+    if (setInjectionStatus(false)) {
+      console.log('❌ Rule injection disabled globally');
+      console.log('   Use "calmhive intercept on" to re-enable');
+    }
+    break;
+    
+  case 'status':
+    showStatus();
+    break;
+    
+  case 'info':
+    showInfo();
+    break;
+    
+  case 'test':
+    testInjection();
+    break;
+    
+  default:
+    console.error(`❌ Unknown command: ${command}`);
+    console.error('   Run: calmhive intercept --help');
+    process.exit(1);
+}

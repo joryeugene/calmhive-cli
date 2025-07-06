@@ -54,7 +54,7 @@ calmhive run "refactor API for better maintainability"
 - ✅ Smart prompting with MCP integration
 - ✅ Sequential thinking for complex tasks
 - ✅ Automatic verification requirements
-- ✅ Knowledge storage via memento
+- ✅ Comprehensive tool integration
 - ✅ Perfect for automation, scripts, CI/CD
 
 ### 🎤 `calmhive voice` - Voice Interface
@@ -179,9 +179,9 @@ All commands have access to 95+ tools:
    ```bash
    claude mcp add-from-claude-desktop -s user
    ```
-3. **Verify**: Run `calmhive chat "test memento search"` to confirm tools work
+3. **Verify**: Run `calmhive chat "test sequential thinking"` to confirm tools work
 
-For detailed MCP setup instructions, see the [Terminal Velocity blog post](http://jorypestorious.com/blog/terminal-velocity/) which covers installation of essential tools like Memento and Sequential Thinking.
+For detailed MCP setup instructions, see the [Terminal Velocity blog post](http://jorypestorious.com/blog/terminal-velocity/) which covers installation of essential tools like Sequential Thinking.
 
 ## File Structure
 

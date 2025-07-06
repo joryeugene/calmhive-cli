@@ -6,6 +6,7 @@
 
 const { spawn } = require('child_process');
 const toolManager = require('../lib/tool-manager');
+const ruleInjector = require('../lib/rule-injector');
 
 // Get all arguments
 const args = process.argv.slice(2);
@@ -31,7 +32,6 @@ Features:
   ✓ Access to 85+ safe tools across 10+ MCP servers
   ✓ Sequential thinking for complex tasks
   ✓ Automatic verification and testing
-  ✓ Knowledge storage via memento
   ✓ Perfect for automation, scripts, CI/CD
 `);
   process.exit(0);
@@ -46,37 +46,15 @@ if (!task) {
   process.exit(1);
 }
 
-// Build execution prompt
-const prePrompt = `CALMHIVE RUN - HEADLESS AUTOMATION
+// Inject CLAUDE.md rules into the task first
+const enhancedTask = ruleInjector.injectRules(task, { commandType: 'run' });
 
-TASK: ${task}
+// Build execution prompt with enhanced task (rules already included)
+const fullPrompt = `CALMHIVE RUN - HEADLESS AUTOMATION
 
-ENHANCED EXECUTION PROTOCOL:
-- Use mcp__sequentialthinking__sequentialthinking_tools for complex tasks (5-8 thoughts)
-- Apply MCP tools strategically:
-  • mcp__memento__create_entities - Store insights and findings
-  • mcp__memento__semantic_search - Search existing knowledge  
-  • mcp__playwright__browser_* - For UI testing and verification
-  • mcp__github__* - For code research (read-only)
-  • mcp__omnisearch__* - For web research when needed
-- VERIFICATION REQUIREMENTS:
-  • Never claim something is fixed without concrete testing
-  • Use appropriate tools to verify your work (playwright for UI, bash for code)
-  • For debugging: expand search scope if initial approach fails
-  • Listen to any user feedback about what doesn't work
-- KNOWLEDGE MANAGEMENT:
-  • Store important insights in memento knowledge graph
-  • Build on existing knowledge where relevant
-
-AVAILABLE MCP TOOLS: 85+ safe tools across memento, sequential thinking, github, playwright, omnisearch, context7, figma, shadcn-ui, gitmcp, and asana (read-only)
+TASK: ${enhancedTask}
 
 BEGIN EXECUTION:`;
-
-const postPrompt = `
-
-lets bee friends`;
-
-const fullPrompt = prePrompt + postPrompt;
 
 // Create temp file for robust prompt handling
 const os = require('os');

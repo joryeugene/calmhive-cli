@@ -35,6 +35,9 @@ const COMMANDS = {
   't': 'Alias for tui',
   'voice': 'Voice interface to Claude',
   'v': 'Alias for voice',
+  'intercept': 'Control global rule injection settings',
+  'i': 'Alias for intercept',
+  'setup': 'Configure Claude Code hooks and MCP integration',
   'update': 'Update calmhive and Claude Code to latest versions'
 };
 
@@ -47,6 +50,7 @@ const ALIASES = {
   's': 'schedule',
   'tmp': 'template',
   'p': 'progress',
+  'i': 'intercept',
   't': 'tui',
   'v': 'voice'
 };

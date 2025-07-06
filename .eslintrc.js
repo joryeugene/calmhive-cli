@@ -45,6 +45,12 @@ module.exports = {
     'no-process-exit': 'off' // CLI tools need process.exit
   },
   globals: {
-    // Node.js CLI globals
+    // Test globals from test-setup.js
+    'expect': 'readonly',
+    'sinon': 'readonly',
+    'TestProjectFactory': 'readonly',
+    'MockManagers': 'readonly',
+    'TestUtils': 'readonly',
+    'testCleanup': 'readonly'
   }
 };
