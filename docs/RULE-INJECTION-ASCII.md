@@ -1,4 +1,4 @@
-# 🐝 CALMHIVE v14.2.1 SMART RULE INJECTION SYSTEM 🐝
+# 🐝 CALMHIVE v14.2.8 SMART RULE INJECTION SYSTEM 🐝
 
 ```
  ██████╗ ██╗     ███████╗██╗   ██╗██████╗ ███████╗    ███╗   ███╗██████╗ 
@@ -26,9 +26,60 @@ The Calmhive Smart Rule Injection System is a production-ready enhancement that 
 ### 📊 **PERFORMANCE METRICS**
 - **19,759 characters** of CLAUDE.md v14.2.0 injected per user message
 - **Smart deduplication** - prevents injection spam and duplicate processing
+- **Typing detection** (v14.2.8) - eliminates #2-29 spam during rapid typing
+- **AFk persistence** (v14.2.8) - re-injects rules each iteration to prevent drift
 - **Request type detection** - distinguishes user messages from tool calls
 - **Zero overhead** - works seamlessly with all commands
 - **100% backward compatibility** - no breaking changes
+
+## 🆕 WHAT'S NEW IN v14.2.8
+
+### 🎯 **TYPING DETECTION**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              🎹 TYPING SPAM ELIMINATION                        │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ❌ BEFORE (v14.2.7):                                          │
+│     User types: "h" → Injection #1                             │
+│                "he" → Injection #2                             │
+│                "hel" → Injection #3                            │
+│                ...                                             │
+│                "hello world" → Injection #29                   │
+│                                                                 │
+│  ✅ AFTER (v14.2.8):                                           │
+│     User types: "h", "he", "hel", "hell", "hello"             │
+│                → No injection (typing detected)                │
+│                "hello world" [ENTER]                           │
+│                → Single injection when complete                │
+│                                                                 │
+│  📊 Result: 96% reduction in injection spam                    │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 🔄 **AFk RULE PERSISTENCE**
+```
+┌─────────────────────────────────────────────────────────────────┐
+│               🔄 AFk ITERATION RE-INJECTION                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ❌ BEFORE (v14.2.7):                                          │
+│     Iteration 1: Full task + CLAUDE.md rules ✓                │
+│     Iteration 2: "Continue..." (no rules) ✗                    │
+│     Iteration 3: "Continue..." (no rules) ✗                    │
+│     → Claude drifts from guidelines over time                  │
+│                                                                 │
+│  ✅ AFTER (v14.2.8):                                           │
+│     Iteration 1: Full task + CLAUDE.md rules ✓                │
+│     Iteration 2: "Continue task" + CLAUDE.md rules ✓          │
+│     Iteration 3: "Continue task" + CLAUDE.md rules ✓          │
+│     → Claude maintains adherence throughout session            │
+│                                                                 │
+│  📊 Perfect for: Long-running overnight AFk sessions           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐

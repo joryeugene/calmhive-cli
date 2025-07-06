@@ -1,7 +1,7 @@
 # Calmhive Rule Injection System
 
-*Last Updated: 2025-01-07*
-*Version: 14.2.1*
+*Last Updated: 2025-07-06*
+*Version: 14.2.8*
 
 ## Overview
 
@@ -9,6 +9,8 @@ The Calmhive CLI provides a sophisticated multi-layer system for automatically i
 
 ### Key Features
 - **Smart Injection**: Injects CLAUDE.md only when needed, not on every API call
+- **Typing Detection** (v14.2.8): Prevents injection spam during rapid typing (#2-29)
+- **AFk Rule Persistence** (v14.2.8): Re-injects rules at each iteration to prevent drift
 - **Request Type Detection**: Distinguishes user messages from tool calls and streaming
 - **Message Deduplication**: Prevents multiple injections of the same message
 - **Multiple Interception Methods**: Network-level, stdio-level, or both
@@ -27,6 +29,7 @@ The injection system now uses intelligent request analysis to inject CLAUDE.md o
 - **Tool Execution Context**: Messages with recent tool calls → SKIP
 - **Continued Conversations**: Long conversations with tool use → SKIP
 - **Duplicate Messages**: Same message content seen before → SKIP
+- **Typing Continuations** (v14.2.8): Partial messages during typing → SKIP
 
 #### Message Analysis
 The system analyzes each request for:
@@ -35,6 +38,7 @@ The system analyzes each request for:
 - Message history length and patterns
 - Recent assistant messages with tool use
 - Message content deduplication
+- Typing patterns - Detects if current message extends a recent one
 
 #### Debug Mode
 Enable detailed logging with `CALMHIVE_DEBUG=1`:
@@ -78,8 +82,15 @@ Uses both network and stdio interception for maximum coverage.
 #### Command-Level Injection
 - **chat**: Supports all three interception methods
 - **run**: Injects into task description before execution
-- **afk**: Injects into background task instructions
+- **afk**: Injects at start AND re-injects at each iteration (v14.2.8)
 - **voice**: Injects into transcribed messages (planned)
+
+#### AFk Rule Persistence (v14.2.8)
+AFk sessions now re-inject CLAUDE.md rules at the beginning of each iteration to prevent rule drift during long-running background tasks:
+- Iteration 1: Full task with rules injected
+- Iterations 2+: Rules re-injected with "Continue working on: [task]"
+- Prevents Claude from forgetting guidelines during multi-hour sessions
+- Rule injector prevents double injection automatically
 
 ### 4. Configuration
 

@@ -1,6 +1,25 @@
 # Calmhive v14.0.0 Changelog
 *From Experimental CLI to Production AI Development Platform*
 
+## [14.2.8] - 2025-07-06
+
+### 🐛 Bug Fixes
+- **Fixed injection spam during typing** - Smart detection prevents #2-29 injection spam when typing rapidly
+- **Fixed AFk rule drift** - Rules now re-injected at each iteration to maintain CLAUDE.md adherence
+- **Fixed conversation tracking** - Single messages properly generate session IDs for deduplication
+
+### 🚀 Improvements
+- **Typing pattern detection** - Prevents mid-word injections for cleaner conversations
+- **AFk rule persistence** - Long-running sessions maintain rules throughout all iterations
+- **Better tool differentiation** - Distinguishes between tool requests and tool results
+- **Session ID generation** - Fixed bug where single messages returned null session IDs
+
+### 📊 Technical Details
+- Enhanced `chat-interceptor.js` with `isTypingContinuation()` function
+- Modified `process-manager.js` to re-inject rules in `runSingleIteration`
+- Added comprehensive test coverage for injection behavior
+- Network interceptor confirmed working in interactive mode
+
 ## [14.0.0] - 2025-07-05
 
 ### 🎉 **Major Feature Release**

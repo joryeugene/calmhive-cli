@@ -1,7 +1,7 @@
 <div align="center">
   <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Logo" width="200">
 
-  # 🐝 Calmhive v14.2.1 - Claude CLI That Works When Claude Doesn't
+  # 🐝 Calmhive v14.2.8 - Claude CLI That Works When Claude Doesn't
 
   ## lets bee friends 🐝
 
@@ -80,6 +80,11 @@ calmhive voice  # Say "hey friend" to activate
 - When to intervene if confidence is low
 
 This transparency builds trust and lets you guide Claude more effectively.
+
+### 🚀 NEW in v14.2.8
+- **🎯 Injection Intelligence** - Eliminates typing spam (#2-29) with smart detection
+- **🔄 AFk Rule Persistence** - Rules re-injected each iteration to prevent drift
+- **🧹 Cleaner Conversations** - Fixed session tracking for all message types
 
 ### 🚀 NEW in v14.2.0
 - **🧠 Smart CLAUDE.md Injection** - Intelligent request analysis prevents injection spam
