@@ -1,4 +1,4 @@
-# 🐝 CALMHIVE v14.1.0 RULE INJECTION SYSTEM 🐝
+# 🐝 CALMHIVE v14.2.1 SMART RULE INJECTION SYSTEM 🐝
 
 ```
  ██████╗ ██╗     ███████╗██╗   ██╗██████╗ ███████╗    ███╗   ███╗██████╗ 
@@ -15,17 +15,18 @@
  ██║  ██║╚██████╔╝███████╗███████╗    ██║██║ ╚████║╚█████╔╝███████╗╚██████╗   ██║   ██║╚██████╔╝██║ ╚████║
  ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚══════╝    ╚═╝╚═╝  ╚═══╝ ╚════╝ ╚══════╝ ╚═════╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
-                            🚀 AUTOMATIC CLAUDE.md ENHANCEMENT 🚀
-                          Transforms Simple Tasks Into Expert Guidance
+                            🚀 SMART CLAUDE.md ENHANCEMENT 🚀
+                      Intelligent Injection • Zero Spam • Expert Guidance
 ```
 
 ## 🌟 SYSTEM OVERVIEW
 
-The Calmhive Rule Injection System is a production-ready enhancement that automatically prepends your personal CLAUDE.md guidelines to every conversation, ensuring consistent high-quality outputs across all commands.
+The Calmhive Smart Rule Injection System is a production-ready enhancement that intelligently injects your personal CLAUDE.md guidelines into conversations when needed, ensuring consistent high-quality outputs while eliminating injection spam.
 
 ### 📊 **PERFORMANCE METRICS**
-- **34,558 characters** of CLAUDE.md content injected per task
-- **48x content enhancement** (from 16 chars → 34,558 chars)
+- **19,759 characters** of CLAUDE.md v14.2.0 injected per user message
+- **Smart deduplication** - prevents injection spam and duplicate processing
+- **Request type detection** - distinguishes user messages from tool calls
 - **Zero overhead** - works seamlessly with all commands
 - **100% backward compatibility** - no breaking changes
 

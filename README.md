@@ -1,18 +1,19 @@
 <div align="center">
   <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Logo" width="200">
-  
-  # 🐝 Calmhive v14.0.0 - Claude CLI That Works When Claude Doesn't
+
+  # 🐝 Calmhive v14.2.1 - Claude CLI That Works When Claude Doesn't
 
   ## lets bee friends 🐝
 
-  > **The secret sauce: Intelligent background processing that recovers from Claude usage limits**  
+  > **The secret sauce: Intelligent background processing that recovers from Claude usage limits**
   > Voice-activated automation with 95+ tools and adaptive retry logic.
 </div>
 
 ✨ **What makes Calmhive special?**
+- 🧠 **Smart CLAUDE.md Injection** - Intelligent context preservation without injection spam
 - 🔄 **Smart retry in AFk mode** - Auto-recovers from Claude usage limits during background tasks
 - 📅 **Natural Language Scheduling** - Say "daily at 9am" to schedule recurring tasks
-- 🎙️ **Voice activated** - Just say "hey friend" to control Claude with your voice  
+- 🎙️ **Voice activated** - Just say "hey friend" to control Claude with your voice
 - 🏃 **Background processing** - Run long tasks in AFk mode while you do other work
 - 📈 **Enhanced Progress Tracking** - Track iterations, milestones, and achievements in real-time
 - 🖥️ **Process monitoring** - Beautiful TUI to track all your sessions
@@ -52,7 +53,7 @@ calmhive voice  # Say "hey friend" to activate
 ```
 
 **🔧 70+ MCP Tools** (requires Claude Code CLI setup):
-- **Quick setup**: See internal documentation for MCP setup instructions 
+- **Quick setup**: See internal documentation for MCP setup instructions
 - **Essential tools**: Sequential thinking tools (glass box AI), OmniSearch, GitHub integration, Playwright
 - **Verify setup**: `calmhive chat "test sequential thinking tools"`
 - **🎆 NEW**: Sequential thinking tools transforms AI from black box to glass box - see Claude's reasoning and tool recommendations with confidence scores!
@@ -80,7 +81,13 @@ calmhive voice  # Say "hey friend" to activate
 
 This transparency builds trust and lets you guide Claude more effectively.
 
-### 🚀 NEW in v14.0.0
+### 🚀 NEW in v14.2.0
+- **🧠 Smart CLAUDE.md Injection** - Intelligent request analysis prevents injection spam
+- **🔍 Request Type Detection** - Distinguishes user messages from tool calls and streaming
+- **⚡ Message Deduplication** - Prevents multiple injections of the same content
+- **📊 Debug Insights** - `CALMHIVE_DEBUG=1` shows injection decisions with full transparency
+
+### 🚀 Previous in v14.0.0
 - **📅 Natural Language Scheduling** - Schedule tasks with "daily at 9am" or "every Monday"
 - **📈 Enhanced Progress Tracking** - Real-time iteration tracking with milestones and achievements
 - **📋 Task Templates** - 5 built-in templates for bug fixes, features, refactoring, testing, and performance
@@ -133,7 +140,7 @@ calmhive c -c        # Continue last conversation to see what happened
 **Power user aliases (all tested and working):**
 ```bash
 calmhive c "debug this error"     # Chat alias
-calmhive a "refactor codebase"    # AFk alias  
+calmhive a "refactor codebase"    # AFk alias
 calmhive r "write unit tests"     # Run alias
 calmhive t                        # TUI alias
 calmhive v                        # Voice alias
@@ -156,12 +163,12 @@ calmhive a killorphans            # Clean up any stuck processes
 # Long-running overnight tasks
 calmhive a "implement OAuth 2.0 flow" --iterations 20 --model sonnet
 
-# Continue from where AFk left off  
+# Continue from where AFk left off
 calmhive c -c "What did you accomplish? Show me the changes."
 
 # Quick pipeline: develop → test → review
 calmhive r "add feature X"
-calmhive a "write comprehensive tests" --iterations 5  
+calmhive a "write comprehensive tests" --iterations 5
 calmhive c "review the implementation and suggest improvements"
 ```
 
@@ -175,7 +182,7 @@ calmhive c "debug this error"    # Quick question
 calmhive chat -c                 # Continue previous conversation
 ```
 
-**💡 Pro Tip: Plan Mode (Shift+Tab)**  
+**💡 Pro Tip: Plan Mode (Shift+Tab)**
 In interactive chat sessions, press **Shift+Tab** to enter plan mode - Claude will research and create a detailed plan before executing complex tasks.
 
 ### `run` - Task Execution (alias: `r`)
@@ -233,7 +240,7 @@ calmhive template apply bug-fix ISSUE_DESCRIPTION="memory leak in auth service"
 
 **Available Templates:**
 - **bug-fix**: Systematic bug investigation (8 iterations)
-- **feature-development**: End-to-end implementation (12 iterations)  
+- **feature-development**: End-to-end implementation (12 iterations)
 - **refactoring**: Safe code refactoring (10 iterations)
 - **testing-setup**: Test infrastructure (6 iterations)
 - **performance-optimization**: Performance tuning (8 iterations)
@@ -245,13 +252,13 @@ calmhive afk "$(calmhive template apply performance-optimization TARGET_SYSTEM=a
 
 # Schedule template-driven workflows
 calmhive schedule create "weekly on Friday at 4pm" \
-  "$(calmhive template apply bug-fix ISSUE_DESCRIPTION='weekly maintenance check')" 
+  "$(calmhive template apply bug-fix ISSUE_DESCRIPTION='weekly maintenance check')"
 ```
 
 **Variable Substitution:**
 Templates support dynamic variables for customization:
 - `ISSUE_DESCRIPTION` - Describe the specific problem
-- `TARGET_SYSTEM` - Specify which system/component to work on  
+- `TARGET_SYSTEM` - Specify which system/component to work on
 - `PRIORITY_LEVEL` - Set urgency (high/medium/low)
 - `ITERATIONS` - Override default iteration count
 
@@ -437,7 +444,45 @@ See our comprehensive [MCP Setup Guide](docs/MCP_SETUP.md) for step-by-step inst
 
 ## 💡 Tips & Tricks
 
-### 📝 CLAUDE.md for Persistent Context
+### 🧠 Smart CLAUDE.md Injection System (v14.2.1)
+
+**Intelligent Context Preservation Without Spam**
+
+Calmhive v14.2.1 introduces a revolutionary smart injection system that maintains CLAUDE.md context while eliminating console spam:
+
+#### 🔍 How Smart Injection Works
+```bash
+# Enable debug mode to see the magic happen
+CALMHIVE_DEBUG=1 calmhive chat "hello world"
+```
+
+**Request Analysis in Action:**
+```
+[Calmhive Debug] === REQUEST ANALYSIS ===
+[Calmhive Debug] Request has tools: false
+[Calmhive Debug] Messages count: 1
+[Calmhive Debug] Has recent tool use: false
+[Calmhive Debug] Request analysis: {
+  "requestType": "fresh-user-message",
+  "isUserMessage": true
+}
+[Calmhive Debug] Injection decision: INJECT (fresh-user-message)
+[Calmhive Interceptor] Rules injected (injection #1)
+```
+
+#### ⚡ Smart Features
+- **Request Type Detection**: Distinguishes user messages from tool calls
+- **Message Deduplication**: Same message content = single injection
+- **Tool Context Awareness**: Skips injection during tool execution
+
+#### 📊 Debug Mode Features
+Enable with `CALMHIVE_DEBUG=1` to see:
+- Full request body analysis
+- Injection decision reasoning
+- Message deduplication in action
+- Request type classification
+
+### 📝 CLAUDE.md Configuration
 
 Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Claude sessions:
 - Global coding preferences and standards
@@ -446,7 +491,16 @@ Create a `~/.claude/CLAUDE.md` file to provide persistent context across all Cla
 
 The enhanced CLAUDE.md includes hierarchical decision framework to prevent catastrophic mistakes.
 
-Learn more about optimal AI development workflows in the project documentation.
+**Quick Setup:**
+```bash
+# Install the optimized CLAUDE.md template
+calmhive config install
+
+# Test smart injection
+calmhive chat "analyze this codebase"
+```
+
+Learn more in our [Smart Injection Documentation](docs/RULE-INJECTION.md).
 
 ### 🎯 Command Templates System
 
@@ -564,7 +618,7 @@ calmhive schedule create "every day at 6am" \
 calmhive schedule create "every Monday at 8am" \
   "calmhive afk 'Conduct comprehensive security audit of all npm dependencies. Run npm audit to identify vulnerabilities. For each vulnerability found, research the security advisory details, understand the attack vector, and evaluate the impact on our codebase. For critical and high severity issues, check if patches are available and test them in isolation. Update all dependencies that have security patches available, running the full test suite after each update to ensure compatibility. Generate a security report including: vulnerabilities found, patches applied, dependencies that need manual updates, and any temporary mitigations implemented. Commit the updated package-lock.json with detailed notes about each security fix.' --iterations 8"
 
-# Template-driven bug investigation  
+# Template-driven bug investigation
 calmhive afk "$(calmhive template apply bug-fix \
   ISSUE_DESCRIPTION='memory leak in auth service')" --iterations 8
 
@@ -578,7 +632,7 @@ calmhive schedule create "every Friday at 4pm" \
 ```bash
 calmhive t                    # Launch TUI
 # Inside TUI:
-# gg = Go to top, G = Go to bottom  
+# gg = Go to top, G = Go to bottom
 # j/k = Navigate up/down (vim style)
 # Enter = View session details
 # l = View logs, s = Stop session
@@ -671,7 +725,7 @@ The **CLAUDE.md configuration** transforms Claude into a reliable automation par
 
 **What Prompthive.sh Adds:**
 - 🎯 Advanced prompt engineering tools
-- 📚 Workflow template libraries  
+- 📚 Workflow template libraries
 - 🔄 Complex automation patterns
 - 🧠 Prompt optimization frameworks
 
@@ -692,7 +746,7 @@ calmhive schedule create "weekly on Friday at 4pm" \
 
 **Why Use Both Together:**
 - **Prompthive.sh**: Manages complex prompts, templates, and workflows
-- **Calmhive**: Provides AI automation, scheduling, and background processing  
+- **Calmhive**: Provides AI automation, scheduling, and background processing
 - **Combined**: Complete automation ecosystem for development workflows
 
 ## 📖 Documentation
@@ -714,7 +768,7 @@ calmhive schedule create "weekly on Friday at 4pm" \
 
 **✅ Essential safety practices:**
 - **Backup your data** - Maintain regular backups of important files and projects
-- **Use version control** - Keep your code in Git repositories with remote backups  
+- **Use version control** - Keep your code in Git repositories with remote backups
 - **Review automation** - Monitor what commands Claude executes, especially in AFk mode
 - **Start small** - Test with simple tasks before running complex automations
 - **Monitor tool usage** - Some MCP tools have their own API costs (search engines, etc.)
@@ -751,7 +805,7 @@ calmhive schedule create "weekly on Friday at 4pm" \
 ## 📚 Documentation
 
 - **[Architecture Guide](docs/ARCHITECTURE.md)** - Technical overview and command structure
-- **[MCP Setup Guide](docs/MCP_SETUP.md)** - Complete MCP tools configuration  
+- **[MCP Setup Guide](docs/MCP_SETUP.md)** - Complete MCP tools configuration
 - **[README Templates](README-TEMPLATES.md)** - Template file documentation
 - **[Claude Code Best Practices](claude-code-best-practices.md)** - Comprehensive Claude Code usage guide
 

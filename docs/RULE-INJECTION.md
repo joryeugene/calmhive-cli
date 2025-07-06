@@ -1,22 +1,54 @@
 # Calmhive Rule Injection System
 
 *Last Updated: 2025-01-07*
-*Version: 2.0.0*
+*Version: 14.2.1*
 
 ## Overview
 
-The Calmhive CLI provides a sophisticated multi-layer system for automatically injecting CLAUDE.md rules into every conversation with Claude. This ensures consistent behavior and adherence to user-defined guidelines across all interactions.
+The Calmhive CLI provides a sophisticated multi-layer system for automatically injecting CLAUDE.md rules into conversations with Claude. This ensures consistent behavior and adherence to user-defined guidelines while intelligently avoiding injection spam.
 
 ### Key Features
+- **Smart Injection**: Injects CLAUDE.md only when needed, not on every API call
+- **Request Type Detection**: Distinguishes user messages from tool calls and streaming
+- **Message Deduplication**: Prevents multiple injections of the same message
 - **Multiple Interception Methods**: Network-level, stdio-level, or both
-- **Automatic Rule Injection**: Prepends CLAUDE.md to every message
 - **Configurable**: Enable/disable via settings or command flags
 - **Enhanced Output**: Optional syntax highlighting and timestamps
 - **Cross-Platform**: Works on all platforms Claude supports
 
 ## How It Works
 
-### 1. Rule Source
+### 1. Smart Injection System (v3.0+)
+
+The injection system now uses intelligent request analysis to inject CLAUDE.md only when appropriate:
+
+#### Request Type Detection
+- **Fresh User Messages**: Short conversations without tool use → INJECT
+- **Tool Execution Context**: Messages with recent tool calls → SKIP
+- **Continued Conversations**: Long conversations with tool use → SKIP
+- **Duplicate Messages**: Same message content seen before → SKIP
+
+#### Message Analysis
+The system analyzes each request for:
+- `bodyData.tools` - Presence of tool definitions
+- `bodyData.stream` - Streaming vs non-streaming requests  
+- Message history length and patterns
+- Recent assistant messages with tool use
+- Message content deduplication
+
+#### Debug Mode
+Enable detailed logging with `CALMHIVE_DEBUG=1`:
+```bash
+CALMHIVE_DEBUG=1 calmhive chat
+```
+
+This shows:
+- Request analysis for each API call
+- Injection decisions and reasoning
+- Message deduplication in action
+- Request body structures
+
+### 2. Rule Source
 - Primary source: `~/.claude/CLAUDE.md`
 - Dynamically loaded at runtime
 - No hardcoded rules - always reads the actual file
@@ -204,7 +236,39 @@ touch ~/.claude/CLAUDE.md
 
 ## Troubleshooting
 
-### Rules Not Being Injected
+### Smart Injection Issues (v3.0+)
+
+#### Rules Not Being Injected
+1. **Enable Debug Mode**: `CALMHIVE_DEBUG=1 calmhive chat`
+2. **Check Request Analysis**: Look for "Request analysis" and "Injection decision" logs
+3. **Verify Message Type**: Ensure you're sending fresh user messages, not in tool execution context
+4. **Check Deduplication**: See if message was already processed with "Already processed this message"
+
+#### Understanding Injection Decisions
+Debug output shows injection reasoning:
+```
+[Calmhive Debug] Injection decision: INJECT (fresh-user-message)
+[Calmhive Debug] Injection decision: SKIP (tool-execution-context)
+[Calmhive Debug] Already processed this message: 19_Hello,howareyou?...
+```
+
+#### Common Scenarios
+
+**Scenario**: Rules injected once then stop
+- **Cause**: Normal behavior - smart deduplication prevents re-injection
+- **Solution**: This is correct - each unique message gets injected once
+
+**Scenario**: No injection during tool use
+- **Cause**: System correctly detects tool execution context
+- **Solution**: This is correct - tools already have context from initial injection
+
+**Scenario**: Rules inject on every message
+- **Cause**: Old injection system or debug mode issue
+- **Solution**: Verify you're running v3.0+ with smart injection
+
+### Legacy Issues
+
+#### Rules Not Being Injected (General)
 1. Check if CLAUDE.md exists: `ls -la ~/.claude/CLAUDE.md`
 2. Verify settings: `cat ~/.claude/calmhive-settings.json`
 3. Check interceptor loading: Look for `[Calmhive Interceptor]` in stderr
