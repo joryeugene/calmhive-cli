@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Logo" width="200">
+  <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Calmbee Mascot" width="200">
 
   # 🐝 Calmhive v14.2.9 - Claude CLI That Works When Claude Doesn't
 

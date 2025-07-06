@@ -1,17 +1,53 @@
 #!/usr/bin/env node
 
-// AFk Command - Reliable background processing with proper lifecycle management
-// Claude That Never Quits
+/**
+ * AFk Command - Reliable background processing with proper lifecycle management
+ * "Claude That Never Quits"
+ * 
+ * Provides comprehensive AFk (Away From Keyboard) session management including:
+ * - Background session creation and execution
+ * - Real-time status monitoring and progress tracking
+ * - Log tailing and session cleanup operations
+ * - Session resume capabilities and orphan process cleanup
+ * - Statistics and validation tools
+ * 
+ * AFk sessions run independently with adaptive retry logic, context monitoring,
+ * and automatic recovery from usage limits and context issues.
+ * 
+ * @example
+ * // Start a background AFk session
+ * node afk "analyze codebase" --iterations 10
+ * 
+ * // Monitor session status
+ * node afk status
+ * 
+ * // Tail session logs
+ * node afk tail afk-12345
+ */
 
 const ProcessManager = require('../lib/process-manager');
 const pathManager = require('../lib/path-manager');
 const ruleInjector = require('../lib/rule-injector');
 
 class AfkCommand {
+  /**
+   * Creates a new AFk command handler
+   * 
+   * Initializes the process manager for session lifecycle management
+   * and sets up database connections for session tracking.
+   */
   constructor() {
     this.processManager = new ProcessManager();
   }
 
+  /**
+   * Main entry point for AFk command execution
+   * 
+   * Parses command line arguments and routes to appropriate subcommand handlers.
+   * Supports: start, stop, status, tail, cleanup, resume, stats, killorphans, validate
+   * 
+   * @throws {Error} If command execution fails or invalid arguments provided
+   */
   async execute() {
     const [,, command, ...args] = process.argv;
     
@@ -72,6 +108,16 @@ class AfkCommand {
     }
   }
 
+  /**
+   * Starts a new AFk background session with the provided task and options
+   * 
+   * Parses command line arguments to extract task description and options,
+   * validates input parameters, injects CLAUDE.md rules, and creates a new
+   * background session with the ProcessManager.
+   * 
+   * @param {string[]} args - Command line arguments containing task and options
+   * @throws {Error} If task is missing or iterations are out of range (1-69)
+   */
   async startSession(args) {
     // First parse options to know what to exclude
     const options = this.parseOptions(args);
@@ -135,6 +181,15 @@ class AfkCommand {
     console.log(`🛑 Stop: calmhive afk stop ${session.id}`);
   }
 
+  /**
+   * Stops a running AFk session by session ID
+   * 
+   * Terminates the specified session and all associated processes.
+   * Supports stopping all sessions with '--all' or 'all' as the session ID.
+   * 
+   * @param {string[]} args - Command arguments, first should be session ID or 'all'
+   * @throws {Error} If session ID is missing or session stop fails
+   */
   async stopSession(args) {
     const sessionId = args[0];
     if (!sessionId) {
@@ -151,6 +206,12 @@ class AfkCommand {
     await this.processManager.stopSession(sessionId);
   }
   
+  /**
+   * Stops all currently running AFk sessions
+   * 
+   * Iterates through all sessions with 'running' status and attempts to stop
+   * each one. Reports success/failure counts at completion.
+   */
   async stopAllSessions() {
     console.log('🛑 Stopping all running sessions...');
     const sessions = await this.processManager.getStatus();
@@ -174,6 +235,17 @@ class AfkCommand {
     console.log(`✅ Stopped ${stopped} of ${running.length} sessions`);
   }
 
+  /**
+   * Displays comprehensive status information for all AFk sessions
+   * 
+   * Performs system maintenance before displaying status:
+   * - Restores incorrectly marked sessions
+   * - Cleans up stale sessions
+   * - Optional system validation with --validate flag
+   * - Optional orphan process cleanup with --cleanup flag
+   * 
+   * @param {string[]} args - Optional flags: -d/--detailed for detailed view, --validate, --cleanup
+   */
   async showStatus(args) {
     // Restore any incorrectly marked sessions first
     await this.processManager.restoreRunningSessions();
@@ -249,6 +321,14 @@ class AfkCommand {
     }
   }
   
+  /**
+   * Displays session status in a compact table format
+   * 
+   * Shows essential information in columns: Session ID, Task, Status, Progress, Started
+   * Limited to 20 most recent sessions for readability.
+   * 
+   * @param {Array} sessions - Array of session objects from database
+   */
   showCompactStatus(sessions) {
     const header = 'Session ID'.padEnd(25) + 
                   'Task'.padEnd(35) + 
