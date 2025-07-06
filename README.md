@@ -1,7 +1,7 @@
 <div align="center">
   <img src="assets/calmhive-logo-optimized.png" alt="Calmhive Calmbee Mascot" width="200">
 
-  # 🐝 Calmhive v14.2.9 - Claude CLI That Works When Claude Doesn't
+  # 🐝 Calmhive v14.2.10 - Claude CLI That Works When Claude Doesn't
 
   ## lets bee friends 🐝
 

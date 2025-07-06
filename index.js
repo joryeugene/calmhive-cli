@@ -7,6 +7,6 @@
 
 module.exports = {
   name: 'calmhive',
-  version: '14.2.9',
+  version: '14.2.10',
   description: 'Intelligent Claude CLI wrapper with AFk background processing'
 };
