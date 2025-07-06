@@ -45,31 +45,6 @@ log = logging.getLogger("calmhive_mcp")
 # MCP data structure
 # This structured data represents all available MCPs and their tools
 MCP_DATA = {
-    "memento": {
-        "description": "Knowledge graph memory system for persistent knowledge storage and retrieval",
-        "tools": {
-            "mcp__memento__create_entities": "Create multiple new entities in your knowledge graph",
-            "mcp__memento__create_relations": "Create multiple new relations between entities",
-            "mcp__memento__add_observations": "Add new observations to existing entities",
-            "mcp__memento__delete_entities": "Delete multiple entities and their associated relations",
-            "mcp__memento__delete_observations": "Delete specific observations from entities",
-            "mcp__memento__delete_relations": "Delete multiple relations from your knowledge graph",
-            "mcp__memento__get_relation": "Get a specific relation with its enhanced properties",
-            "mcp__memento__update_relation": "Update an existing relation with enhanced properties",
-            "mcp__memento__read_graph": "Read the entire knowledge graph memory system",
-            "mcp__memento__search_nodes": "Search for nodes based on a query",
-            "mcp__memento__open_nodes": "Open specific nodes by their names",
-            "mcp__memento__semantic_search": "Search for entities semantically using vector embeddings",
-            "mcp__memento__get_entity_embedding": "Get the vector embedding for a specific entity",
-            "mcp__memento__get_entity_history": "Get the version history of an entity",
-            "mcp__memento__get_relation_history": "Get the version history of a relation",
-            "mcp__memento__get_graph_at_time": "Get your knowledge graph as it existed at a specific point in time",
-            "mcp__memento__get_decayed_graph": "Get your knowledge graph with confidence values decayed based on time",
-            "mcp__memento__force_generate_embedding": "Forcibly generate and store an embedding for an entity",
-            "mcp__memento__debug_embedding_config": "Debug tool to check embedding configuration and status",
-            "mcp__memento__diagnose_vector_search": "Diagnostic tool to directly query database for entity embeddings"
-        }
-    },
     "sequentialthinking": {
         "description": "Structured analytical thinking framework with tool recommendations",
         "tools": {

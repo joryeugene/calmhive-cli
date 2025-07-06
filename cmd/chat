@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 /**
  * Calmhive Chat Command
- * Interactive passthrough to Claude with auto tools
+ * Interactive passthrough to Claude with auto tools and enhanced interception
  */
 
 const { spawn } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 const toolManager = require('../lib/tool-manager');
+const ruleInjector = require('../lib/rule-injector');
+const { wrapProcessStdin } = require('../lib/stdin-interceptor');
+const { wrapProcessStdout } = require('../lib/stdout-interceptor');
 
 // Get all arguments
 const args = process.argv.slice(2);
@@ -27,28 +33,149 @@ Examples:
   calmhive chat -c "continue our work"   # Continue previous session
   calmhive chat -r                       # Resume a session
 
+Interception Options:
+  --intercept=network   # Use network-level interception (default)
+  --intercept=stdio     # Use stdin/stdout interception
+  --intercept=both      # Use both methods
+  --no-intercept        # Disable rule injection
+  --highlight           # Enable syntax highlighting (stdio only)
+  --timestamps          # Add timestamps to output (stdio only)
+
 All Claude options work. This command invokes:
   claude --allowedTools [95+ tools] [your arguments]
 
 Features:
   ✓ Interactive Claude experience
   ✓ Access to 95+ tools (15 core + 80+ MCP integrations)
-  ✓ Supports all Claude flags unchanged
+  ✓ Automatic CLAUDE.md rule injection
+  ✓ Optional syntax highlighting
   ✓ Perfect for exploration, debugging, Q&A
 `);
   process.exit(0);
 }
 
-// Add allowed tools unless user already specified them
-if (!args.some(arg => arg.startsWith('--allowedTools') || arg.startsWith('--disallowedTools'))) {
-  const allTools = toolManager.getAllToolsArray();
-  args.push('--allowedTools', ...allTools);
+// Parse interception options
+let interceptionMethod = 'network'; // default
+let enableHighlight = false;
+let enableTimestamps = false;
+let filteredArgs = [];
+
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  if (arg.startsWith('--intercept=')) {
+    interceptionMethod = arg.split('=')[1];
+  } else if (arg === '--no-intercept') {
+    interceptionMethod = 'none';
+  } else if (arg === '--highlight') {
+    enableHighlight = true;
+  } else if (arg === '--timestamps') {
+    enableTimestamps = true;
+  } else {
+    filteredArgs.push(arg);
+  }
 }
 
-// Spawn claude with all arguments passed through
-const claude = spawn('claude', args, {
-  stdio: 'inherit'
-});
+// Process arguments for rule injection
+const processedArgs = processArgsWithRuleInjection(filteredArgs);
+
+// Add allowed tools unless user already specified them
+if (!processedArgs.some(arg => arg.startsWith('--allowedTools') || arg.startsWith('--disallowedTools'))) {
+  const allTools = toolManager.getAllToolsArray();
+  processedArgs.push('--allowedTools', ...allTools);
+}
+
+/**
+ * Process arguments to inject CLAUDE.md rules into user messages
+ */
+function processArgsWithRuleInjection(originalArgs) {
+  const args = [...originalArgs];
+  
+  // Find potential user message (first non-flag argument)
+  let messageIndex = -1;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    
+    // Skip flags and their values
+    if (arg.startsWith('-')) {
+      // Skip flag and its value (if it takes a value)
+      if (arg === '-m' || arg === '--model' || arg === '--allowedTools' || arg === '--disallowedTools') {
+        i++; // Skip the next argument (flag value)
+      }
+      continue;
+    }
+    
+    // Found potential message
+    messageIndex = i;
+    break;
+  }
+  
+  // If we found a message, inject rules
+  if (messageIndex >= 0 && args[messageIndex]) {
+    const originalMessage = args[messageIndex];
+    const enhancedMessage = ruleInjector.injectRules(originalMessage, { 
+      commandType: 'chat' 
+    });
+    
+    // Only replace if injection actually happened
+    if (enhancedMessage !== originalMessage) {
+      args[messageIndex] = enhancedMessage;
+    }
+  }
+  
+  return args;
+}
+
+// Find the claude executable path
+const { execSync } = require('child_process');
+let claudePath;
+try {
+  claudePath = execSync('which claude', { encoding: 'utf8' }).trim();
+} catch (error) {
+  console.error('Error: claude command not found. Please install Claude Code first.');
+  process.exit(1);
+}
+
+// Use node with --require flag to load our interceptor
+const interceptorPath = require('path').join(__dirname, '../lib/chat-interceptor.js');
+
+// Launch claude with the appropriate interception method
+const isPipeMode = processedArgs.includes('-p') || processedArgs.includes('--pipe');
+
+let claude;
+let stdinInterceptor;
+let stdoutInterceptor;
+
+if (interceptionMethod === 'none' || isPipeMode) {
+  // No interception or pipe mode: use regular spawn (rules already injected in first message)
+  claude = spawn('claude', processedArgs, {
+    stdio: 'inherit'
+  });
+} else if (interceptionMethod === 'stdio' || interceptionMethod === 'both') {
+  // Stdio interception: wrap stdin/stdout
+  claude = spawn('claude', processedArgs, {
+    stdio: ['pipe', 'pipe', 'inherit']
+  });
+  
+  // Apply stdin interceptor
+  stdinInterceptor = wrapProcessStdin(claude);
+  
+  // Apply stdout interceptor with options
+  stdoutInterceptor = wrapProcessStdout(claude, {
+    syntaxHighlight: enableHighlight,
+    addTimestamps: enableTimestamps
+  });
+  
+  if (interceptionMethod === 'both') {
+    // Also load network interceptor
+    require(interceptorPath);
+  }
+} else {
+  // Network interception (default): use node with interceptor
+  claude = spawn('node', ['--require', interceptorPath, claudePath, ...processedArgs], {
+    stdio: 'inherit',
+    env: { ...process.env }
+  });
+}
 
 claude.on('error', (err) => {
   console.error('Failed to start claude:', err);

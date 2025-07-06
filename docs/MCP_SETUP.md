@@ -129,18 +129,6 @@ Save this as `~/.claude/claude_desktop_config.json`:
         "PERPLEXITY_API_KEY": "pplx-EXAMPLE_KEY_REPLACE_ME"
       }
     },
-    "memento": {
-      "command": "npx",
-      "args": ["-y", "@gannonh/memento-mcp"],
-      "env": {
-        "MEMORY_STORAGE_TYPE": "neo4j",
-        "NEO4J_URI": "bolt://127.0.0.1:7687",
-        "NEO4J_USERNAME": "neo4j",
-        "NEO4J_PASSWORD": "EXAMPLE_PASSWORD_REPLACE_ME",
-        "NEO4J_DATABASE": "neo4j",
-        "OPENAI_API_KEY": "sk-EXAMPLE_KEY_REPLACE_ME"
-      }
-    },
     "github": {
       "command": "docker",
       "args": [

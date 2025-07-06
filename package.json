@@ -1,7 +1,7 @@
 {
   "name": "@calmhive/calmhive-cli",
-  "version": "14.0.1",
-  "description": "🐝 Intelligent Claude CLI wrapper with AFk background processing, voice interface, and adaptive retry",
+  "version": "14.2.0",
+  "description": "🐝 Intelligent Claude CLI wrapper with rule injection, AFk background processing, voice interface, and adaptive retry",
   "main": "index.js",
   "bin": {
     "calmhive": "bin/calmhive"
@@ -27,7 +27,7 @@
     "test:quick": "node scripts/test-runner.js --no-lint unit",
     "test:ci": "node scripts/test-runner.js --coverage",
     "test:watch": "mocha test/**/*.test.js --watch",
-    "lint": "eslint lib/ --fix",
+    "lint": "eslint lib/ test/ --fix",
     "lint:check": "eslint lib/",
     "build": "npm run test:ci",
     "quality": "npm run test:all --verbose --coverage",
@@ -79,6 +79,7 @@
   ],
   "dependencies": {
     "blessed": "^0.1.81",
+    "chalk": "^5.4.1",
     "fs-extra": "^11.3.0",
     "ink": "^6.0.0",
     "node-cron": "^3.0.3",

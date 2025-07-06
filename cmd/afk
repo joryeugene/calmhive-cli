@@ -5,6 +5,7 @@
 
 const ProcessManager = require('../lib/process-manager');
 const pathManager = require('../lib/path-manager');
+const ruleInjector = require('../lib/rule-injector');
 
 class AfkCommand {
   constructor() {
@@ -111,12 +112,18 @@ class AfkCommand {
       process.exit(1);
     }
     
+    // Inject CLAUDE.md rules into the task for background processing
+    const enhancedTask = ruleInjector.injectRules(task, { 
+      commandType: 'afk',
+      iterations: options.iterations 
+    });
+    
     console.log(`🚀 Starting v${pathManager.getVersion()} AFk session...`);
     
     // Always run AFk sessions in background mode for proper isolation
     options.background = true;
     
-    const session = await this.processManager.startAfkSession(task, options);
+    const session = await this.processManager.startAfkSession(enhancedTask, options);
     
     console.log(`\n📋 Session Details:`);
     console.log(`   ID: ${session.id}`);
@@ -659,6 +666,13 @@ SCHEDULER INTEGRATION (v14.0.0):
       const resumeTask = `[RESUME from iteration ${session.iterations_completed || 0}] ${session.task}`;
       const resumeIterations = Math.max(1, (session.iterations_planned || 5) - (session.iterations_completed || 0));
       
+      // Inject CLAUDE.md rules into the resume task
+      const enhancedResumeTask = ruleInjector.injectRules(resumeTask, { 
+        commandType: 'afk',
+        iterations: resumeIterations,
+        isResume: true
+      });
+      
       console.log(`📝 Creating resume session with ${resumeIterations} remaining iterations...`);
       
       // Start new session with resume context
@@ -669,7 +683,7 @@ SCHEDULER INTEGRATION (v14.0.0):
       };
       
       const newSession = await this.processManager.startAfkSession(
-        resumeTask,
+        enhancedResumeTask,
         {
           iterations: resumeIterations,
           background: true,

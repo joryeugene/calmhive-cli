@@ -1,0 +1,279 @@
+#!/usr/bin/env node
+
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+
+/**
+ * Calmhive Setup - Configure Claude Code Integration
+ * 
+ * This command sets up the complete Calmhive integration with Claude Code:
+ * - Configures hooks for automatic CLAUDE.md rule injection
+ * - Sets up MCP servers (sequentialthinking-tools)
+ * - Validates configurations
+ * - Creates backup of existing settings
+ * 
+ * Usage: calmhive setup [--dry-run] [--force]
+ */
+
+const CLAUDE_DIR = path.join(os.homedir(), '.claude');
+const SETTINGS_PATH = path.join(CLAUDE_DIR, 'settings.json');
+const CALMHIVE_BIN_PATH = path.resolve(__dirname, '..', 'cmd', 'inject-rules');
+
+function readSettingsSafely() {
+  try {
+    if (!fs.existsSync(SETTINGS_PATH)) {
+      return {};
+    }
+    const content = fs.readFileSync(SETTINGS_PATH, 'utf8').trim();
+    return content ? JSON.parse(content) : {};
+  } catch (error) {
+    console.warn(`Warning: Could not parse existing settings.json: ${error.message}`);
+    return {};
+  }
+}
+
+function writeSettingsSafely(settings, dryRun = false) {
+  const settingsJson = JSON.stringify(settings, null, 2);
+  
+  if (dryRun) {
+    console.log('\n[DRY RUN] Would write to settings.json:');
+    console.log(settingsJson);
+    return true;
+  }
+  
+  // Create backup if file exists
+  if (fs.existsSync(SETTINGS_PATH)) {
+    const backupPath = `${SETTINGS_PATH}.calmhive-backup-${Date.now()}`;
+    fs.copyFileSync(SETTINGS_PATH, backupPath);
+    console.log(`✓ Created backup: ${backupPath}`);
+  }
+  
+  // Ensure .claude directory exists
+  if (!fs.existsSync(CLAUDE_DIR)) {
+    fs.mkdirSync(CLAUDE_DIR, { recursive: true });
+  }
+  
+  // Atomic write
+  const tempPath = `${SETTINGS_PATH}.tmp`;
+  fs.writeFileSync(tempPath, settingsJson);
+  fs.renameSync(tempPath, SETTINGS_PATH);
+  
+  return true;
+}
+
+function validateInjectRulesCommand() {
+  if (!fs.existsSync(CALMHIVE_BIN_PATH)) {
+    throw new Error(`inject-rules command not found at: ${CALMHIVE_BIN_PATH}`);
+  }
+  
+  // Check if it's executable
+  try {
+    fs.accessSync(CALMHIVE_BIN_PATH, fs.constants.X_OK);
+  } catch (error) {
+    // Try to make it executable
+    fs.chmodSync(CALMHIVE_BIN_PATH, '755');
+  }
+  
+  return true;
+}
+
+function generateHookConfiguration() {
+  return {
+    hooks: {
+      preToolUse: {
+        command: CALMHIVE_BIN_PATH,
+        description: "Automatically inject CLAUDE.md rules into conversations"
+      }
+    }
+  };
+}
+
+function generateMCPConfiguration() {
+  return {
+    mcpServers: {
+      "sequentialthinking-tools": {
+        command: "npx",
+        args: ["-y", "mcp-sequentialthinking-tools"],
+        description: "Sequential thinking tools for transparent reasoning"
+      }
+    }
+  };
+}
+
+function mergeConfigurations(existing, hooks, mcp, force = false) {
+  const result = { ...existing };
+  
+  // Merge hooks
+  if (!result.hooks) {
+    result.hooks = {};
+  }
+  
+  if (result.hooks.preToolUse && !force) {
+    console.warn('Warning: preToolUse hook already exists. Use --force to override.');
+  } else {
+    Object.assign(result.hooks, hooks.hooks);
+    console.log('✓ Configured Claude Code hooks for automatic rule injection');
+  }
+  
+  // Merge MCP servers
+  if (!result.mcpServers) {
+    result.mcpServers = {};
+  }
+  
+  if (result.mcpServers["sequentialthinking-tools"] && !force) {
+    console.log('ℹ Sequential thinking tools already configured');
+  } else {
+    Object.assign(result.mcpServers, mcp.mcpServers);
+    console.log('✓ Configured sequential thinking tools MCP server');
+  }
+  
+  return result;
+}
+
+function validateFinalConfiguration(settings) {
+  const errors = [];
+  
+  // Validate hook configuration
+  if (!settings.hooks?.preToolUse?.command) {
+    errors.push('Missing preToolUse hook command');
+  } else if (!fs.existsSync(settings.hooks.preToolUse.command)) {
+    errors.push(`Hook command not found: ${settings.hooks.preToolUse.command}`);
+  }
+  
+  // Validate MCP configuration
+  if (!settings.mcpServers?.["sequentialthinking-tools"]) {
+    errors.push('Missing sequentialthinking-tools MCP server configuration');
+  }
+  
+  if (errors.length > 0) {
+    throw new Error(`Configuration validation failed:\n${errors.map(e => `  - ${e}`).join('\n')}`);
+  }
+  
+  return true;
+}
+
+function displaySetupSummary(settings) {
+  console.log('\n🐝 Calmhive Setup Complete! 🐝\n');
+  
+  console.log('Configured Features:');
+  console.log('┌─────────────────────────────────────────────────────────────┐');
+  console.log('│ ✓ Automatic CLAUDE.md rule injection (preToolUse hook)     │');
+  console.log('│ ✓ Sequential thinking tools MCP server                     │');
+  console.log('│ ✓ Safe file handling with backups                          │');
+  console.log('│ ✓ Double-injection prevention                               │');
+  console.log('└─────────────────────────────────────────────────────────────┘');
+  
+  console.log('\nNext Steps:');
+  console.log('1. Restart Claude Code to activate new settings');
+  console.log('2. Test with: claude run "help me commit this code"');
+  console.log('3. Verify CLAUDE.md rules appear in conversation');
+  
+  console.log('\nConfiguration Files:');
+  console.log(`  Settings: ${SETTINGS_PATH}`);
+  console.log(`  Hook Command: ${CALMHIVE_BIN_PATH}`);
+  
+  if (settings.hooks?.preToolUse?.command) {
+    console.log('\nHook Configuration:');
+    console.log(`  Command: ${settings.hooks.preToolUse.command}`);
+    console.log(`  Description: ${settings.hooks.preToolUse.description}`);
+  }
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  const dryRun = args.includes('--dry-run');
+  const force = args.includes('--force');
+  const help = args.includes('--help') || args.includes('-h');
+  
+  if (help) {
+    console.log(`
+Calmhive Setup - Configure Claude Code Integration
+
+DESCRIPTION:
+  Sets up complete Calmhive integration with Claude Code including:
+  - Automatic CLAUDE.md rule injection hooks
+  - Sequential thinking tools MCP server
+  - Safe configuration with backups
+
+USAGE:
+  calmhive setup [options]
+
+OPTIONS:
+  --dry-run    Show what would be configured without making changes
+  --force      Override existing hook/MCP configurations
+  --help, -h   Show this help message
+
+SAFETY FEATURES:
+  - Creates backup of existing settings.json
+  - Validates all configurations before applying
+  - Atomic file operations
+  - Non-destructive merging with existing settings
+
+EXAMPLES:
+  calmhive setup                  # Standard setup
+  calmhive setup --dry-run        # Preview changes
+  calmhive setup --force          # Override existing configs
+`);
+    process.exit(0);
+  }
+  
+  try {
+    console.log('🐝 Starting Calmhive Setup...\n');
+    
+    // Validate inject-rules command exists and is executable
+    console.log('Validating inject-rules command...');
+    validateInjectRulesCommand();
+    console.log('✓ inject-rules command validated');
+    
+    // Read existing settings
+    console.log('Reading existing Claude Code settings...');
+    const existingSettings = readSettingsSafely();
+    console.log('✓ Settings loaded successfully');
+    
+    // Generate configurations
+    console.log('Generating hook configuration...');
+    const hookConfig = generateHookConfiguration();
+    console.log('✓ Hook configuration generated');
+    
+    console.log('Generating MCP server configuration...');
+    const mcpConfig = generateMCPConfiguration();
+    console.log('✓ MCP configuration generated');
+    
+    // Merge configurations
+    console.log('Merging configurations...');
+    const finalSettings = mergeConfigurations(existingSettings, hookConfig, mcpConfig, force);
+    
+    // Validate final configuration
+    console.log('Validating final configuration...');
+    validateFinalConfiguration(finalSettings);
+    console.log('✓ Configuration validation passed');
+    
+    // Write settings
+    console.log('Writing settings to Claude Code...');
+    writeSettingsSafely(finalSettings, dryRun);
+    
+    if (!dryRun) {
+      console.log('✓ Settings written successfully');
+      displaySetupSummary(finalSettings);
+    } else {
+      console.log('\n[DRY RUN] Setup completed successfully - no changes made');
+    }
+    
+    process.exit(0);
+    
+  } catch (error) {
+    console.error(`\n❌ Setup failed: ${error.message}\n`);
+    
+    console.log('Troubleshooting:');
+    console.log('1. Ensure Claude Code CLI is installed');
+    console.log('2. Check ~/.claude directory permissions');
+    console.log('3. Run with --dry-run to preview changes');
+    console.log('4. Check existing settings.json syntax');
+    
+    process.exit(1);
+  }
+}
+
+// Run setup
+main();
