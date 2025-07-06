@@ -1,6 +1,6 @@
 {
   "name": "@calmhive/calmhive-cli",
-  "version": "14.2.8",
+  "version": "14.2.9",
   "description": "🐝 Intelligent Claude CLI wrapper with rule injection, AFk background processing, voice interface, and adaptive retry",
   "main": "index.js",
   "bin": {
@@ -12,9 +12,9 @@
   "scripts": {
     "start:tui": "node cmd/tui",
     "start:afk": "node cmd/afk",
-    "test": "mocha test/**/*.test.js --timeout 10000",
-    "test:unit": "mocha test/unit/**/*.test.js",
-    "test:integration": "mocha test/integration/**/*.test.js",
+    "test": "CALMHIVE_TEST_MODE=true mocha test/**/*.test.js --timeout 10000",
+    "test:unit": "CALMHIVE_TEST_MODE=true mocha test/unit/**/*.test.js",
+    "test:integration": "CALMHIVE_TEST_MODE=true mocha test/integration/**/*.test.js",
     "test:e2e": "mocha test/e2e/**/*.test.js --timeout 30000",
     "test:production": "mocha test/production/**/*.test.js --timeout 60000",
     "test:coverage": "nyc npm test",

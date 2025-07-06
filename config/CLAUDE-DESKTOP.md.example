@@ -230,7 +230,7 @@ NO attribution, NO Claude mentions, NO generation notes
 **Break automatic retrieval-execution cycles**
 
 #### Test Modification Interrupt
-🚨 **TESTS ARE CRITICAL VERIFICATION TOOLS**
+🚨 **TESTS ARE SACRED - NEVER DELETE TEST FILES**
 ```
 DETECT: Automatic test deletion/modification
 PAUSE: Before any test changes
@@ -238,6 +238,14 @@ ANALYZE: What functionality does this test verify?
 CONSCIOUS CHOICE: Replace automatic with intentional
 STAGE: Conscious decision in buffer for validation
 EXECUTE: Only after all modules approve
+
+ABSOLUTE RULES:
+- NEVER delete test files (.test.js, .spec.js, test-*.js)
+- NEVER remove test cases without explicit user permission
+- Tests are the foundation of trust and quality
+- Deleting tests = destroying verification = catastrophic failure
+- If a test fails, FIX THE CODE, not the test
+- Tests document expected behavior - they are sacred contracts
 ```
 
 #### Tool Selection Interrupt

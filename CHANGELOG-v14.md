@@ -1,6 +1,35 @@
 # Calmhive v14.0.0 Changelog
 *From Experimental CLI to Production AI Development Platform*
 
+## [14.2.9] - 2025-01-06
+
+### 🐛 Bug Fixes
+- **Fixed chat interceptor spam** - Improved deduplication prevents #1-#11 injection spam
+  - SHA-256 hashing for stable message identification
+  - 80%+ similarity detection for typing continuation
+  - Timestamp tracking with 1-hour automatic cleanup
+  - Proper session-based deduplication
+- **Fixed TUI log viewer crash** - TUI no longer exits when viewing logs
+  - Fixed blessed.js tag parsing crash with deferred scrolling
+  - Added comprehensive error handling throughout TUI
+  - Escaped problematic characters in log content
+  - Added null/undefined safety checks
+
+### ✅ Testing & Quality
+- **Added comprehensive test coverage** for chat interceptor
+  - Unit tests for hash, similarity, deduplication
+  - Integration tests for typing patterns, concurrent sessions
+  - Performance tests under load (100 messages)
+- **Added TUI log viewer tests** to prevent regression
+  - Malformed content handling tests
+  - Component initialization tests
+  - Error boundary tests
+- **TESTS ARE SACRED** rule added to CLAUDE.md
+
+### 🔧 Infrastructure
+- Updated deploy-to-projects.sh exclusions for test files
+- Propagated CLAUDE.md v14.2.1 to all template files
+
 ## [14.2.8] - 2025-07-06
 
 ### 🐛 Bug Fixes

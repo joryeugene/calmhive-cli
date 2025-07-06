@@ -120,13 +120,13 @@ class AfkCommand {
     
     console.log(`🚀 Starting v${pathManager.getVersion()} AFk session...`);
     
-    // Always run AFk sessions in background mode for proper isolation
-    options.background = true;
+    // Run in foreground for tests, background for normal use
+    options.background = !process.env.CALMHIVE_TEST_MODE;
     
     const session = await this.processManager.startAfkSession(enhancedTask, options);
     
     console.log(`\n📋 Session Details:`);
-    console.log(`   ID: ${session.id}`);
+    console.log(`   Session ID: ${session.id}`);
     console.log(`   Task: ${session.task}`);
     console.log(`   Iterations: ${session.iterations_planned}`);
     console.log(`   Sleep Prevention: ${session.iterations_planned > 5 && options.preventSleep !== false ? 'Enabled' : 'Disabled'}`);
