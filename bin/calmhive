@@ -9,7 +9,10 @@ const path = require('path');
 const fs = require('fs');
 const pathManager = require('../lib/path-manager');
 
-// Get version from path manager
+/**
+ * Get the current version of Calmhive from the path manager
+ * @returns {string} The version string from package.json
+ */
 function getVersion() {
   return pathManager.getVersion();
 }
@@ -55,6 +58,10 @@ const ALIASES = {
   'v': 'voice'
 };
 
+/**
+ * Display the main help message showing all available commands and usage examples
+ * Formats commands with their descriptions and aliases, shows practical examples
+ */
 function showHelp() {
   const version = getVersion();
   console.log(`
@@ -90,14 +97,19 @@ For command-specific help:
 `);
 }
 
-// Main execution
+/**
+ * Main execution logic - Parse command line arguments and route to appropriate commands
+ * Handles help, version, and update commands before delegating to specific command modules
+ */
 const args = process.argv.slice(2);
 
+// Handle help flags
 if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
   showHelp();
   process.exit(0);
 }
 
+// Handle version flag
 if (args[0] === '--version' || args[0] === '-v') {
   console.log(getVersion());
   process.exit(0);
