@@ -1,52 +1,10 @@
 #!/usr/bin/env node
+/**
+ * Calmhive 'a' command - Alias for 'afk'
+ * Quick access to AFk (Away From Keyboard) background processing
+ */
 
-// AFk Command - Reliable background processing with proper lifecycle management
-// Claude That Never Quits
-
-const ProcessManager = require('../lib/process-manager');
-const pathManager = require('../lib/path-manager');
-
-class AfkCommand {
-  constructor() {
-    this.processManager = new ProcessManager();
-  }
-
-  async execute() {
-    const [,, command, ...args] = process.argv;
-    
-    // Check for help flag
-    if (command === '--help' || command === '-h' || 
-        (args.length > 0 && (args[0] === '--help' || args[0] === '-h'))) {
-      this.showHelp();
-      process.exit(0);
-    }
-    
-    try {
-      switch (command) {
-        case undefined:
-        case 'start':
-          await this.startSession(args);
-          break;
-          
-        case 'stop':
-          await this.stopSession(args);
-          break;
-          
-        case 'status':
-          await this.showStatus(args);
-          break;
-          
-        case 'tail':
-          await this.tailLogs(args);
-          break;
-          
-        case 'cleanup':
-          await this.cleanup(args);
-          break;
-          
-        case 'stats':
-          await this.showStats();
-          break;
+require('./afk');
           
         case 'killorphans':
           await this.killOrphans();

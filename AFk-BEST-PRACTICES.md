@@ -251,7 +251,7 @@ calmhive afk results session-id-here
 calmhive afk "continue previous task: [specific next steps based on results]" --iterations 8
 ```
 
-## v14.0.0 New Features
+## v14.4.0 New Features
 
 ### AFk Scheduler
 Schedule AFk sessions using natural language:
@@ -475,7 +475,7 @@ calmhive schedule create "weekly on Sunday at 1am" "$(calmhive template apply se
 
 ## Future AFk Capabilities
 
-### v14.0.0 Features (Available Now)
+### v14.4.0 Features (Available Now)
 - **✅ Scheduler**: Natural language cron scheduling for AFk automation
 - **✅ Template System**: Variable substitution for complex workflows  
 - **✅ Progress Tracking**: Detailed iteration summaries and monitoring
@@ -496,6 +496,6 @@ calmhive schedule create "weekly on Sunday at 1am" "$(calmhive template apply se
 
 *AFk represents the future of development--where AI works autonomously on your behalf. Master these patterns to 10x your development productivity.*
 
-**Document Version**: 1.0 for v14.0.0  
+**Document Version**: 1.0 for v14.4.0  
 **Last Updated**: 2025-07-04  
 **Community**: Share your AFk patterns at https://discord.gg/calmhive

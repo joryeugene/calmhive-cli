@@ -158,27 +158,26 @@ class AfkCommand {
       process.exit(1);
     }
     
-    // Inject CLAUDE.md rules into the task for background processing
-    const enhancedTask = ruleInjector.injectRules(task, { 
-      commandType: 'afk',
-      iterations: options.iterations 
-    });
+    // Only inject CLAUDE.md rules if explicitly enabled (disabled by default to reduce log clutter)
+    const enhancedTask = ruleInjector.isEnabled() ? 
+      ruleInjector.injectRules(task, { commandType: 'afk', iterations: options.iterations }) : 
+      task;
     
     console.log(`🚀 Starting v${pathManager.getVersion()} AFk session...`);
     
     // Run in foreground for tests, background for normal use
     options.background = !process.env.CALMHIVE_TEST_MODE;
     
-    const session = await this.processManager.startAfkSession(enhancedTask, options);
+    const executionResult = await this.processManager.startAfkSession(enhancedTask, options);
     
     console.log(`\n📋 Session Details:`);
-    console.log(`   Session ID: ${session.id}`);
-    console.log(`   Task: ${session.task}`);
-    console.log(`   Iterations: ${session.iterations_planned}`);
-    console.log(`   Sleep Prevention: ${session.iterations_planned > 5 && options.preventSleep !== false ? 'Enabled' : 'Disabled'}`);
+    console.log(`   Session ID: ${executionResult.sessionId}`);
+    console.log(`   Task: ${task.substring(0, 50)}${task.length > 50 ? '...' : ''}`);
+    console.log(`   Iterations: ${options.iterations || 5}`);
+    console.log(`   Sleep Prevention: ${(options.iterations || 5) > 5 && options.preventSleep !== false ? 'Enabled' : 'Disabled'}`);
     console.log(`\n📊 Monitor: calmhive afk status`);
-    console.log(`📝 Logs: calmhive afk tail ${session.id}`);
-    console.log(`🛑 Stop: calmhive afk stop ${session.id}`);
+    console.log(`📝 Logs: calmhive afk tail ${executionResult.sessionId}`);
+    console.log(`🛑 Stop: calmhive afk stop ${executionResult.sessionId}`);
   }
 
   /**
@@ -284,7 +283,7 @@ class AfkCommand {
     }
     
     const detailed = args.includes('-d') || args.includes('--detailed');
-    const sessions = await this.processManager.getStatus();
+    const sessions = await this.processManager.db.getAllSessions();
     
     if (sessions.length === 0) {
       console.log('📊 No AFk sessions found');
@@ -746,12 +745,10 @@ SCHEDULER INTEGRATION (v14.0.0):
       const resumeTask = `[RESUME from iteration ${session.iterations_completed || 0}] ${session.task}`;
       const resumeIterations = Math.max(1, (session.iterations_planned || 5) - (session.iterations_completed || 0));
       
-      // Inject CLAUDE.md rules into the resume task
-      const enhancedResumeTask = ruleInjector.injectRules(resumeTask, { 
-        commandType: 'afk',
-        iterations: resumeIterations,
-        isResume: true
-      });
+      // Only inject CLAUDE.md rules if explicitly enabled (disabled by default to reduce log clutter)
+      const enhancedResumeTask = ruleInjector.isEnabled() ? 
+        ruleInjector.injectRules(resumeTask, { commandType: 'afk', iterations: resumeIterations, isResume: true }) : 
+        resumeTask;
       
       console.log(`📝 Creating resume session with ${resumeIterations} remaining iterations...`);
       
@@ -762,7 +759,7 @@ SCHEDULER INTEGRATION (v14.0.0):
         resume_iteration: (session.iterations_completed || 0) + 1
       };
       
-      const newSession = await this.processManager.startAfkSession(
+      const executionResult = await this.processManager.startAfkSession(
         enhancedResumeTask,
         {
           iterations: resumeIterations,
@@ -771,7 +768,7 @@ SCHEDULER INTEGRATION (v14.0.0):
         }
       );
       
-      const newSessionId = newSession.id;
+      const newSessionId = executionResult.sessionId;
       
       console.log(`✅ Resume session started: ${newSessionId}`);
       console.log(`📊 Use 'calmhive afk status' to monitor progress`);

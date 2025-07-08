@@ -1,7 +1,7 @@
-# Calmhive v11.0.0 Claude Code Templates
+# Calmhive v14.4.0 Claude Code Templates
 
 ## Overview
-Calmhive v11.0.0 includes curated Claude Code command templates that enhance your development workflow. These templates provide structured approaches to common engineering tasks with production-ready quality and clean architecture principles.
+Calmhive v14.4.0 includes curated Claude Code command templates that enhance your development workflow. These templates provide structured approaches to common engineering tasks with production-ready quality, clean architecture principles, and advanced todo-Task parallelization features for beautiful batch execution.
 
 ## Template Categories
 
@@ -69,7 +69,7 @@ claude -p "query" --output-format json
 ```
 
 ## Template Structure
-Each template follows the CALMHIVE v11.0.0 protocol:
+Each template follows the CALMHIVE v14.4.0 protocol:
 - Systematic approach with multiple tool invocations
 - Comprehensive context gathering before action
 - Verification-driven methodology

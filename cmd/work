@@ -1,54 +1,92 @@
 #!/usr/bin/env node
 /**
- * Calmhive v14.0.0 Work Command
+ * Calmhive Work Command
  * Intelligent task execution with automatic model selection and AFk orchestration
  * Simplified version - wraps AFk with smart defaults
  */
 
+// Exit codes
+const EXIT_CODES = {
+  SUCCESS: 0,
+  INVALID_ARGS: 1,
+  ANALYSIS_FAILED: 2,
+  AFK_FAILED: 3,
+  CONTEXT_ERROR: 4
+};
+
 const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs-extra');
+const pathManager = require('../lib/path-manager');
+const WorkComplexityAnalyzer = require('../lib/work-complexity-analyzer');
 
 const args = process.argv.slice(2);
 
 // Show help
 if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
   console.log(`
-🐝 Calmhive Work Command v14.0.0
+🐝 Calmhive Work Command v${pathManager.getVersion()}
 Intelligent task execution with automatic optimization
 
 Usage: calmhive work "<task description>" [options]
 
 Examples:
-  calmhive work "fix the login bug"
-  calmhive work "implement user profiles" --iterations 5
-  calmhive work "refactor authentication" --model opus
-  calmhive work "add dark mode toggle" --dry-run
+  calmhive work "fix the login bug"                    # Simple task
+  calmhive work "implement user profiles" --iterations 5  # Override iterations
+  calmhive work "refactor authentication" --model opus    # Force complex model
+  calmhive work "add dark mode toggle" --dry-run         # Preview command
 
 Options:
   --iterations <n>    Number of AFk iterations (default: auto-detect)
-  --model <name>      Force model: haiku, sonnet, opus (default: auto)
-  --context <file>    Provide additional context file
-  --dry-run          Preview what would be executed
+                      Simple tasks: 1-3, Moderate: 4-6, Complex: 8-15
+  --model <name>      Force model: sonnet, opus (default: auto)
+                      sonnet: Default for most tasks
+                      opus: Complex architecture/migration tasks
+  --context <file>    Provide additional context from a file
+  --dry-run          Preview what would be executed without running
   --help, -h         Show this help message
 
 Features:
-  🧠 Natural language understanding
-  🎯 Automatic complexity detection
-  🚀 Smart model selection
-  📈 Optimal iteration calculation
-  🔄 Seamless AFk integration
+  🧠 Natural language understanding - Describe tasks conversationally
+  🎯 Automatic complexity detection - AI analyzes task requirements
+  🚀 Smart model selection - Chooses optimal Claude model
+  📈 Optimal iteration calculation - Right amount of work cycles
+  🔄 Seamless AFk integration - Handles background execution
 
-The work command analyzes your task and automatically:
-- Selects the best model based on complexity
-- Determines optimal iteration count
-- Configures AFk for best results
+How it works:
+  1. Analyzes your task description using Claude
+  2. Determines complexity (simple/moderate/complex)
+  3. Selects appropriate model and iteration count
+  4. Executes via AFk with optimal settings
+
+Exit codes:
+  0 - Success
+  1 - Invalid arguments
+  2 - Analysis failed
+  3 - AFk execution failed
+  4 - Context file error
   `);
-  process.exit(0);
+  process.exit(EXIT_CODES.SUCCESS);
 }
 
 // Parse task and options
 const taskDescription = args[0];
+
+// Validate task description
+if (!taskDescription || taskDescription.trim().length === 0) {
+  console.error('❌ Task description is required');
+  console.log('Usage: calmhive work "<task description>" [options]');
+  console.log('Example: calmhive work "fix the login bug"');
+  process.exit(EXIT_CODES.INVALID_ARGS);
+}
+
+// Validate task description length
+if (taskDescription.length > 10000) {
+  console.error('❌ Task description is too long (max 10,000 characters)');
+  console.log('Please provide a more concise task description');
+  process.exit(EXIT_CODES.INVALID_ARGS);
+}
+
 let options = {
   iterations: null,
   model: null,
@@ -65,15 +103,17 @@ for (let i = 1; i < args.length; i++) {
     case '--iterations':
       options.iterations = parseInt(value);
       if (isNaN(options.iterations) || options.iterations < 1) {
-        console.error('❌ Iterations must be a positive number');
-        process.exit(1);
+        console.error(`❌ Invalid iterations value: "${value}"`);
+        console.error('   Iterations must be a positive number (e.g., --iterations 5)');
+        process.exit(EXIT_CODES.INVALID_ARGS);
       }
       i++;
       break;
     case '--model':
-      if (!['haiku', 'sonnet', 'opus'].includes(value)) {
-        console.error('❌ Model must be: haiku, sonnet, or opus');
-        process.exit(1);
+      if (!['sonnet', 'opus'].includes(value)) {
+        console.error(`❌ Invalid model: "${value}"`);
+        console.error('   Available models: sonnet (default), opus (complex tasks)');
+        process.exit(EXIT_CODES.INVALID_ARGS);
       }
       options.model = value;
       i++;
@@ -87,53 +127,39 @@ for (let i = 1; i < args.length; i++) {
       break;
     default:
       console.error(`❌ Unknown option: ${arg}`);
-      process.exit(1);
+      process.exit(EXIT_CODES.INVALID_ARGS);
   }
 }
 
-// Analyze task complexity
-function analyzeTaskComplexity(task) {
-  const taskLower = task.toLowerCase();
-  
-  // Simple tasks (1-2 iterations, haiku/sonnet)
-  const simplePatterns = [
-    /^(fix|update|change|modify|adjust) (a |the |an )?(\w+\s)?bug/,
-    /^add (a |the |an )?simple/,
-    /^create (a |the |an )?basic/,
-    /^rename/,
-    /^move/,
-    /^delete (unused|old)/,
-    /^update (version|dependency|dependencies)/,
-    /^fix (typo|formatting|style)/
-  ];
-  
-  // Complex tasks (5-10 iterations, opus)
-  const complexPatterns = [
-    /refactor/,
-    /migrate/,
-    /implement.*system/,
-    /design.*architecture/,
-    /optimize.*performance/,
-    /add.*authentication/,
-    /create.*api/,
-    /build.*from scratch/,
-    /rewrite/,
-    /restructure/
-  ];
-  
-  // Check patterns
-  const isSimple = simplePatterns.some(p => p.test(taskLower));
-  const isComplex = complexPatterns.some(p => p.test(taskLower));
-  
-  // Word count heuristic
-  const wordCount = task.split(/\s+/).length;
-  
-  if (isComplex || wordCount > 15) {
-    return { complexity: 'complex', suggestedIterations: 8, suggestedModel: 'opus' };
-  } else if (isSimple || wordCount < 8) {
-    return { complexity: 'simple', suggestedIterations: 2, suggestedModel: 'sonnet' };
-  } else {
-    return { complexity: 'moderate', suggestedIterations: 5, suggestedModel: 'sonnet' };
+// Initialize complexity analyzer
+const complexityAnalyzer = new WorkComplexityAnalyzer();
+
+// Analyze task complexity using Claude LLM judge
+async function analyzeTaskComplexity(task) {
+  try {
+    const analysis = await complexityAnalyzer.analyzeComplexity(task);
+    
+    return {
+      complexity: analysis.complexity,
+      suggestedIterations: analysis.iterations,
+      suggestedModel: analysis.model,
+      confidence: analysis.confidence,
+      reasoning: analysis.reasoning,
+      source: analysis.source
+    };
+  } catch (error) {
+    console.warn(`⚠️  Complexity analysis failed: ${error.message}`);
+    console.log('🔄 Using fallback analysis...');
+    
+    // Simple fallback if LLM analysis completely fails
+    const wordCount = task.split(/\s+/).length;
+    if (wordCount < 6) {
+      return { complexity: 'simple', suggestedIterations: 2, suggestedModel: 'sonnet', confidence: 0.5, reasoning: 'Simple fallback based on word count', source: 'emergency_fallback' };
+    } else if (wordCount > 15) {
+      return { complexity: 'complex', suggestedIterations: 10, suggestedModel: 'opus', confidence: 0.5, reasoning: 'Complex fallback based on word count', source: 'emergency_fallback' };
+    } else {
+      return { complexity: 'moderate', suggestedIterations: 5, suggestedModel: 'sonnet', confidence: 0.5, reasoning: 'Moderate fallback based on word count', source: 'emergency_fallback' };
+    }
   }
 }
 
@@ -141,7 +167,7 @@ function analyzeTaskComplexity(task) {
 async function executeWork() {
   console.log('🚀 Analyzing task...');
   
-  const analysis = analyzeTaskComplexity(taskDescription);
+  const analysis = await analyzeTaskComplexity(taskDescription);
   
   // Use provided options or smart defaults
   const iterations = options.iterations || analysis.suggestedIterations;
@@ -151,15 +177,27 @@ async function executeWork() {
   - Complexity: ${analysis.complexity}
   - Model: ${model}
   - Iterations: ${iterations}
+  - Confidence: ${(analysis.confidence * 100).toFixed(0)}%
+  - Source: ${analysis.source}
   - Task: "${taskDescription}"`);
+  
+  if (analysis.reasoning) {
+    console.log(`  - Reasoning: ${analysis.reasoning}`);
+  }
   
   if (options.dryRun) {
     console.log('\n🔍 Dry run mode - would execute:');
-    console.log(`calmhive afk "${taskDescription}" --iterations ${iterations} --model ${model}`);
+    // Escape quotes in task description for display
+    const escapedTask = taskDescription.replace(/"/g, '\\"');
+    let afkCommand = `calmhive afk "${escapedTask}" --iterations ${iterations}`;
+    if (model !== 'sonnet') {
+      afkCommand += ` --model ${model}`;
+    }
+    console.log(afkCommand);
     if (options.context) {
       console.log(`  with context from: ${options.context}`);
     }
-    process.exit(0);
+    process.exit(EXIT_CODES.SUCCESS);
   }
   
   // Build AFk command
@@ -192,19 +230,19 @@ async function executeWork() {
   
   afkProcess.on('error', (error) => {
     console.error(`❌ Failed to execute AFk: ${error.message}`);
-    process.exit(1);
+    process.exit(EXIT_CODES.AFK_FAILED);
   });
   
   afkProcess.on('exit', (code) => {
     if (code === 0) {
       console.log('\n✅ Work completed successfully!');
     }
-    process.exit(code || 0);
+    process.exit(code || EXIT_CODES.SUCCESS);
   });
 }
 
 // Execute
 executeWork().catch(error => {
   console.error('❌ Unexpected error:', error);
-  process.exit(1);
+  process.exit(EXIT_CODES.ANALYSIS_FAILED);
 });

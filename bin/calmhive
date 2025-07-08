@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Calmhive v14.2.10 - Main Entry Point
+ * Calmhive v14.2.9 - Main Entry Point
  * The intelligent Claude CLI wrapper
  */
 
@@ -19,27 +19,17 @@ function getVersion() {
 
 // Available commands
 const COMMANDS = {
-  'work': 'Intelligent task execution with automatic optimization',
-  'w': 'Alias for work',
   'afk': 'Run long tasks in background with automatic retries',
-  'a': 'Alias for afk',
   'chat': 'Interactive chat with Claude',
-  'c': 'Alias for chat',
   'config': 'Manage CLAUDE.md configuration files',
   'run': 'Execute one-shot tasks headlessly',
-  'r': 'Alias for run',
   'schedule': 'Natural language task scheduling with Claude Code',
-  's': 'Alias for schedule',
   'template': 'Manage task templates for common workflows',
-  'tmp': 'Alias for template',
   'progress': 'View detailed progress for AFk sessions',
-  'p': 'Alias for progress',
   'tui': 'Terminal UI for process management',
-  't': 'Alias for tui',
   'voice': 'Voice interface to Claude',
-  'v': 'Alias for voice',
+  'health': 'System health monitoring and diagnostics',
   'intercept': 'Control global rule injection settings',
-  'i': 'Alias for intercept',
   'setup': 'Configure Claude Code hooks and MCP integration',
   'update': 'Update calmhive and Claude Code to latest versions'
 };
@@ -55,7 +45,8 @@ const ALIASES = {
   'p': 'progress',
   'i': 'intercept',
   't': 'tui',
-  'v': 'voice'
+  'v': 'voice',
+  'h': 'health'
 };
 
 /**
@@ -84,7 +75,6 @@ Commands:
   
   console.log(`
 Examples:
-  calmhive work "fix the login bug"
   calmhive chat "explain this code"
   calmhive run "add tests to utils.js"
   calmhive afk "migrate to TypeScript" --iterations 20

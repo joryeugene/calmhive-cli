@@ -148,17 +148,18 @@ calmhive schedule list
 calmhive schedule run backup-task
 ```
 
-#### `work` (alias: `w`)
-**Workspace and project management**
-- Project context switching
-- Workspace-specific configurations
-- Multi-project session management
-- Context-aware tool selection
+#### `work` (alias: `w`) - HIDDEN COMMAND
+**Intelligent task execution wrapper**
+- Automatic task complexity analysis
+- Smart model selection (haiku/sonnet/opus)
+- Optimal iteration count determination
+- Seamless AFk integration with smart defaults
 
 ```bash
-calmhive work switch frontend
-calmhive work status
-calmhive work sync
+calmhive work "fix the login bug"
+calmhive work "implement user profiles" --iterations 5
+calmhive work "refactor authentication" --model opus
+calmhive work "add dark mode toggle" --dry-run
 ```
 
 ### Utility Commands

@@ -1,0 +1,151 @@
+#!/usr/bin/env node
+
+/**
+ * Calmhive Health Monitor Command
+ * 
+ * Starts health monitoring and optional HTTP endpoint for system monitoring
+ */
+
+const HealthMonitor = require('../lib/health-monitor');
+const HealthServer = require('../lib/health-server');
+const SessionDatabase = require('../lib/session-database');
+const ProcessManager = require('../lib/process-manager');
+
+async function main() {
+  const args = process.argv.slice(2);
+  const showHelp = args.includes('--help') || args.includes('-h');
+  const serverMode = args.includes('--server') || args.includes('-s');
+  const port = args.find(arg => arg.startsWith('--port='))?.split('=')[1] || 8080;
+  const host = args.find(arg => arg.startsWith('--host='))?.split('=')[1] || 'localhost';
+  const interval = args.find(arg => arg.startsWith('--interval='))?.split('=')[1] || 30000;
+
+  if (showHelp) {
+    console.log(`
+🏥 Calmhive Health Monitor
+
+USAGE:
+  calmhive health [options]
+
+OPTIONS:
+  --server, -s           Start HTTP health server
+  --port=<port>          HTTP server port (default: 8080)
+  --host=<host>          HTTP server host (default: localhost)
+  --interval=<ms>        Health check interval in ms (default: 30000)
+  --help, -h             Show this help
+
+EXAMPLES:
+  calmhive health                           # Start health monitoring only
+  calmhive health --server                  # Start with HTTP endpoint
+  calmhive health --server --port=3000      # Custom port
+  calmhive health --interval=10000          # Check every 10 seconds
+
+ENDPOINTS (when --server is used):
+  GET /health                               # Basic health status
+  GET /health/detailed                      # Detailed health information
+  GET /metrics                              # Performance metrics
+  GET /status                               # System status summary
+`);
+    process.exit(0);
+  }
+
+  console.log('🏥 Starting Calmhive Health Monitor...');
+
+  try {
+    // Initialize components
+    const sessionDb = new SessionDatabase();
+    await sessionDb.init();
+
+    const processManager = new ProcessManager();
+
+    // Create health monitor
+    const healthMonitor = new HealthMonitor({
+      checkInterval: parseInt(interval),
+      sessionDb,
+      processManager
+    });
+
+    let healthServer = null;
+
+    if (serverMode) {
+      // Start HTTP server
+      healthServer = new HealthServer({
+        port: parseInt(port),
+        host,
+        healthMonitor
+      });
+
+      await healthServer.start();
+      console.log(`🌐 Health endpoints available at http://${host}:${port}/health`);
+    } else {
+      // Start monitoring only
+      healthMonitor.start();
+      console.log('📊 Health monitoring started (console mode)');
+    }
+
+    // Graceful shutdown handling
+    const cleanup = async () => {
+      console.log('\n🔄 Shutting down health monitor...');
+      
+      if (healthServer) {
+        await healthServer.stop();
+      }
+      
+      healthMonitor.stop();
+      sessionDb.cleanup();
+      
+      console.log('✅ Health monitor shutdown complete');
+      process.exit(0);
+    };
+
+    process.on('SIGINT', cleanup);
+    process.on('SIGTERM', cleanup);
+
+    // In console mode, show periodic health updates
+    if (!serverMode) {
+      setInterval(() => {
+        const health = healthMonitor.getHealthSummary();
+        const timestamp = new Date().toISOString();
+        
+        console.log(`\n[${timestamp}] Health Status: ${health.status.toUpperCase()}`);
+        
+        if (health.issues.length > 0) {
+          console.log('Issues:');
+          health.issues.forEach(issue => {
+            console.log(`  ⚠️  ${issue}`);
+          });
+        }
+        
+        if (health.components) {
+          console.log('Components:');
+          Object.entries(health.components).forEach(([name, component]) => {
+            const status = component.status;
+            const icon = status === 'healthy' ? '✅' : status === 'warning' ? '⚠️' : '❌';
+            console.log(`  ${icon} ${name}: ${status}`);
+          });
+        }
+      }, 60000); // Show update every minute
+    }
+
+    console.log('\n📋 Health monitoring is running. Press Ctrl+C to stop.\n');
+
+  } catch (error) {
+    console.error('❌ Failed to start health monitor:', error.message);
+    process.exit(1);
+  }
+}
+
+// Handle uncaught errors
+process.on('uncaughtException', (error) => {
+  console.error('💥 Uncaught exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+main().catch(error => {
+  console.error('❌ Health monitor failed:', error);
+  process.exit(1);
+});
