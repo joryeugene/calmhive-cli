@@ -802,6 +802,48 @@ calmhive schedule create "weekly on Friday at 4pm" \
 - **Calmhive**: Provides AI automation, scheduling, and background processing
 - **Combined**: Complete automation ecosystem for development workflows
 
+## 🐝 AI Guidelines for Teams
+
+### Enhanced AI Interaction with CLAUDE.md v15.1.0
+
+Calmhive includes powerful AI guidelines that transform how AI assists your team. These guidelines work with Claude Code CLI, ChatGPT, Claude.ai, Cursor, and other AI interfaces.
+
+**What's New in v15.1.0:**
+- ✅ **Root Cause Analysis Integration** - Forces 5 Whys methodology before jumping to solutions
+- ✅ **5 Key Engineering Lessons** - Prevents over-engineering and maintains focus
+- ✅ **Package-First Development** - Mandatory package search before custom implementations
+- ✅ **Voice Authenticity** - Eliminates corporate speak and AI giveaways
+- ✅ **Evidence-Based Responses** - No claims without proof
+
+### 📚 CLAUDE.md Versions
+
+We provide two versions optimized for different use cases:
+
+**CLI Version** (`CLAUDE.md`) - For Claude Code CLI users:
+- Full Task parallelization support
+- TodoWrite/Read integration
+- Command-line specific optimizations
+- MCP tool awareness
+- Located: `~/.claude/CLAUDE.md`
+
+**Desktop Version** (`CLAUDE-DESKTOP.md`) - For web interfaces:
+- Works with ChatGPT, Claude.ai, Cursor, etc.
+- No CLI-specific features
+- Same behavioral improvements (RCA, Key Lessons, etc.)
+- Customizable for team culture
+- Example: `/calmhive/v3/config/CLAUDE-DESKTOP.md.example`
+
+### 🛠️ Customization Guide
+
+While the guidelines work great out-of-the-box, teams can adapt them:
+
+1. **Voice Traits** - Adjust formality level to match team culture
+2. **Evidence Standards** - Define what constitutes "proof" in your context
+3. **Key Lessons** - Add team-specific lessons learned
+4. **Technical Standards** - Include your coding conventions
+
+The guidelines are designed to enhance, not replace, your team's existing practices.
+
 ## 📖 Documentation
 
 - **[Calmhive.com](https://calmhive.com/)** - Official website with demos, features showcase, and getting started guides

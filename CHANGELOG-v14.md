@@ -1,5 +1,49 @@
-# Calmhive v14.0.0 Changelog
-*From Experimental CLI to Production AI Development Platform*
+# Calmhive v15.0.0 Changelog
+*AI Development Platform with Root Cause Analysis and Conscious Execution*
+
+## [15.0.1] - 2025-01-08
+
+### 🧠 **Patch Release: Root Cause Analysis Integration + Key Lessons**
+*Systematic problem-solving through mandatory 5 Whys methodology and fundamental AI principles*
+
+This patch enhances CLAUDE.md with Root Cause Analysis integration and 5 Key Lessons, transforming reactive symptom-fixing into proactive root cause elimination while preventing common AI failure patterns.
+
+#### ✅ **TASK COMPLETION ENFORCER Enhancement**
+- Added RCA validation checkboxes to consciousness buffer (now 12 total checks)
+- Mandatory 5 Whys analysis before todo creation
+- Root cause resolution verification at completion
+- Key Lesson validation prevents over-engineering and scope creep
+- Simplest solution enforcement (Key Lesson #2)
+- Complexity prevention (Key Lesson #3)
+- Working code protection (Key Lesson #4)
+- Problem focus maintenance (Key Lesson #5)
+
+#### 📋 **Evidence Requirements Enhancement**
+- Root Cause Analysis requirement section added
+- Clear examples of symptom vs root cause fixing
+- Mandatory root cause documentation in todos
+- Evidence must prove root cause elimination
+- Prevention-focused approach vs symptom management
+
+#### 🚨 **New Consciousness Triggers**
+- **Root Cause Analysis Triggers**: Problem statements force RCA methodology
+- **Key Lesson Violation Triggers**: Detect and prevent common AI failures
+  - Complex solutions trigger simplicity check
+  - Working code refactoring requires permission
+  - Scope creep blocked by problem focus
+  - Over-engineering triggers simplification
+
+#### 🎯 **KEY LESSONS FOR CONSCIOUS EXECUTION**
+New section added with 5 fundamental principles:
+1. **Always diagnose before prescribing** - 5 Whys before solutions
+2. **Try the simplest fix first** - Minimal changes over rewrites
+3. **Complexity is not quality** - Simple > clever
+4. **Respect existing, working code** - Never refactor without permission
+5. **Stay focused on the actual problem** - Resist scope creep
+
+**Impact**: Prevents recurring "incomplete migration" patterns by addressing underlying issues rather than symptoms. Ensures systematic problem-solving that prevents issue recurrence while maintaining simplicity and focus.
+
+**Breaking Changes**: Todos now require 5 Whys analysis and root cause documentation before creation.
 
 ## [14.4.0] - 2025-07-07
 
