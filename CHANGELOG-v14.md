@@ -1,5 +1,52 @@
-# Calmhive v15.0.0 Changelog
-*AI Development Platform with Root Cause Analysis and Conscious Execution*
+# Calmhive v15.1.0 Changelog
+*AI Development Platform with Intelligent Tool Resilience and Solution-First Development*
+
+## [15.1.0] - 2025-07-08
+
+### 🚀 **Major Feature Release: Tool Resilience Protocol & Solution-First Development Mandate**
+*Intelligent tool resilience and mandatory solution research preventing AI failure patterns*
+
+This major release introduces two transformative consciousness protocols that address core AI failure patterns: premature tool abandonment and unnecessary custom implementations.
+
+#### 🛠️ **TOOL RESILIENCE PROTOCOL (Stage 4 Enhanced)**
+- Primary tool failure triggers alternative exploration
+- MCP tool availability checks before giving up
+- Command line equivalents considered (gh, curl, etc.)
+- Creative workarounds attempted before declaring impossible
+- Tool resilience demonstrates adaptability and persistence
+- **Result**: Dramatically improved problem-solving persistence
+
+#### 🔍 **SOLUTION-FIRST DEVELOPMENT MANDATE (New Stage 9)**
+- No custom implementation without solution research
+- Research performed for existing solutions (libraries, frameworks, services, tools)
+- Multiple solution options evaluated before implementing custom code
+- Solution quality assessed (community support, maintenance, documentation)
+- Custom implementation justified only if no suitable solutions exist
+- 10-line threshold respected for mandatory solution research
+- **Result**: Reduced technical debt, better architecture decisions
+
+#### 🧠 **ENHANCED CONSCIOUSNESS BUFFER**
+- Expanded from 4 to 9 validation stages
+- Systematic prevention of common AI antipatterns
+- Evidence-based decision making throughout
+- Tool resilience validation integrated
+- Solution research validation integrated
+
+#### 🤝 **IMPROVED COLLABORATION**
+- Enhanced human partnership model with constructive debate
+- Disagree and commit principle integrated
+- Trust colleagues enough to challenge ideas constructively
+- Seek feedback actively, not defensively
+
+#### 🐝 **PHILOSOPHY UPDATE**
+Updated closing covenant emphasizing ecosystem service:
+- "We help teams thrive through evidence and action"
+- "We measure our impact with clarity and purpose"
+- "We pollinate progress across the ecosystem we serve"
+
+**Impact**: Prevents "give up" behavior when tools fail and eliminates unnecessary custom code through research mandates. Maintains focus on actual problems while improving collaboration through enhanced partnership models.
+
+**Breaking Changes**: None. All changes are additive consciousness protocol enhancements.
 
 ## [15.0.1] - 2025-01-08
 
